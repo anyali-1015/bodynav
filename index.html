@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>薄肌比例导航</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: three working columns — 输入 | 轮廓差距 | 训练分配 — collapsing to one on phones; rule trace spans the bottom. */
+:root{
+  --bg:#f3f5f3; --surface:#ffffff; --ink:#16201e; --muted:#5a6764; --line:#d8dfdc;
+  --accent:#0d6b63; --focus:#0d6b63; --boost:#79b9ae; --keep:#e1e7e4; --less:#a5afac;
+  --body:#cbd5d1; --body-line:#9fb0ab; --warm:#c96a0a; --warm-soft:#fbead6;
+  --display:"Bricolage Grotesque","PingFang SC","Noto Sans SC",system-ui,sans-serif;
+  --text:"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1514; --surface:#161f1e; --ink:#e6eeec; --muted:#9aaeaa; --line:#283432;
+  --accent:#4cbcae; --focus:#4cbcae; --boost:#2c776e; --keep:#25302e; --less:#5f6f6c;
+  --body:#33403e; --body-line:#4d5f5b; --warm:#f0a347; --warm-soft:#3a2a17; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1514; --surface:#161f1e; --ink:#e6eeec; --muted:#9aaeaa; --line:#283432;
+  --accent:#4cbcae; --focus:#4cbcae; --boost:#2c776e; --keep:#25302e; --less:#5f6f6c;
+  --body:#33403e; --body-line:#4d5f5b; --warm:#f0a347; --warm-soft:#3a2a17; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--text);font-size:14px;line-height:1.6}
+.wrap{max-width:1280px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.brand{font-family:var(--display);font-weight:700;font-size:clamp(22px,3vw,30px);letter-spacing:-.01em;margin:0;text-wrap:balance}
+.brand small{font-family:var(--mono);font-weight:400;font-size:12px;color:var(--muted);margin-left:10px;letter-spacing:.04em}
+.tagline{color:var(--muted);margin:0;max-width:52ch}
+
+.grid{display:grid;gap:20px;grid-template-columns:1fr}
+@media(min-width:760px){.grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.col-in{grid-column:1 / -1}}
+@media(min-width:1120px){.grid{grid-template-columns:minmax(290px,330px) minmax(0,1fr) minmax(0,1.1fr)}.col-in{grid-column:auto}}
+.col{min-width:0;display:flex;flex-direction:column;gap:20px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.label{font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin:0 0 10px;font-weight:600}
+h2{font-family:var(--display);font-size:18px;font-weight:700;margin:0 0 4px}
+.hint{color:var(--muted);font-size:12.5px;margin:6px 0 0}
+
+/* segmented + chips */
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button,.chip{font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.seg button small{opacity:.7;margin-left:4px}
+button:focus-visible,input:focus-visible,label.file:focus-within,.tcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.flags{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.flag{display:flex;align-items:center;gap:10px;cursor:pointer}
+.flag input{width:18px;height:18px;accent-color:var(--accent)}
+.flag span small{color:var(--muted);margin-left:6px}
+
+.targets{display:grid;gap:8px}
+.tcard{display:grid;grid-template-columns:1fr auto;gap:2px 10px;text-align:left;font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 12px;cursor:pointer}
+.tcard b{font-weight:600}
+.tcard .r{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;align-self:center}
+.tcard .n{grid-column:1 / -1;font-size:12px;color:var(--muted)}
+.tcard[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+
+/* photo stage */
+.stage{position:relative;margin-top:12px;border-radius:8px;overflow:hidden;background:var(--keep);touch-action:none;user-select:none}
+.stage img{display:block;width:100%;height:auto}
+.stage svg.lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.pt{position:absolute;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;border:2px solid #fff;background:var(--accent);color:#fff;font-size:10px;font-family:var(--mono);display:grid;place-items:center;cursor:grab;box-shadow:0 1px 4px rgba(0,0,0,.35);touch-action:none}
+.pt:active{cursor:grabbing}
+label.file{display:inline-flex;align-items:center;gap:8px;border:1px dashed var(--body-line);border-radius:8px;padding:10px 14px;cursor:pointer;width:100%;justify-content:center;color:var(--ink)}
+label.file input{position:absolute;opacity:0;width:1px;height:1px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.btn{font:inherit;border:1px solid var(--accent);color:var(--accent);background:transparent;border-radius:6px;padding:6px 12px;cursor:pointer}
+.status{font-size:12.5px;color:var(--muted)}
+.status.err{color:var(--warm)}
+
+/* summary */
+.summary{font-size:15.5px;line-height:1.7;margin:0}
+.summary b{font-weight:600}
+.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.metric{border-top:2px solid var(--ink);padding-top:6px}
+.metric .k{font-size:12px;color:var(--muted)}
+.metric .v{font-family:var(--mono);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.metric .v .to{color:var(--muted);font-weight:400;font-size:15px}
+.metric .d{font-family:var(--mono);font-size:12px;color:var(--warm);font-variant-numeric:tabular-nums}
+.metric .d.ok{color:var(--accent)}
+
+.sil{display:flex;justify-content:center}
+.sil svg{width:100%;max-width:300px;height:auto}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);justify-content:center}
+.legend i{display:inline-block;width:18px;height:10px;vertical-align:middle;margin-right:6px;border-radius:2px}
+
+/* muscle map */
+.maps{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.maps figure{margin:0;text-align:center}
+.maps svg{width:100%;max-width:170px;height:auto}
+.maps figcaption{font-size:12px;color:var(--muted)}
+.region{cursor:pointer;transition:opacity .15s}
+.region.sel{stroke:var(--ink);stroke-width:2}
+.keyrow{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+.keyrow span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block}
+
+/* allocation list */
+.alloc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.alloc li button{all:unset;box-sizing:border-box;width:100%;display:grid;grid-template-columns:62px minmax(0,1fr) 54px;gap:10px;align-items:center;padding:8px 6px;border-bottom:1px solid var(--line);cursor:pointer}
+.alloc li button:focus-visible{outline:2px solid var(--accent)}
+.alloc li button[aria-current="true"]{background:var(--keep)}
+.pill{font-size:11.5px;font-weight:600;text-align:center;border-radius:999px;padding:2px 0}
+.pill.focus{background:var(--focus);color:var(--surface)}
+.pill.boost{background:var(--boost);color:var(--ink)}
+.pill.keep{background:var(--keep);color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
+.pill.less{background:transparent;color:var(--muted);box-shadow:inset 0 0 0 1px var(--less)}
+.pill.stretch{background:transparent;color:var(--accent);border:1px dashed var(--accent)}
+.mname{min-width:0}
+.bar{height:6px;border-radius:3px;background:var(--keep);margin-top:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent)}
+.sets{font-family:var(--mono);font-size:12.5px;text-align:right;font-variant-numeric:tabular-nums}
+.detail{margin-top:14px;padding:12px 14px;border-radius:8px;background:var(--warm-soft)}
+.detail h3{margin:0 0 6px;font-size:15px}
+.detail ul{margin:6px 0 0;padding-left:18px}
+.detail .ex{font-size:13px;color:var(--muted);margin-top:8px}
+
+/* notes + trace */
+.notes{margin:12px 0 0;padding-left:18px;font-size:13px;color:var(--muted)}
+.trace{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
+.trace th{text-align:left;font-weight:600;font-size:11.5px;color:var(--muted);letter-spacing:.06em;padding:6px 8px;border-bottom:1px solid var(--line)}
+.trace td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+.trace td.mono{font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums}
+.trace tr.off td{color:var(--muted);opacity:.6}
+.trace .state{font-size:11.5px;font-weight:600}
+.trace tr.on .state{color:var(--accent)}
+.scroll{overflow-x:auto}
+footer{margin-top:24px;font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 class="brand">薄肌比例导航<small>BodyNav demo</small></h1>
+    <p class="tagline">现在在哪，想去哪，差在哪块肌肉。结论由固定规则算出，同样的输入永远得到同样的结果。</p>
+  </header>
+
+  <div class="grid">
+    <!-- 输入 -->
+    <section class="col col-in" aria-label="输入">
+      <div class="panel">
+        <p class="label">1 · 现在的你</p>
+        <div class="seg" id="modeSeg" role="group" aria-label="数据来源"></div>
+        <div id="sampleInfo" class="hint"></div>
+        <div id="photoBox" hidden>
+          <label class="file" id="fileLabel"><input type="file" id="file" accept="image/*">上传一张正面全身照</label>
+          <div class="stage" id="stage" hidden>
+            <img id="photo" alt="你上传的照片">
+            <svg class="lines" id="lines" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+          </div>
+          <div class="row" id="photoTools" hidden>
+            <button class="btn" id="autoBtn" type="button">自动识别关键点</button>
+            <span class="status" id="photoStatus">把 6 个点拖到肩外侧、腰最细处、臀最宽处</span>
+          </div>
+          <p class="hint">照片只在你的浏览器里处理，不会上传。2D 照片只能算相对比例，算不出精确围度。</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <p class="label">体态（侧面问题需要侧照判断，这里手动勾选）</p>
+        <div class="flags">
+          <label class="flag"><input type="checkbox" id="fRounded"><span>圆肩<small>肩膀前扣、含胸</small></span></label>
+          <label class="flag"><input type="checkbox" id="fApt"><span>骨盆前倾<small>腰下陷、小腹前突</small></span></label>
+        </div>
+      </div>
+
+      <div class="panel">
+        <p class="label">2 · 目标身材</p>
+        <div class="targets" id="targets" role="group" aria-label="目标身材"></div>
+        <p class="hint">目标比例为演示设定值，正式版应基于真实样本校准。</p>
+      </div>
+    </section>
+
+    <!-- 差距 -->
+    <section class="col" aria-label="比例差距">
+      <div class="panel">
+        <p class="label">3 · 差距</p>
+        <p class="summary" id="summary"></p>
+        <div class="metrics" id="metrics"></div>
+      </div>
+      <div class="panel">
+        <div class="sil" id="sil"></div>
+        <div class="legend">
+          <span><i style="background:var(--body)"></i>现在</span>
+          <span><i style="border:2px dashed var(--accent);background:transparent"></i>目标</span>
+          <span><i style="background:var(--warm)"></i>需要补的宽度</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 训练 -->
+    <section class="col" aria-label="训练路线">
+      <div class="panel">
+        <p class="label">4 · 路线：每周训练组数怎么分</p>
+        <div class="maps" id="maps"></div>
+        <div class="keyrow">
+          <span><i class="sw" style="background:var(--focus)"></i>重点</span>
+          <span><i class="sw" style="background:var(--boost)"></i>加强</span>
+          <span><i class="sw" style="background:var(--keep);box-shadow:inset 0 0 0 1px var(--line)"></i>保持</span>
+          <span><i class="sw" style="background:transparent;box-shadow:inset 0 0 0 1px var(--less)"></i>少分配</span>
+          <span><i class="sw" style="border:1px dashed var(--accent)"></i>拉伸</span>
+        </div>
+      </div>
+      <div class="panel">
+        <ul class="alloc" id="alloc"></ul>
+        <div class="detail" id="detail"></div>
+        <ul class="notes" id="notes"></ul>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel" style="margin-top:20px" aria-label="规则轨迹">
+    <p class="label">规则轨迹 · 每条结论从哪来</p>
+    <div class="scroll"><table class="trace" id="trace"></table></div>
+  </section>
+
+  <footer>演示用规则与目标比例为设定值，仅供参考，不替代专业教练或医疗建议。</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $ = id => document.getElementById(id);
+const f2 = v => (Math.round(v*100)/100).toFixed(2);
+const sgn = v => (v>0?'+':v<0?'−':'')+f2(Math.abs(v));
+
+/* ---------- data ---------- */
+const TARGETS = [
+  {id:'square',  name:'直角肩薄背', swr:1.45, hwr:1.30, note:'肩线清晰，背部有宽度'},
+  {id:'peach',   name:'蜜桃线条',   swr:1.34, hwr:1.45, note:'臀部饱满，腰臀差明显'},
+  {id:'balanced',name:'均衡薄肌',   swr:1.40, hwr:1.38, note:'上下比例平均'},
+  {id:'athletic',name:'运动 X 型',  swr:1.50, hwr:1.45, note:'肩和臀都有明显宽度'},
+  {id:'ballet',  name:'纤长芭蕾',   swr:1.30, hwr:1.30, note:'整体线条纤细'}
+];
+const SAMPLES = {
+  a:{label:'样例 A', tag:'窄肩 + 圆肩', m:{swr:1.22, hwr:1.31, sTilt:0.036, hTilt:0.006}, rounded:true,  apt:false,
+     desc:'样例 A：肩腰比 1.22、臀腰比 1.31，右肩比左肩高约 3.6%，有圆肩。'},
+  b:{label:'样例 B', tag:'臀部偏平 + 骨盆前倾', m:{swr:1.37, hwr:1.17, sTilt:0.008, hTilt:0.034}, rounded:false, apt:true,
+     desc:'样例 B：肩腰比 1.37、臀腰比 1.17，髋线有约 3.4% 的倾斜，有骨盆前倾。'}
+};
+const MUSCLES = {
+  delt_side:{name:'三角肌中束', ex:['哑铃侧平举','绳索单侧侧平举'], base:'维持现有训练量即可'},
+  lats:{name:'背阔肌', ex:['高位下拉','直臂下压'], base:'划船、下拉类动作正常做'},
+  rear:{name:'三角肌后束 · 中下斜方', ex:['反向飞鸟','面拉'], base:'作为肩部健康的常规训练'},
+  traps_up:{name:'斜方肌上束', ex:['不额外安排耸肩'], base:'硬拉、划船时会被动练到，不需要单独加量'},
+  pecs:{name:'胸大肌', ex:['俯卧撑','哑铃卧推'], base:'正常训练'},
+  core:{name:'核心', ex:['死虫','平板支撑'], base:'正常训练'},
+  glute_max:{name:'臀大肌', ex:['臀推','罗马尼亚硬拉'], base:'正常训练'},
+  glute_med:{name:'臀中肌', ex:['弹力带侧向走','侧卧抬腿'], base:'正常训练'},
+  hams:{name:'腘绳肌', ex:['罗马尼亚硬拉','俯卧腿弯举'], base:'正常训练'},
+  quads:{name:'股四头肌', ex:['高脚杯深蹲','分腿蹲'], base:'不要跳过：膝关节稳定和基础力量都靠它，新手也很难把腿练粗'},
+  hipflex:{name:'髋屈肌', ex:['弓步髋屈肌拉伸，每侧 2×30 秒'], base:''}
+};
+const LV = {
+  focus:{label:'重点',rank:4,w:3}, boost:{label:'加强',rank:3,w:2},
+  keep:{label:'保持',rank:2,w:1}, less:{label:'少分配',rank:1,w:0.5}, stretch:{label:'拉伸',rank:0,w:0}
+};
+const WEEKLY_SETS = 36;
+
+/* ---------- state ---------- */
+const S = {
+  mode:'a', target:'square', rounded:true, apt:false,
+  photoPts:null, photoM:null, selected:null
+};
+
+/* ---------- rule engine ---------- */
+function analyze(m, flags, t){
+  const out = {}; const trace = []; const notes = [];
+  const raise = (id,lv,why)=>{ const c=out[id]; if(!c){out[id]={level:lv,reasons:[why]};return;}
+    if(LV[lv].rank>LV[c.level].rank) c.level=lv; c.reasons.push(why); };
+  const lower = (id,why)=>{ const c=out[id]; if(!c){out[id]={level:'less',reasons:[why]};return;}
+    if(c.level==='keep') c.level='less'; c.reasons.push(why); };
+  const dS = t.swr - m.swr, dH = t.hwr - m.hwr;
+  const rule = (id,cond,calc,fired,effect)=>trace.push({id,cond,calc,fired,effect});
+
+  // R1 shoulder/waist
+  const c1 = `目标 ${f2(t.swr)} − 现在 ${f2(m.swr)} = ${sgn(dS)}`;
+  rule('R1a','肩腰比差距 ≥ 0.10',c1,dS>=0.10,'三角肌中束 → 重点；背阔肌 → 加强');
+  rule('R1b','0.04 ≤ 肩腰比差距 < 0.10',c1,dS>=0.04&&dS<0.10,'三角肌中束、背阔肌 → 加强');
+  rule('R1c','肩腰比差距 ≤ −0.04',c1,dS<=-0.04,'肩已够宽：三角肌中束保持，斜方肌上束少分配');
+  if(dS>=0.10){
+    raise('delt_side','focus',`肩腰比差 ${f2(dS)}。肩部的视觉宽度主要来自三角肌中束，它是缩小差距最直接的肌肉`);
+    raise('lats','boost','背阔肌让上背从腋下展开，配合肩宽形成倒三角');
+  }else if(dS>=0.04){
+    raise('delt_side','boost',`肩腰比差 ${f2(dS)}，适度加量就够`);
+    raise('lats','boost','背阔肌让上背从腋下展开');
+  }else if(dS<=-0.04){
+    raise('delt_side','keep',`肩腰比已比目标高 ${f2(-dS)}，不需要再加宽`);
+    lower('traps_up','肩已够宽，避免上斜方继续变厚让肩线变斜');
+  }
+
+  // R2 hip/waist
+  const c2 = `目标 ${f2(t.hwr)} − 现在 ${f2(m.hwr)} = ${sgn(dH)}`;
+  rule('R2a','臀腰比差距 ≥ 0.10',c2,dH>=0.10,'臀中肌、臀大肌 → 重点');
+  rule('R2b','0.04 ≤ 臀腰比差距 < 0.10',c2,dH>=0.04&&dH<0.10,'臀中肌、臀大肌 → 加强');
+  rule('R2c','臀腰比差距 ≤ −0.04',c2,dH<=-0.04,'臀部已够宽：臀部训练保持');
+  if(dH>=0.10){
+    raise('glute_med','focus',`臀腰比差 ${f2(dH)}。髋部外侧的宽度主要来自臀中肌`);
+    raise('glute_max','focus','臀大肌决定臀部的饱满度和侧面轮廓');
+  }else if(dH>=0.04){
+    raise('glute_med','boost',`臀腰比差 ${f2(dH)}，适度加量`);
+    raise('glute_max','boost','臀大肌决定臀部的饱满度');
+  }else if(dH<=-0.04){
+    raise('glute_med','keep',`臀腰比已比目标高 ${f2(-dH)}`);
+    raise('glute_max','keep','维持即可');
+  }
+
+  // R3 rounded shoulders
+  rule('R3','圆肩 = 是',flags.rounded?'是':'否',flags.rounded,'后束·中下斜方 → 重点；胸、上斜方 → 少分配');
+  if(flags.rounded){
+    raise('rear','focus','圆肩：后束和中下斜方负责把肩膀拉回中立位，先纠正再谈加宽');
+    lower('pecs','圆肩：推类动作减量，每次练完做胸部拉伸');
+    lower('traps_up','圆肩人群上斜方常常代偿发力，不额外加量');
+  }
+
+  // R4 anterior pelvic tilt
+  rule('R4','骨盆前倾 = 是',flags.apt?'是':'否',flags.apt,'臀大肌、腘绳肌、核心 → 至少加强；髋屈肌 → 拉伸');
+  if(flags.apt){
+    raise('glute_max','boost','骨盆前倾：臀大肌负责把骨盆往后拉正');
+    raise('hams','boost','骨盆前倾：腘绳肌和臀大肌一起控制骨盆后倾');
+    raise('core','boost','骨盆前倾：腹部负责防止腰椎过度前凸，死虫比卷腹更合适');
+    raise('hipflex','stretch','骨盆前倾：髋屈肌通常偏紧，需要拉伸而不是加练');
+  }
+
+  // R5 shoulder tilt
+  const st = m.sTilt||0;
+  rule('R5','肩线倾斜 ≥ 3%',`${(st*100).toFixed(1)}%`,st>=0.03,'侧平举改为单侧，从低侧开始');
+  if(st>=0.03){
+    raise('delt_side', out.delt_side?out.delt_side.level:'keep','高低肩：侧平举改单侧做，从较低一侧开始，组数两侧相同');
+    lower('traps_up','高低肩：高侧上斜方常偏紧，不加练，做颈侧拉伸');
+  }
+
+  // R6 hip tilt
+  const ht = m.hTilt||0;
+  rule('R6','髋线倾斜 ≥ 3%',`${(ht*100).toFixed(1)}%`,ht>=0.03,'臀中肌加入单腿训练');
+  if(ht>=0.03){
+    raise('glute_med', out.glute_med && LV[out.glute_med.level].rank>=LV.boost.rank ? out.glute_med.level : 'boost','髋线不平：加入单腿动作（如单腿臀桥），左右分开练');
+  }
+
+  // R7 slender target
+  const r7 = t.id==='ballet' && dH<=0;
+  rule('R7','目标为纤长芭蕾，且臀腰比已达标',r7?'是':'否',r7,'股四头肌 → 少分配（不是不练）');
+  if(r7) lower('quads','目标偏纤长，下肢以臀和腿后侧为主，股四头比例上少分配，但不要停练');
+
+  // R8 waist note
+  const r8 = dS>=0.06 && dH>=0.06;
+  rule('R8','肩腰比、臀腰比都差 ≥ 0.06',`${sgn(dS)} / ${sgn(dH)}`,r8,'提示：腰围是两个比例共同的分母');
+  if(r8) notes.push('两个比例都偏低时，腰围也是原因之一。腰围变化主要靠整体体脂下降，练腹不能局部瘦腰。');
+
+  // defaults
+  for(const id in MUSCLES){
+    if(id==='hipflex') continue;
+    if(!out[id]) out[id]={level:'keep',reasons:[MUSCLES[id].base]};
+    else if(id==='quads' && out[id].level!=='less') out[id].reasons.push(MUSCLES.quads.base);
+  }
+  if(out.quads && out.quads.reasons.length===0) out.quads.reasons.push(MUSCLES.quads.base);
+
+  // allocation
+  const ids = Object.keys(out).filter(id=>out[id].level!=='stretch');
+  const wsum = ids.reduce((a,id)=>a+LV[out[id].level].w,0);
+  ids.forEach(id=>{ out[id].sets = Math.max(1,Math.round(WEEKLY_SETS*LV[out[id].level].w/wsum)); });
+
+  // headline
+  let headline;
+  if(Math.max(dS,dH)<0.04) headline='比例已经接近目标，重点是维持和纠正体态';
+  else if(dS>=dH) headline='主要差在肩部宽度';
+  else headline='主要差在臀部外侧';
+  if(st>=0.03 || ht>=0.03) notes.push('检测到左右不平：本页只给训练侧重点，如有疼痛或明显不对称，先找康复师评估。');
+
+  return {muscles:out, trace, notes, dS, dH, headline};
+}
+
+/* ---------- body outline ---------- */
+function smoothClosed(p){
+  const F=v=>v.toFixed(1); const n=p.length; let d=`M${F(p[0][0])},${F(p[0][1])}`;
+  for(let i=0;i<n;i++){
+    const p0=p[(i-1+n)%n],p1=p[i],p2=p[(i+1)%n],p3=p[(i+2)%n];
+    d+=`C${F(p1[0]+(p2[0]-p0[0])/6)},${F(p1[1]+(p2[1]-p0[1])/6)} ${F(p2[0]-(p3[0]-p1[0])/6)},${F(p2[1]-(p3[1]-p1[1])/6)} ${F(p2[0])},${F(p2[1])}`;
+  }
+  return d+'Z';
+}
+function bodyPath(cx, halfW, swr, hwr, sOff=0, hOff=0){
+  const hS=halfW*swr, hH=halfW*hwr, ua=halfW+(hS-halfW)*0.55;
+  const right = (k)=>[
+    [9,62,0],[hS*0.6,76,k*sOff*0.6],[hS,92,k*sOff],[hS*0.94,114,k*sOff*0.6],[ua,135,0],[halfW,185,0],
+    [hH,232,k*hOff],[hH*0.93,268,k*hOff*0.5],[hH*0.68,330,0],[hH*0.5,372,0],[hH*0.44,410,0],[hH*0.2,414,0],
+    [hH*0.17,372,0],[hH*0.16,320,0],[4,280,0]
+  ];
+  const R = right(1).map(([x,y,o])=>[cx+x,y+o]);
+  const L = right(-1).map(([x,y,o])=>[cx-x,y+o]).reverse();
+  return smoothClosed(R.concat(L));
+}
+
+/* ---------- render ---------- */
+function currentM(){
+  if(S.mode==='photo') return S.photoM;
+  return SAMPLES[S.mode].m;
+}
+
+function renderMode(){
+  const seg=$('modeSeg'); seg.innerHTML='';
+  [['a',SAMPLES.a.label,SAMPLES.a.tag],['b',SAMPLES.b.label,SAMPLES.b.tag],['photo','我的照片','']].forEach(([id,l,tag])=>{
+    const b=document.createElement('button'); b.type='button'; b.setAttribute('aria-pressed',S.mode===id);
+    b.innerHTML = l + (tag?`<small>${tag}</small>`:''); b.onclick=()=>setMode(id); seg.appendChild(b);
+  });
+  $('photoBox').hidden = S.mode!=='photo';
+  $('sampleInfo').textContent = S.mode==='photo' ? '' : SAMPLES[S.mode].desc + ' 可以切换样例，看同一个目标下结论怎么变。';
+}
+function setMode(id){
+  S.mode=id;
+  if(id!=='photo'){ S.rounded=SAMPLES[id].rounded; S.apt=SAMPLES[id].apt; }
+  $('fRounded').checked=S.rounded; $('fApt').checked=S.apt; S.selected=null;
+  renderAll();
+}
+
+function renderTargets(){
+  const box=$('targets'); box.innerHTML='';
+  TARGETS.forEach(t=>{
+    const b=document.createElement('button'); b.type='button'; b.className='tcard'; b.setAttribute('aria-pressed',S.target===t.id);
+    b.innerHTML=`<b>${t.name}</b><span class="r">肩腰 ${f2(t.swr)} · 臀腰 ${f2(t.hwr)}</span><span class="n">${t.note}</span>`;
+    b.onclick=()=>{S.target=t.id;S.selected=null;renderAll();};
+    box.appendChild(b);
+  });
+}
+
+function renderSil(m,t){
+  const W=34, cx=120;
+  const sOff = (m.sTilt||0)*W*m.swr*2, hOff=(m.hTilt||0)*W*m.hwr*2;
+  const cur = bodyPath(cx,W,m.swr,m.hwr,sOff,hOff), tgt = bodyPath(cx,W,t.swr,t.hwr);
+  const arrows=[];
+  const mk=(y,from,to,label,lx)=>{
+    if(Math.abs(to-from)<1.2) return;
+    [1,-1].forEach(k=>{
+      const x1=cx+k*from, x2=cx+k*to, dir=Math.sign(x2-x1);
+      arrows.push(`<line x1="${x1.toFixed(1)}" y1="${y}" x2="${x2.toFixed(1)}" y2="${y}" style="stroke:var(--warm)" stroke-width="3" stroke-linecap="round"/>`+
+        `<path d="M${x2.toFixed(1)},${y} l${(-dir*5).toFixed(1)},-4 l0,8z" style="fill:var(--warm)"/>`);
+    });
+    arrows.push(`<text x="${cx+to+6}" y="${y+4}" text-anchor="start" style="fill:var(--warm);font:600 11px var(--mono)">${label}</text>`);
+  };
+  const dS=t.swr-m.swr, dH=t.hwr-m.hwr;
+  if(dS>0) mk(92+ (m.sTilt? 0:0), W*m.swr, W*t.swr, '肩 '+sgn(dS), cx);
+  if(dH>0) mk(232, W*m.hwr, W*t.hwr, '臀 '+sgn(dH), cx);
+  $('sil').innerHTML = `<svg viewBox="0 0 240 430" role="img" aria-label="现在与目标的轮廓叠加">
+    <circle cx="${cx}" cy="40" r="20" style="fill:var(--body)"/>
+    <path d="${cur}" style="fill:var(--body);stroke:var(--body-line)" stroke-width="1"/>
+    <path d="${tgt}" style="fill:none;stroke:var(--accent)" stroke-width="2" stroke-dasharray="5 4"/>
+    <line x1="${cx-W}" y1="185" x2="${cx+W}" y2="185" style="stroke:var(--muted)" stroke-width="1" stroke-dasharray="2 3"/>
+    <text x="${cx}" y="200" text-anchor="middle" style="fill:var(--muted);font:11px var(--mono)">腰 = 1.00</text>
+    ${arrows.join('')}
+  </svg>`;
+}
+
+function renderSummary(m,t,res){
+  const order = Object.entries(res.muscles).sort((a,b)=>LV[b[1].level].rank-LV[a[1].level].rank);
+  const focus = order.filter(([,v])=>v.level==='focus').map(([id])=>MUSCLES[id].name);
+  const boost = order.filter(([,v])=>v.level==='boost').map(([id])=>MUSCLES[id].name);
+  let s = `目标「${t.name}」。<b>${res.headline}</b>。`;
+  if(S.rounded) s+=' 有圆肩，先把肩膀拉回中立位。';
+  if(focus.length) s+=` 重点练 <b>${focus.join('、')}</b>`;
+  if(boost.length) s+=`${focus.length?'，':' '}加强 ${boost.join('、')}`;
+  s+='。';
+  $('summary').innerHTML=s;
+  const met=(k,cur,tg,d)=>`<div class="metric"><div class="k">${k}</div><div class="v">${f2(cur)} <span class="to">→ ${f2(tg)}</span></div><div class="d ${Math.abs(d)<0.04?'ok':''}">${Math.abs(d)<0.04?'已接近目标':'差距 '+sgn(d)}</div></div>`;
+  $('metrics').innerHTML = met('肩腰比',m.swr,t.swr,res.dS)+met('臀腰比',m.hwr,t.hwr,res.dH);
+}
+
+const REGIONS = {
+  front:[
+    ['traps_up','e',83,74,9,4,-20],['traps_up','e',117,74,9,4,20],
+    ['delt_side','e',64,97,7,12,0],['delt_side','e',136,97,7,12,0],
+    ['pecs','e',86,113,13,10,0],['pecs','e',114,113,13,10,0],
+    ['core','r',88,130,24,58,8],
+    ['hipflex','e',82,246,6,11,-15],['hipflex','e',118,246,6,11,15],
+    ['quads','e',81,302,11,34,0],['quads','e',119,302,11,34,0]
+  ],
+  back:[
+    ['traps_up','e',83,74,9,4,-20],['traps_up','e',117,74,9,4,20],
+    ['delt_side','e',63,97,6,12,0],['delt_side','e',137,97,6,12,0],
+    ['rear','e',71,101,7,9,0],['rear','e',129,101,7,9,0],['rear','r',91,96,18,30,5],
+    ['lats','e',79,152,9,26,-10],['lats','e',121,152,9,26,10],
+    ['glute_med','e',69,226,8,11,0],['glute_med','e',131,226,8,11,0],
+    ['glute_max','e',85,242,14,15,0],['glute_max','e',115,242,14,15,0],
+    ['hams','e',81,302,10,32,0],['hams','e',119,302,10,32,0]
+  ]
+};
+function regionStyle(lv){
+  switch(lv){
+    case 'focus': return 'fill:var(--focus)';
+    case 'boost': return 'fill:var(--boost)';
+    case 'less': return 'fill:url(#hatch);stroke:var(--less);stroke-width:1';
+    case 'stretch': return 'fill:transparent;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 2';
+    default: return 'fill:var(--keep);stroke:var(--body-line);stroke-width:.6';
+  }
+}
+function renderMaps(res){
+  const base = bodyPath(100,28,1.4,1.38);
+  const svg=(view,cap)=>{
+    const rs = REGIONS[view].map(([id,type,x,y,a,b,r])=>{
+      const mm=res.muscles[id]; if(!mm) return '';
+      const st=regionStyle(mm.level); const sel=S.selected===id?' sel':'';
+      const attrs=`class="region${sel}" data-m="${id}" style="${st}"`;
+      return type==='e'
+        ? `<ellipse ${attrs} cx="${x}" cy="${y}" rx="${a}" ry="${b}" transform="rotate(${r} ${x} ${y})"><title>${MUSCLES[id].name}：${LV[mm.level].label}</title></ellipse>`
+        : `<rect ${attrs} x="${x}" y="${y}" width="${a}" height="${b}" rx="${r}"><title>${MUSCLES[id].name}：${LV[mm.level].label}</title></rect>`;
+    }).join('');
+    return `<figure><svg viewBox="0 0 200 430" role="img" aria-label="${cap}肌群图">
+      <defs><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" style="stroke:var(--less)" stroke-width="1.4"/></pattern></defs>
+      <circle cx="100" cy="40" r="18" style="fill:var(--surface);stroke:var(--body-line)"/>
+      <path d="${base}" style="fill:var(--surface);stroke:var(--body-line)" stroke-width="1"/>${rs}</svg><figcaption>${cap}</figcaption></figure>`;
+  };
+  $('maps').innerHTML = svg('front','正面') + svg('back','背面');
+}
+
+function renderAlloc(res){
+  const entries = Object.entries(res.muscles).sort((a,b)=>LV[b[1].level].rank-LV[a[1].level].rank || (b[1].sets||0)-(a[1].sets||0));
+  if(!S.selected || !res.muscles[S.selected]) S.selected = entries[0][0];
+  const max = Math.max(...entries.map(([,v])=>v.sets||0));
+  $('alloc').innerHTML = entries.map(([id,v])=>`<li><button type="button" data-m="${id}" aria-current="${S.selected===id}">
+    <span class="pill ${v.level}">${LV[v.level].label}</span>
+    <span class="mname">${MUSCLES[id].name}${v.level==='stretch'?'':`<span class="bar"><i style="width:${((v.sets||0)/max*100).toFixed(0)}%"></i></span>`}</span>
+    <span class="sets">${v.level==='stretch'?'每天':(v.sets+' 组')}</span></button></li>`).join('');
+  const sel = res.muscles[S.selected];
+  $('detail').innerHTML = `<h3>${MUSCLES[S.selected].name} · ${LV[sel.level].label}</h3>
+    <ul>${sel.reasons.map(r=>`<li>${r}</li>`).join('')}</ul>
+    <div class="ex">推荐动作：${MUSCLES[S.selected].ex.join('、')}</div>`;
+  $('notes').innerHTML = [`每周共约 ${entries.reduce((a,[,v])=>a+(v.sets||0),0)} 组，按 重点 3 : 加强 2 : 保持 1 : 少分配 0.5 的权重分配。`].concat(res.notes).map(n=>`<li>${n}</li>`).join('');
+}
+
+function renderTrace(res){
+  $('trace').innerHTML = `<thead><tr><th>规则</th><th>条件</th><th>计算</th><th>结果</th><th>影响</th></tr></thead><tbody>`+
+    res.trace.map(r=>`<tr class="${r.fired?'on':'off'}"><td class="mono">${r.id}</td><td>${r.cond}</td><td class="mono">${r.calc}</td><td class="state">${r.fired?'触发':'未触发'}</td><td>${r.effect}</td></tr>`).join('')+'</tbody>';
+}
+
+function renderAll(){
+  renderMode(); renderTargets();
+  const m=currentM(); const t=TARGETS.find(x=>x.id===S.target);
+  if(!m){
+    $('summary').innerHTML='上传照片并放好 6 个点后，这里会显示你的比例和差距。也可以先切回样例看看效果。';
+    $('metrics').innerHTML=''; $('sil').innerHTML=''; $('maps').innerHTML=''; $('alloc').innerHTML=''; $('detail').innerHTML=''; $('notes').innerHTML=''; $('trace').innerHTML='';
+    return;
+  }
+  const res=analyze(m,{rounded:S.rounded,apt:S.apt},t);
+  renderSummary(m,t,res); renderSil(m,t); renderAlloc(res); renderMaps(res); renderTrace(res);
+}
+
+/* selection via map or list */
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-m]'); if(!el) return;
+  S.selected=el.getAttribute('data-m'); renderAll();
+});
+$('fRounded').addEventListener('change',e=>{S.rounded=e.target.checked;renderAll();});
+$('fApt').addEventListener('change',e=>{S.apt=e.target.checked;renderAll();});
+
+/* ---------- photo mode ---------- */
+const PT_LABELS={sl:'肩',sr:'肩',wl:'腰',wr:'腰',hl:'臀',hr:'臀'};
+function defaultPts(){return {sl:[.32,.25],sr:[.68,.25],wl:[.41,.44],wr:[.59,.44],hl:[.36,.53],hr:[.64,.53]};}
+function measureFromPts(p){
+  const img=$('photo'); const ar=(img.naturalHeight||1)/(img.naturalWidth||1);
+  const w=(a,b)=>Math.abs(p[b][0]-p[a][0]);
+  const sw=w('sl','sr'), ww=w('wl','wr'), hw=w('hl','hr');
+  if(ww<0.02||sw<0.02||hw<0.02) return null;
+  const tilt=(a,b,width)=>Math.abs((p[a][1]-p[b][1])*ar)/width;
+  return {swr:sw/ww, hwr:hw/ww, sTilt:tilt('sl','sr',sw), hTilt:tilt('hl','hr',hw)};
+}
+function drawPts(){
+  const st=$('stage'); st.querySelectorAll('.pt').forEach(n=>n.remove());
+  const p=S.photoPts;
+  for(const k in p){
+    const d=document.createElement('div'); d.className='pt'; d.dataset.k=k; d.textContent=PT_LABELS[k];
+    d.style.left=(p[k][0]*100)+'%'; d.style.top=(p[k][1]*100)+'%';
+    d.setAttribute('role','slider'); d.setAttribute('aria-label',PT_LABELS[k]+(k.endsWith('l')?'（左）':'（右）'));
+    d.addEventListener('pointerdown',startDrag); st.appendChild(d);
+  }
+  const L=(a,b)=>`<line x1="${p[a][0]*100}" y1="${p[a][1]*100}" x2="${p[b][0]*100}" y2="${p[b][1]*100}" stroke="white" stroke-width="0.6" vector-effect="non-scaling-stroke" style="stroke-width:2px"/>`;
+  $('lines').innerHTML = L('sl','sr')+L('wl','wr')+L('hl','hr');
+}
+function updatePhotoM(){
+  const m=measureFromPts(S.photoPts);
+  S.photoM=m;
+  $('photoStatus').className='status'+(m?'':' err');
+  $('photoStatus').textContent = m ? `肩腰比 ${f2(m.swr)} · 臀腰比 ${f2(m.hwr)}。继续拖动可以微调。` : '两点距离太近，算不出比例。请把左右两个点拉开。';
+}
+let drag=null;
+function startDrag(e){
+  e.preventDefault(); drag=e.currentTarget.dataset.k; e.currentTarget.setPointerCapture(e.pointerId);
+  e.currentTarget.addEventListener('pointermove',onDrag); e.currentTarget.addEventListener('pointerup',endDrag,{once:true});
+}
+function onDrag(e){
+  if(!drag) return; const r=$('stage').getBoundingClientRect();
+  const x=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)), y=Math.min(1,Math.max(0,(e.clientY-r.top)/r.height));
+  S.photoPts[drag]=[x,y]; e.currentTarget.style.left=(x*100)+'%'; e.currentTarget.style.top=(y*100)+'%';
+  drawLinesOnly(); updatePhotoM(); scheduleRender();
+}
+function drawLinesOnly(){
+  const p=S.photoPts; const L=(a,b)=>`<line x1="${p[a][0]*100}" y1="${p[a][1]*100}" x2="${p[b][0]*100}" y2="${p[b][1]*100}" stroke="white" vector-effect="non-scaling-stroke" style="stroke-width:2px"/>`;
+  $('lines').innerHTML = L('sl','sr')+L('wl','wr')+L('hl','hr');
+}
+function endDrag(e){ e.currentTarget.removeEventListener('pointermove',onDrag); drag=null; renderAllKeepStage(); }
+let raf=0; function scheduleRender(){ if(raf) return; raf=requestAnimationFrame(()=>{raf=0;renderAllKeepStage();}); }
+function renderAllKeepStage(){ // photo stage is outside re-rendered areas
+  renderAll();
+}
+$('file').addEventListener('change',e=>{
+  const file=e.target.files&&e.target.files[0]; if(!file) return;
+  const url=URL.createObjectURL(file); const img=$('photo');
+  img.onload=()=>{ $('stage').hidden=false; $('photoTools').hidden=false; S.photoPts=defaultPts(); drawPts(); updatePhotoM(); S.selected=null; renderAll(); };
+  img.onerror=()=>{ $('photoStatus').className='status err'; $('photoStatus').textContent='这张图片打不开，请换一张 JPG 或 PNG。'; $('photoTools').hidden=false; };
+  img.src=url;
+});
+
+/* optional auto-detect (works when the page can load MediaPipe, e.g. on GitHub Pages) */
+const MP='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
+let landmarker=null;
+async function getLandmarker(){
+  if(landmarker) return landmarker;
+  const v = await import(MP+'/vision_bundle.mjs');
+  const fs = await v.FilesetResolver.forVisionTasks(MP+'/wasm');
+  landmarker = await v.PoseLandmarker.createFromOptions(fs,{
+    baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task'},
+    runningMode:'IMAGE', numPoses:1});
+  return landmarker;
+}
+$('autoBtn').addEventListener('click',async()=>{
+  const st=$('photoStatus'); st.className='status'; st.textContent='正在加载识别模型…';
+  try{
+    const lm = await Promise.race([getLandmarker(), new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),15000))]);
+    const r = lm.detect($('photo')); const L = r.landmarks && r.landmarks[0];
+    if(!L) throw new Error('nopose');
+    const sh=[L[11],L[12]].sort((a,b)=>a.x-b.x), hp=[L[23],L[24]].sort((a,b)=>a.x-b.x);
+    const sj=sh[1].x-sh[0].x, hj=hp[1].x-hp[0].x, hy=(hp[0].y+hp[1].y)/2, sy=(sh[0].y+sh[1].y)/2;
+    const hcx=(hp[0].x+hp[1].x)/2, wy=sy+(hy-sy)*0.68, whalf=hj*0.62;
+    S.photoPts={
+      sl:[sh[0].x-sj*0.12,sh[0].y], sr:[sh[1].x+sj*0.12,sh[1].y],
+      wl:[hcx-whalf,wy], wr:[hcx+whalf,wy],
+      hl:[hp[0].x-hj*0.38,hp[0].y], hr:[hp[1].x+hj*0.38,hp[1].y]
+    };
+    drawPts(); updatePhotoM(); renderAll();
+    st.textContent='已自动放好关键点。腰和臀是估算位置，请拖到实际最细、最宽处。';
+  }catch(err){
+    st.className='status err';
+    st.textContent = err.message==='nopose' ? '没有识别到人体，换一张全身正面照试试，或手动拖动 6 个点。'
+      : '当前环境加载不了识别模型，请手动拖动 6 个点。部署到 GitHub Pages 后可以自动识别。';
+  }
+});
+
+/* boot */
+$('fRounded').checked=S.rounded; $('fApt').checked=S.apt;
+renderAll();
+})();
+</script>
+</body>
+</html>
