@@ -39,6 +39,7 @@ p,h1,h2,h3{margin:0}
 
 .view{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-block:4px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
 .view>*{flex-shrink:0}
+[hidden]{display:none!important}
 .view.fwd{animation:inR .22s ease-out}.view.back{animation:inL .22s ease-out}
 @keyframes inR{from{transform:translateX(24px);opacity:.4}to{transform:none;opacity:1}}
 @keyframes inL{from{transform:translateX(-24px);opacity:.4}to{transform:none;opacity:1}}
@@ -132,7 +133,16 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .stage{position:relative;border-radius:14px;overflow:hidden;background:var(--line);touch-action:none;user-select:none}
 .stage img{display:block;width:100%;height:auto}
 .stage svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.pt{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border:2px solid #fff;background:var(--accent);color:#fff;font-size:11px;display:grid;place-items:center;touch-action:none;cursor:grab;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.pt{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;touch-action:none;cursor:grab;outline:none}
+.pt::before{content:"";position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px #fff,0 1px 4px rgba(0,0,0,.5)}
+.pt::after{content:"";position:absolute;left:50%;top:50%;width:1px;height:1px;margin:-.5px 0 0 -.5px;background:#fff}
+.pt.on::before{width:6px;height:6px;margin:-3px 0 0 -3px;box-shadow:0 0 0 1.5px #fff}
+.pt:focus-visible::before{box-shadow:0 0 0 2px #fff,0 0 0 5px var(--accent)}
+.pt b{position:absolute;left:50%;bottom:31px;transform:translateX(-50%);font:600 10px/1 system-ui,sans-serif;padding:3px 5px;border-radius:5px;background:rgba(0,0,0,.55);color:#fff;white-space:nowrap;pointer-events:none}
+.pt.on b{opacity:0}
+.loupe{position:absolute;top:10px;width:132px;height:132px;border-radius:50%;border:2px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.45);pointer-events:none;overflow:hidden;background:#000;z-index:3}
+.loupe canvas{display:block;width:100%;height:100%}
+.ptip{font-size:12px;color:var(--muted);margin:6px 2px 0}
 .status{font-size:13px;color:var(--muted)}
 .status.err{color:var(--warm)}
 
@@ -462,7 +472,7 @@ const P={
     return `<div class="seg" role="group" aria-label="数据来源">${[['photo','我的照片'],['a','样例 A'],['b','样例 B']].map(([k,l])=>`<button type="button" data-act="mode" data-arg="${k}" aria-pressed="${S.mode===k}">${l}</button>`).join('')}</div>
     ${S.mode==='photo'?`
       <label class="drop" id="drop" ${T.photoURL?'hidden':''}><input type="file" id="file" accept="image/*"><b>上传正面全身照</b><span class="muted small">穿贴身衣服，站直，全身入镜。照片不会离开你的设备。</span></label>
-      <div id="photoArea" ${T.photoURL?'':'hidden'}><div class="stage" id="stage"><img id="photo" alt="你的照片" ${T.photoURL?`src="${T.photoURL}"`:''}><svg id="lines" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div></div>
+      <div id="photoArea" ${T.photoURL?'':'hidden'}><div class="stage" id="stage"><img id="photo" alt="你的照片" ${T.photoURL?`src="${T.photoURL}"`:''}><svg id="lines" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div><p class="ptip">每个点对准身体轮廓的最外侧。腰取最细处，臀取最宽处。</p></div>
       <p class="status" id="pstatus">${S.photoM&&!T.photoURL?`当前：肩腰比 ${f2(S.photoM.swr)} · 臀腰比 ${f2(S.photoM.hwr)}`:''}</p>
       <div id="pbtns" style="display:flex;flex-direction:column;gap:10px" ${T.photoURL?'':'hidden'}>
         <button class="btn ghost" type="button" data-act="auto">自动识别关键点</button>
@@ -486,6 +496,7 @@ let stack=[{p:'home'}];
 function render(dir){
   const c=stack[stack.length-1], pg=P[c.p];
   if(c.p!=='session') stopSession();
+  if(c.p==='measure'||c.p==='coach'||c.p==='session') setTimeout(()=>mpLoad().catch(()=>{}),300); // 提前在后台下载模型
   $('app').classList.toggle('immersive',!!pg.immersive);
   const title=typeof pg.title==='function'?pg.title(c.a):pg.title;
   const root=stack.length===1;
@@ -527,7 +538,36 @@ function openEx(arg){
 
 
 /* ---------------- AI coach ---------------- */
-const MODEL='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task';
+/* MediaPipe：先用和页面一起发布的本地文件（预览页的安全策略、国内网络都拦 CDN 和谷歌存储），失败再走 CDN */
+const MP_LIB=[
+  {lib:'mp/vision_bundle.mjs', wasm:'mp/wasm'},
+  {lib:'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs', wasm:'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'}
+];
+// GitHub Pages 上模型放在仓库根目录；预览页只托管固定类型的文件，模型以 .wasm 扩展名存放（内容一样）
+const MP_MODEL=['pose_landmarker_lite.task','mp/pose_landmarker_lite.task.wasm','https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task'];
+const absURL=u=>new URL(u,location.href).href;
+let mpBase=null, mpP=null;
+const mpLog=m=>{ console.log('[BodyNav] '+m); if(window.__mpdbg) window.__mpdbg(m); };
+const withTimeout=(p,ms,what)=>Promise.race([p,new Promise((_,j)=>setTimeout(()=>j(new Error(what+' timeout')),ms))]);
+async function firstOk(list,fn){ let last; for(const x of list){ try{ return await withTimeout(fn(x),90000,'load'); }catch(e){ last=e; mpLog('fail '+JSON.stringify(x).slice(0,60)+' '+(e&&e.message)); } } throw last||new Error('mediapipe'); }
+function mpLoad(){
+  if(mpBase) return Promise.resolve(mpBase);
+  if(!mpP) mpP=mpLoad0().catch(e=>{ mpP=null; throw e; });
+  return mpP;
+}
+async function mpLoad0(){
+  const [lib,buf]=await Promise.all([
+    firstOk(MP_LIB,async s=>{ mpLog('import '+s.lib); const v=await import(absURL(s.lib)); mpLog('fileset'); const fs=await v.FilesetResolver.forVisionTasks(absURL(s.wasm)); mpLog('lib ok'); return {v,fs}; }),
+    firstOk(MP_MODEL,async u=>{ const r=await fetch(absURL(u)); if(!r.ok) throw new Error('model '+r.status); const b=new Uint8Array(await r.arrayBuffer()); if(b.length<100000) throw new Error('model too small'); return b; })
+  ]);
+  mpBase={...lib,buf}; return mpBase;
+}
+async function mkLandmarker(mode){
+  const {v,fs,buf}=await mpLoad();
+  const mk=d=>withTimeout(v.PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetBuffer:buf,delegate:d},runningMode:mode,numPoses:1}),45000,'create');
+  mpLog('create');
+  try{ return await mk('GPU'); }catch(e){ mpLog('gpu fail '+(e&&e.message)); return await mk('CPU'); }
+}
 const TRK_OF={lat_raise:'abd',cable_lat:'abd',band_lat:'abd',reverse_fly:'abd',pulldown:'elbow',db_row:'elbow',face_pull:'elbow',band_pull:'spread',pushup:'push',goblet:'squat',split_squat:'split',rdl:'hinge',hip_thrust:'bridge',glute_bridge:'bridge',sl_bridge:'bridge',leg_curl:'curl',side_leg:'legabd',band_walk:'steps',plank:'plank',dead_bug:'hold',hipflex_stretch:'hold',chest_stretch:'hold'};
 const MODE_LABEL=k=>({plank:'计时 · 体态检测',hold:'计时'}[k]||'自动计数');
 let AR=1;
@@ -643,16 +683,14 @@ async function initCam(){
   C.stream=stream; const v=$('cv'); v.srcObject=stream; try{ await v.play(); }catch(e){}
   setStat('正在加载 AI 模型…');
   try{
-    await Promise.race([loadVideoModel(), new Promise((_,j)=>setTimeout(()=>j(new Error('timeout')),20000))]);
+    await Promise.race([loadVideoModel(), new Promise((_,j)=>setTimeout(()=>j(new Error('timeout')),100000))]);
   }catch(e){ if(C===me){ manualMode('AI 模型加载失败',true); setStat('手动模式 · 模型未加载','warn'); } return; }
   if(C!==me) return;
   setStat('AI 识别中','live'); loop();
 }
 async function loadVideoModel(){
   if(lmkV) return lmkV;
-  const v=await import(MP+'/vision_bundle.mjs'); const fs=await v.FilesetResolver.forVisionTasks(MP+'/wasm');
-  const mk=d=>v.PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:MODEL,delegate:d},runningMode:'VIDEO',numPoses:1});
-  try{ lmkV=await mk('GPU'); }catch(e){ lmkV=await mk('CPU'); }
+  lmkV=await mkLandmarker('VIDEO');
   return lmkV;
 }
 function loop(){
@@ -788,17 +826,42 @@ function measure(){
   T.photoM=(wa<.02||s<.02||h<.02)?null:{swr:s/wa,hwr:h/wa};
   const st=$('pstatus'); if(!st) return;
   st.className='status'+(T.photoM?'':' err');
-  st.textContent=T.photoM?`肩腰比 ${f2(T.photoM.swr)} · 臀腰比 ${f2(T.photoM.hwr)}　拖动圆点可微调`:'左右两点太近了，请拉开';
+  st.textContent=T.photoM?`肩腰比 ${f2(T.photoM.swr)} · 臀腰比 ${f2(T.photoM.hwr)}　按住圆点拖动，放大镜里对准身体边缘`:'左右两点太近了，请拉开';
 }
-function lines(){ const p=T.pts; $('lines').innerHTML=[['sl','sr'],['wl','wr'],['hl','hr']].map(([a,b])=>`<line x1="${p[a][0]*100}" y1="${p[a][1]*100}" x2="${p[b][0]*100}" y2="${p[b][1]*100}" stroke="white" vector-effect="non-scaling-stroke" style="stroke-width:2px"/>`).join(''); }
+function lines(){ const p=T.pts; $('lines').innerHTML=[['sl','sr'],['wl','wr'],['hl','hr']].map(([a,b])=>`<line x1="${p[a][0]*100}" y1="${p[a][1]*100}" x2="${p[b][0]*100}" y2="${p[b][1]*100}" stroke="white" vector-effect="non-scaling-stroke" style="stroke-width:1.5px"/>`).join(''); }
+/* 拖动：按相对位移移动（手指不会挡住点），同时在角落显示 3 倍放大镜 */
+function loupe(st,k){
+  let lp=st.querySelector('.loupe'); if(!lp){ lp=document.createElement('div'); lp.className='loupe'; lp.innerHTML='<canvas></canvas>'; st.appendChild(lp); }
+  const [x,y]=T.pts[k], left=x>.5;
+  lp.style.left=left?'10px':''; lp.style.right=left?'':'10px';
+  const img=$('photo'), cv=lp.firstChild, dpr=window.devicePixelRatio||1, S=132, Z=3;
+  if(cv.width!==S*dpr){ cv.width=cv.height=S*dpr; }
+  const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
+  const r=st.getBoundingClientRect(), nat=img.naturalWidth/r.width, src=S/Z*nat;
+  g.fillStyle='#000'; g.fillRect(0,0,S,S);
+  g.drawImage(img,x*img.naturalWidth-src/2,y*img.naturalHeight-src/2,src,src,0,0,S,S);
+  // 同一行的另一个点也画出连线，方便对齐水平
+  const pair={sl:'sr',sr:'sl',wl:'wr',wr:'wl',hl:'hr',hr:'hl'}[k], q=T.pts[pair];
+  const qx=S/2+(q[0]-x)*r.width*Z, qy=S/2+(q[1]-y)*r.height*Z;
+  g.strokeStyle='rgba(255,255,255,.85)'; g.lineWidth=1; g.beginPath(); g.moveTo(S/2,S/2); g.lineTo(qx,qy); g.stroke();
+  g.strokeStyle='#ff5a4e'; g.beginPath(); g.moveTo(S/2-14,S/2); g.lineTo(S/2-3,S/2); g.moveTo(S/2+3,S/2); g.lineTo(S/2+14,S/2); g.moveTo(S/2,S/2-14); g.lineTo(S/2,S/2-3); g.moveTo(S/2,S/2+3); g.lineTo(S/2,S/2+14); g.stroke();
+  g.fillStyle='#ff5a4e'; g.fillRect(S/2-1,S/2-1,2,2);
+}
 function pts(){
-  const st=$('stage'); st.querySelectorAll('.pt').forEach(n=>n.remove());
-  for(const k in T.pts){ const d=document.createElement('div'); d.className='pt'; d.textContent=LBL[k];
-    d.style.left=T.pts[k][0]*100+'%'; d.style.top=T.pts[k][1]*100+'%';
-    d.addEventListener('pointerdown',ev=>{ ev.preventDefault(); d.setPointerCapture(ev.pointerId);
-      const mv=e2=>{ const r=st.getBoundingClientRect(); const x=Math.min(1,Math.max(0,(e2.clientX-r.left)/r.width)), y=Math.min(1,Math.max(0,(e2.clientY-r.top)/r.height));
-        T.pts[k]=[x,y]; d.style.left=x*100+'%'; d.style.top=y*100+'%'; lines(); measure(); };
-      d.addEventListener('pointermove',mv); d.addEventListener('pointerup',()=>d.removeEventListener('pointermove',mv),{once:true}); });
+  const st=$('stage'); st.querySelectorAll('.pt,.loupe').forEach(n=>n.remove());
+  const place=(d,k)=>{ d.style.left=T.pts[k][0]*100+'%'; d.style.top=T.pts[k][1]*100+'%'; };
+  for(const k in T.pts){ const d=document.createElement('div'); d.className='pt'; d.tabIndex=0; d.innerHTML=`<b>${LBL[k]}</b>`;
+    d.setAttribute('role','slider'); d.setAttribute('aria-label',LBL[k]+(k.endsWith('l')?'（左）':'（右）')+'，方向键微调');
+    place(d,k);
+    d.addEventListener('pointerdown',ev=>{ ev.preventDefault(); d.setPointerCapture(ev.pointerId); d.classList.add('on');
+      const r=st.getBoundingClientRect(), x0=ev.clientX, y0=ev.clientY, p0=T.pts[k].slice();
+      loupe(st,k);
+      const mv=e2=>{ const x=Math.min(1,Math.max(0,p0[0]+(e2.clientX-x0)/r.width)), y=Math.min(1,Math.max(0,p0[1]+(e2.clientY-y0)/r.height));
+        T.pts[k]=[x,y]; place(d,k); lines(); measure(); loupe(st,k); };
+      const up=()=>{ d.removeEventListener('pointermove',mv); d.classList.remove('on'); const lp=st.querySelector('.loupe'); if(lp) lp.remove(); };
+      d.addEventListener('pointermove',mv); d.addEventListener('pointerup',up,{once:true}); d.addEventListener('pointercancel',up,{once:true}); });
+    d.addEventListener('keydown',e=>{ const s=e.shiftKey?.01:.002, m={ArrowLeft:[-s,0],ArrowRight:[s,0],ArrowUp:[0,-s],ArrowDown:[0,s]}[e.key]; if(!m) return;
+      e.preventDefault(); T.pts[k]=[Math.min(1,Math.max(0,T.pts[k][0]+m[0])),Math.min(1,Math.max(0,T.pts[k][1]+m[1]))]; place(d,k); lines(); measure(); });
     st.appendChild(d); }
   lines(); measure();
 }
@@ -807,21 +870,56 @@ function setupPhoto(){
   f.addEventListener('change',e=>{ const file=e.target.files&&e.target.files[0]; if(!file) return;
     if(T.photoURL) URL.revokeObjectURL(T.photoURL); T.photoURL=URL.createObjectURL(file); T.pts=defPts();
     $('drop').hidden=true; $('photoArea').hidden=false; $('pbtns').hidden=false;
-    const img=$('photo'); img.onload=pts; img.onerror=()=>{ $('pstatus').className='status err'; $('pstatus').textContent='这张图片打不开，换一张 JPG 或 PNG'; }; img.src=T.photoURL; });
+    const img=$('photo'); img.onload=()=>{ pts(); autoDetect(); }; img.onerror=()=>{ $('pstatus').className='status err'; $('pstatus').textContent='这张图片打不开，换一张 JPG 或 PNG'; }; img.src=T.photoURL; });
   if(T.photoURL){ const img=$('photo'); if(img.complete) pts(); else img.onload=pts; }
 }
-const MP='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14'; let lmk=null;
+let lmk=null;
+/* 照片识别：骨骼点定高度，人体分割蒙版找真实轮廓边缘；蒙版被手臂粘连时退回比例估算 */
 async function autoDetect(){
-  const st=$('pstatus'); st.className='status'; st.textContent='正在识别…';
+  const st=$('pstatus'); st.className='status'; st.textContent=mpBase?'正在识别…':'正在加载识别模型，第一次大约 10–30 秒…';
+  let L,mask,W,H;
   try{
-    if(!lmk){ const v=await import(MP+'/vision_bundle.mjs'); const fs=await v.FilesetResolver.forVisionTasks(MP+'/wasm');
-      lmk=await v.PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task'},runningMode:'IMAGE',numPoses:1}); }
-    const L=(lmk.detect($('photo')).landmarks||[])[0]; if(!L) throw new Error('nopose');
-    const sh=[L[11],L[12]].sort((a,b)=>a.x-b.x), hp=[L[23],L[24]].sort((a,b)=>a.x-b.x);
-    const sj=sh[1].x-sh[0].x, hj=hp[1].x-hp[0].x, sy=(sh[0].y+sh[1].y)/2, hy=(hp[0].y+hp[1].y)/2, cx=(hp[0].x+hp[1].x)/2, wy=sy+(hy-sy)*.68;
-    T.pts={sl:[sh[0].x-sj*.12,sh[0].y],sr:[sh[1].x+sj*.12,sh[1].y],wl:[cx-hj*.62,wy],wr:[cx+hj*.62,wy],hl:[hp[0].x-hj*.38,hp[0].y],hr:[hp[1].x+hj*.38,hp[1].y]};
-    pts();
-  }catch(err){ st.className='status err'; st.textContent=err.message==='nopose'?'没识别到人体，换一张全身正面照，或手动拖动圆点':'识别模型加载失败，请手动拖动圆点'; }
+    if(!lmk){
+      const {v,fs,buf}=await mpLoad();
+      const mk=d=>v.PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetBuffer:buf,delegate:d},runningMode:'IMAGE',numPoses:1,outputSegmentationMasks:true});
+      try{ lmk=await mk('GPU'); }catch(e){ lmk=await mk('CPU'); }
+    }
+  }catch(err){ console.warn('[BodyNav] model',err); st.className='status err'; st.textContent='识别模型没加载出来（网络或浏览器限制），可以直接拖动圆点手动标注'; return; }
+  st.textContent='正在识别…';
+  try{
+    const img=$('photo'), k=Math.min(1,1024/Math.max(img.naturalWidth,img.naturalHeight));
+    W=Math.round(img.naturalWidth*k); H=Math.round(img.naturalHeight*k);
+    const cv=document.createElement('canvas'); cv.width=W; cv.height=H; cv.getContext('2d').drawImage(img,0,0,W,H);
+    const r=lmk.detect(cv); L=(r.landmarks||[])[0];
+    const m=r.segmentationMasks&&r.segmentationMasks[0];
+    if(m){ mask={w:m.width,h:m.height,d:m.getAsFloat32Array().slice()}; try{m.close();}catch(e){} }
+  }catch(err){ console.warn('[BodyNav] detect',err); }
+  if(!L){ st.className='status err'; st.textContent='没识别到人体，换一张全身正面照，或手动拖动圆点'; return; }
+  const sh=[L[11],L[12]].sort((a,b)=>a.x-b.x), hp=[L[23],L[24]].sort((a,b)=>a.x-b.x);
+  const sj=sh[1].x-sh[0].x, hj=hp[1].x-hp[0].x, sy=(sh[0].y+sh[1].y)/2, hy=(hp[0].y+hp[1].y)/2;
+  const scx=(sh[0].x+sh[1].x)/2, hcx=(hp[0].x+hp[1].x)/2, tl=hy-sy;
+  const mid=y=>scx+(hcx-scx)*Math.min(1,Math.max(0,(y-sy)/(tl||1)));
+  // 某一行从中线向两侧走到蒙版边缘，返回 [左, 右]（0-1 坐标）
+  const edges=y=>{ if(!mask) return null; const row=Math.round(y*mask.h); if(row<0||row>=mask.h) return null;
+    const c=Math.round(mid(y)*mask.w), o=row*mask.w; if(mask.d[o+c]<.5) return null;
+    let l=c, r=c; while(l>0&&mask.d[o+l-1]>=.5) l--; while(r<mask.w-1&&mask.d[o+r+1]>=.5) r++;
+    return [l/mask.w,(r+1)/mask.w]; };
+  const scan=(y0,y1,lo,hi,pick)=>{ let best=null; const n=24;
+    for(let i=0;i<=n;i++){ const y=y0+(y1-y0)*i/n, e=edges(y); if(!e) continue; const w=e[1]-e[0];
+      if(w<lo||w>hi) continue; if(!best||(pick==='min'?w<best.w:w>best.w)) best={y,w,e}; }
+    return best; };
+  const sB=scan(sy-tl*.02,sy+tl*.08,sj*1.02,sj*1.5,'max');
+  const wB=scan(sy+tl*.45,hy-tl*.05,hj*.85,hj*1.65,'min');
+  const hB=scan(hy-tl*.05,hy+tl*.28,hj*1.25,hj*2.15,'max');
+  const wy=wB?wB.y:sy+tl*.68;
+  T.pts={
+    sl:sB?[sB.e[0],sB.y]:[sh[0].x-sj*.12,sh[0].y], sr:sB?[sB.e[1],sB.y]:[sh[1].x+sj*.12,sh[1].y],
+    wl:wB?[wB.e[0],wy]:[hcx-hj*.62,wy], wr:wB?[wB.e[1],wy]:[hcx+hj*.62,wy],
+    hl:hB?[hB.e[0],hB.y]:[hp[0].x-hj*.38,hp[0].y], hr:hB?[hB.e[1],hB.y]:[hp[1].x+hj*.38,hp[1].y]
+  };
+  pts();
+  const est=[!sB&&'肩',!wB&&'腰',!hB&&'臀'].filter(Boolean);
+  if(est.length&&T.photoM){ st.textContent+=`（${est.join('、')}被手臂挡住，是估算值，建议放大核对）`; }
 }
 
 render();
