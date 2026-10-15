@@ -8,180 +8,148 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
-/* Layout: phone app shell — top bar / scrolling view / bottom tab bar; framed as a phone on wide screens. */
+/* Layout: phone shell. Home = body vs target; one path into the week plan; settings live under 我的. */
 :root{
-  --desk:#dfe5e2; --bg:#f3f5f3; --surface:#ffffff; --ink:#16201e; --muted:#5a6764; --line:#dde3e0;
-  --accent:#0d6b63; --accent-ink:#ffffff; --accent-soft:#dcefeb; --boost:#79b9ae; --keep:#e7ece9; --less:#a5afac;
-  --body:#cbd5d1; --body-line:#9fb0ab; --warm:#c96a0a; --warm-soft:#fbead6;
+  --desk:#e3e8e5; --bg:#f5f7f6; --surface:#ffffff; --ink:#15201d; --muted:#66736f; --line:#e2e7e4;
+  --accent:#0d6b63; --accent-ink:#ffffff; --soft:#e2f1ee; --body:#d5ddda; --warm:#c4610a; --warm-soft:#fcecdc;
   --display:"Bricolage Grotesque","PingFang SC","Noto Sans SC",system-ui,sans-serif;
   --text:"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --desk:#090d0c; --bg:#0f1514; --surface:#172120; --ink:#e6eeec; --muted:#9aaeaa; --line:#26322f;
-  --accent:#4cbcae; --accent-ink:#06201d; --accent-soft:#183a35; --boost:#2c776e; --keep:#222d2b; --less:#5f6f6c;
-  --body:#33403e; --body-line:#4d5f5b; --warm:#f0a347; --warm-soft:#3a2a17; color-scheme:dark}}
+  --desk:#080c0b; --bg:#0e1413; --surface:#17201f; --ink:#e7eeec; --muted:#97a9a5; --line:#25302e;
+  --accent:#4cbcae; --accent-ink:#05201c; --soft:#173632; --body:#2e3b39; --warm:#f0a347; --warm-soft:#3a2a17; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --desk:#090d0c; --bg:#0f1514; --surface:#172120; --ink:#e6eeec; --muted:#9aaeaa; --line:#26322f;
-  --accent:#4cbcae; --accent-ink:#06201d; --accent-soft:#183a35; --boost:#2c776e; --keep:#222d2b; --less:#5f6f6c;
-  --body:#33403e; --body-line:#4d5f5b; --warm:#f0a347; --warm-soft:#3a2a17; color-scheme:dark}
+  --desk:#080c0b; --bg:#0e1413; --surface:#17201f; --ink:#e7eeec; --muted:#97a9a5; --line:#25302e;
+  --accent:#4cbcae; --accent-ink:#05201c; --soft:#173632; --body:#2e3b39; --warm:#f0a347; --warm-soft:#3a2a17; color-scheme:dark}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
-body{background:var(--desk);color:var(--ink);font-family:var(--text);font-size:15px;line-height:1.55;overflow:hidden}
+body{background:var(--desk);color:var(--ink);font-family:var(--text);font-size:15px;line-height:1.5;overflow:hidden}
 button{font:inherit;color:inherit}
-.app{position:relative;height:100%;max-width:440px;margin:0 auto;display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
-@media (min-width:600px){.app{height:calc(100% - 48px);max-height:900px;margin-top:24px;border-radius:32px;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.18)}}
+p,h1,h2,h3{margin:0}
+.app{position:relative;height:100%;max-width:430px;margin:0 auto;display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
+@media (min-width:600px){.app{height:calc(100% - 48px);max-height:880px;margin-top:24px;border-radius:32px;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.16)}}
 
-/* top bar */
-.top{flex:none;display:grid;grid-template-columns:48px minmax(0,1fr) 48px;align-items:center;height:54px;padding-left:max(4px,env(safe-area-inset-left,0px));padding-right:max(4px,env(safe-area-inset-right,0px));background:var(--bg);border-bottom:1px solid transparent}
-.top.lvl2,.top.lvl3{border-bottom-color:var(--line);background:var(--surface)}
-.top h1{margin:0;text-align:center;font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.top.lvl1 h1{text-align:left;font-family:var(--display);font-size:22px;font-weight:700;padding-left:12px;grid-column:1 / 3}
-.iconbtn{width:44px;height:44px;border:0;background:transparent;border-radius:12px;display:grid;place-items:center;cursor:pointer}
-.iconbtn:active{background:var(--keep)}
+.top{flex:none;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;height:52px;padding-left:max(6px,env(safe-area-inset-left,0px));padding-right:max(6px,env(safe-area-inset-right,0px))}
+.top h1{text-align:center;font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top.root h1{grid-column:1 / 3;text-align:left;padding-left:10px;font-family:var(--display);font-size:22px}
+.iconbtn{width:40px;height:40px;border:0;background:transparent;border-radius:12px;display:grid;place-items:center;cursor:pointer}
 .iconbtn svg{width:22px;height:22px}
-.crumb{grid-column:1 / -1;font-size:11px;color:var(--muted);text-align:center;margin-top:-8px;letter-spacing:.04em}
 
-/* view */
-.view{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-block:12px 28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
+.view{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-block:4px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
 .view>*{flex-shrink:0}
-.view.fwd{animation:inR .24s ease-out}
-.view.back{animation:inL .24s ease-out}
-.view.fade{animation:fadeIn .18s ease-out}
-@keyframes inR{from{transform:translateX(28px);opacity:.3}to{transform:none;opacity:1}}
-@keyframes inL{from{transform:translateX(-28px);opacity:.3}to{transform:none;opacity:1}}
-@keyframes fadeIn{from{opacity:.4}to{opacity:1}}
-@media (prefers-reduced-motion: reduce){.view{animation:none!important}*{transition:none!important}}
+.view.fwd{animation:inR .22s ease-out}.view.back{animation:inL .22s ease-out}
+@keyframes inR{from{transform:translateX(24px);opacity:.4}to{transform:none;opacity:1}}
+@keyframes inL{from{transform:translateX(-24px);opacity:.4}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion: reduce){.view,.sheet{animation:none!important}}
 
-/* tab bar */
-.tabs{flex:none;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:1px solid var(--line);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.tabs{flex:none;display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border-top:1px solid var(--line)}
 .tabs button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 10px;font-size:11px;color:var(--muted);cursor:pointer}
 .tabs button svg{width:24px;height:24px}
 .tabs button[aria-current="page"]{color:var(--accent);font-weight:600}
 
-/* building blocks */
-.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px}
-.hero{background:var(--accent);color:var(--accent-ink);border:0}
-.hero .muted{color:inherit;opacity:.8}
-.eyebrow{font-size:11.5px;letter-spacing:.1em;color:var(--muted);font-weight:600;margin:0}
-.hero .eyebrow{color:inherit;opacity:.8}
-h2{font-family:var(--display);font-size:21px;line-height:1.3;margin:4px 0 0;text-wrap:balance}
-h3{font-size:15px;margin:0}
+.card{background:var(--surface);border-radius:20px;padding:16px 18px}
+.label{font-size:12px;color:var(--muted);letter-spacing:.06em}
 .muted{color:var(--muted)}
 .small{font-size:13px}
-p{margin:0}
-.stack{display:flex;flex-direction:column;gap:10px}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.section-h{display:flex;justify-content:space-between;align-items:baseline;margin:6px 2px -4px}
-.section-h b{font-size:15px}
-.link{border:0;background:transparent;color:var(--accent);font-size:13px;cursor:pointer;padding:4px}
+.big{font-family:var(--display);font-size:22px;line-height:1.3;text-wrap:balance}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
 
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;border-radius:14px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:16px;cursor:pointer}
-.btn:active{transform:scale(.99);filter:brightness(.95)}
-.btn.ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
-.btn.light{background:var(--surface);color:var(--accent)}
-.btn.danger{background:transparent;color:var(--warm);border:1.5px solid var(--warm)}
-.btn:focus-visible,.iconbtn:focus-visible,.tabs button:focus-visible,.li:focus-visible,.opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:52px;border-radius:16px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:16px;cursor:pointer}
+.btn svg{width:18px;height:18px}
+.btn.ghost{background:transparent;color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-/* list rows */
-.list{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden}
-.li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;padding:14px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;text-align:left;cursor:pointer}
-.li:last-child{border-bottom:0}
-.li:active{background:var(--keep)}
-.li .t{font-weight:600}
-.li .s{font-size:12.5px;color:var(--muted);margin-top:1px}
-.li .r{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;font-family:var(--mono)}
-.li .r svg{width:16px;height:16px}
-.badge{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-family:var(--mono);font-weight:600;font-size:13px}
-.badge.done{background:var(--accent);color:var(--accent-ink)}
+/* home: body */
+.bodyfig{display:flex;justify-content:center;margin:2px 0 4px}
+.bodyfig svg{width:100%;max-width:165px;height:auto}
+.legend{display:flex;justify-content:center;gap:18px;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:20px;height:0;border-top:2px solid var(--ink)}
+.legend i.dash{border-top:2px dashed var(--accent)}
 
-.pill{display:inline-block;font-size:11.5px;font-weight:600;text-align:center;border-radius:999px;padding:3px 10px;white-space:nowrap}
-.pill.focus{background:var(--accent);color:var(--accent-ink)}
-.pill.boost{background:var(--boost);color:var(--ink)}
-.pill.keep{background:var(--keep);color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
-.pill.less{background:transparent;color:var(--muted);box-shadow:inset 0 0 0 1px var(--less)}
-.pill.stretch{background:transparent;color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.gap{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.gap:first-child{border-top:0}
+.gap .n{font-size:13.5px;color:var(--muted)}
+.gap .v{font-family:var(--mono);font-size:13px;text-align:right;white-space:nowrap}
+.gap .v b{font-size:16px}
+.gap .d{grid-column:2 / -1;font-family:var(--mono);font-size:12px;color:var(--warm)}
+.gap .d.ok{color:var(--accent)}
+.track{position:relative;height:8px;border-radius:4px;background:var(--line)}
+.track .fill{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--ink)}
+.track .tgt{position:absolute;top:-5px;bottom:-5px;width:0;border-left:2px dashed var(--accent)}
 
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font-size:13.5px;cursor:pointer}
+/* week strip */
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.week .d{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600}
+.dot.train{background:var(--soft);color:var(--accent)}
+.dot.rest{color:var(--muted)}
+.dot.done{background:var(--accent);color:var(--accent-ink)}
+.dot.today{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--ink)}
+.dot svg{width:16px;height:16px}
 
-.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--keep);border-radius:12px;padding:3px;gap:3px}
-.seg button{border:0;background:transparent;border-radius:9px;padding:8px 4px;font-size:13.5px;cursor:pointer;color:var(--muted)}
-.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12)}
-
-/* stats */
-.stat .k{font-size:12px;color:var(--muted)}
-.hero .stat .k{color:inherit;opacity:.8}
-.stat .v{font-family:var(--mono);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
-.stat .v span{font-size:14px;font-weight:400;opacity:.75}
-.stat .d{font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums;color:var(--warm)}
-.stat .d.ok{color:var(--accent)}
-.hero .stat .d{color:inherit;opacity:.9}
-
-/* figures */
-.sil{display:flex;justify-content:center}
-.sil svg{width:100%;max-width:190px;height:auto}
-.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);justify-content:center}
-.legend i{display:inline-block;width:16px;height:9px;vertical-align:middle;margin-right:5px;border-radius:2px}
-.mapbox{display:flex;justify-content:center}
-.mapbox svg{width:100%;max-width:220px;height:auto}
-.region{cursor:pointer}
-.keyrow{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);justify-content:center}
-.keyrow span{display:inline-flex;align-items:center;gap:5px}
-.sw{width:11px;height:11px;border-radius:3px;display:inline-block}
-.bar{height:5px;border-radius:3px;background:var(--keep);margin-top:6px;overflow:hidden}
-.bar i{display:block;height:100%;background:var(--accent)}
+/* rows */
+.rows{background:var(--surface);border-radius:20px;overflow:hidden}
+.row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;width:100%;padding:15px 16px;border:0;border-top:1px solid var(--line);background:transparent;text-align:left;cursor:pointer}
+.row:first-child{border-top:0}
+.row:active{background:var(--bg)}
+.row[disabled]{cursor:default}
+.row .t{display:block;font-weight:600}
+.row .s{display:block;font-size:13px;color:var(--muted);margin-top:1px}
+.row .r{display:flex;align-items:center;gap:4px;color:var(--muted);font-size:13px}
+.row .r svg{width:16px;height:16px}
+.day{width:42px;text-align:center}
+.day b{display:block;font-size:15px}
+.day span{font-size:11px;color:var(--muted)}
+.num{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--accent);font-family:var(--mono);font-size:13px;font-weight:600}
+.num.done{background:var(--accent);color:var(--accent-ink)}
+.num svg{width:15px;height:15px}
+.tag{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--soft);color:var(--accent);margin-left:6px;vertical-align:1px}
+.tag.today{background:var(--ink);color:var(--surface)}
+.prog{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent)}
 
 /* options */
-.opt{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;width:100%;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:14px;cursor:pointer}
-.opt[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
-.opt .tick{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--less);display:grid;place-items:center}
-.opt[aria-checked="true"] .tick{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.opt .tick svg{width:14px;height:14px}
-.opt .s{grid-column:1 / -1;font-size:12.5px;color:var(--muted)}
-.ratio{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-
-/* steps */
-.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;counter-reset:s}
-.steps li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;counter-increment:s}
-.steps li::before{content:counter(s);width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-family:var(--mono);font-weight:600;display:grid;place-items:center;font-size:13px}
-.note{border-radius:14px;padding:12px 14px;background:var(--warm-soft);font-size:13.5px}
-.note.ok{background:var(--accent-soft)}
-ul.reasons{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.opt{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;width:100%;padding:12px 16px;border:0;border-top:1px solid var(--line);background:transparent;text-align:left;cursor:pointer}
+.opt:first-child{border-top:0}
+.opt svg.mini{width:34px;height:60px}
+.radio{width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--muted);display:grid;place-items:center}
+.opt[aria-checked="true"] .radio{background:var(--accent);box-shadow:none;color:var(--accent-ink)}
+.radio svg{width:14px;height:14px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--line);border-radius:12px;padding:3px;gap:3px}
+.seg button{border:0;background:transparent;border-radius:9px;padding:9px 4px;font-size:14px;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600}
+.switch{width:46px;height:28px;border-radius:14px;background:var(--line);position:relative;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
+[aria-checked="true"] .switch{background:var(--accent)}
+[aria-checked="true"] .switch::after{transform:translateX(18px)}
 
 /* photo */
-.stage{position:relative;border-radius:14px;overflow:hidden;background:var(--keep);touch-action:none;user-select:none}
-.stage img{display:block;width:100%;height:auto}
-.stage svg.lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.pt{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border:2px solid #fff;background:var(--accent);color:#fff;font-size:11px;display:grid;place-items:center;cursor:grab;box-shadow:0 1px 4px rgba(0,0,0,.4);touch-action:none}
-.drop{display:flex;flex-direction:column;align-items:center;gap:6px;border:1.5px dashed var(--body-line);border-radius:16px;padding:28px 12px;cursor:pointer;text-align:center;background:var(--surface)}
+.drop{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;border:1.5px dashed var(--muted);border-radius:16px;padding:26px 12px;cursor:pointer;text-align:center}
 .drop input{position:absolute;opacity:0;width:1px;height:1px}
-.drop svg{width:30px;height:30px;color:var(--accent)}
+.stage{position:relative;border-radius:14px;overflow:hidden;background:var(--line);touch-action:none;user-select:none}
+.stage img{display:block;width:100%;height:auto}
+.stage svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.pt{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border:2px solid #fff;background:var(--accent);color:#fff;font-size:11px;display:grid;place-items:center;touch-action:none;cursor:grab;box-shadow:0 1px 4px rgba(0,0,0,.4)}
 .status{font-size:13px;color:var(--muted)}
 .status.err{color:var(--warm)}
 
-/* trace */
-.rule{border-left:3px solid var(--line);padding:4px 0 4px 12px}
-.rule.on{border-left-color:var(--accent)}
-.rule .id{font-family:var(--mono);font-size:12px;color:var(--muted)}
-.rule.on .id{color:var(--accent);font-weight:600}
-.rule .calc{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-
-table.tbl{width:100%;border-collapse:collapse;font-size:13px}
-table.tbl th,table.tbl td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
-table.tbl th{font-size:12px;color:var(--muted);font-weight:600}
-.scroll-x{overflow-x:auto}
-
-.empty{text-align:center;padding:28px 12px;display:flex;flex-direction:column;gap:12px;align-items:center}
-.empty svg{width:40px;height:40px;color:var(--body-line)}
-
-/* toast + sheet */
-.toast{position:absolute;left:50%;bottom:86px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;white-space:nowrap;z-index:30;box-shadow:0 6px 20px rgba(0,0,0,.25)}
-.scrim{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:20;display:flex;align-items:flex-end}
-.sheet{width:100%;background:var(--surface);border-radius:22px 22px 0 0;padding-block:12px 20px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:12px;animation:up .2s ease-out}
-.sheet .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 4px}
+/* sheet + toast */
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.42);z-index:20;display:flex;align-items:flex-end}
+.sheet{width:100%;max-height:88%;overflow-y:auto;background:var(--surface);border-radius:24px 24px 0 0;padding-block:10px 22px;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px;animation:up .2s ease-out}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto}
 @keyframes up{from{transform:translateY(40px)}to{transform:none}}
+ol.steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;counter-reset:s}
+ol.steps li{display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;counter-increment:s;font-size:14.5px}
+ol.steps li::before{content:counter(s);width:26px;height:26px;border-radius:50%;background:var(--soft);color:var(--accent);font-family:var(--mono);font-size:12px;font-weight:600;display:grid;place-items:center}
+.tip{border-radius:14px;padding:11px 14px;font-size:13.5px;background:var(--soft)}
+.tip.warn{background:var(--warm-soft)}
+.alts{display:flex;flex-wrap:wrap;gap:8px}
+.alt{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-size:14px;cursor:pointer}
+.alt[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);font-weight:600}
+.toast{position:absolute;left:50%;bottom:84px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;white-space:nowrap;z-index:30}
 </style>
 </head>
 <body>
@@ -194,646 +162,362 @@ table.tbl th{font-size:12px;color:var(--muted);font-weight:600}
 <script>
 (function(){
 "use strict";
-const $ = id => document.getElementById(id);
-const f2 = v => (Math.round(v*100)/100).toFixed(2);
-const sgn = v => (v>0?'+':v<0?'−':'')+f2(Math.abs(v));
+const $=id=>document.getElementById(id);
+const f2=v=>(Math.round(v*100)/100).toFixed(2);
 
-/* ================= icons ================= */
-const I = {
-  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg>',
-  scan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><circle cx="12" cy="8.5" r="2"/><path d="M8.5 17c.4-2.5 1.8-4.5 3.5-4.5s3.1 2 3.5 4.5"/></svg>',
-  route:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8.2 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.8"/></svg>',
+const I={
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20H14.5v-6h-5v6H4z"/></svg>',
   me:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c1-3.8 4-6 7.5-6s6.5 2.2 7.5 6"/></svg>',
   back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
   chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
-  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
-  camera:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
-  info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg>',
-  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></svg>'
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
 };
 
-/* ================= data ================= */
-const TARGETS = [
-  {id:'square',  name:'直角肩薄背', swr:1.45, hwr:1.30, note:'肩线清晰，背部有宽度', who:'想穿吊带、露背装好看；上半身显挺拔', key:'三角肌中束、背阔肌'},
-  {id:'peach',   name:'蜜桃线条',   swr:1.34, hwr:1.45, note:'臀部饱满，腰臀差明显', who:'想穿牛仔裤、紧身裤更有曲线', key:'臀中肌、臀大肌'},
-  {id:'balanced',name:'均衡薄肌',   swr:1.40, hwr:1.38, note:'上下比例平均', who:'没有特别偏好，想整体匀称', key:'肩、背、臀均衡'},
-  {id:'athletic',name:'运动 X 型',  swr:1.50, hwr:1.45, note:'肩和臀都有明显宽度', who:'喜欢运动感，接受更明显的肌肉线条', key:'肩和臀都要加量'},
-  {id:'ballet',  name:'纤长芭蕾',   swr:1.30, hwr:1.30, note:'整体线条纤细', who:'偏好纤细、拉长的视觉效果', key:'以体态和臀腿后侧为主'}
+/* ---------------- data ---------------- */
+const TARGETS=[
+  {id:'square',name:'直角肩薄背',swr:1.45,hwr:1.30,note:'肩线清晰，背部有宽度'},
+  {id:'peach',name:'蜜桃线条',swr:1.34,hwr:1.45,note:'臀部饱满，腰臀差明显'},
+  {id:'balanced',name:'均衡薄肌',swr:1.40,hwr:1.38,note:'上下比例匀称'},
+  {id:'athletic',name:'运动 X 型',swr:1.50,hwr:1.45,note:'肩和臀都有明显宽度'},
+  {id:'ballet',name:'纤长芭蕾',swr:1.30,hwr:1.30,note:'整体线条纤细'}
 ];
-const SAMPLES = {
-  a:{label:'样例 A', tag:'窄肩 + 圆肩', m:{swr:1.22, hwr:1.31, sTilt:0.036, hTilt:0.006}, rounded:true, apt:false},
-  b:{label:'样例 B', tag:'臀部偏平 + 骨盆前倾', m:{swr:1.37, hwr:1.17, sTilt:0.008, hTilt:0.034}, rounded:false, apt:true}
+const SAMPLES={
+  a:{label:'样例 A',m:{swr:1.22,hwr:1.31},rounded:true,apt:false},
+  b:{label:'样例 B',m:{swr:1.37,hwr:1.17},rounded:false,apt:true}
 };
-const EX = {
-  lat_raise:{name:'哑铃侧平举',dose:'3–4 组 × 12–20 次',steps:['站直，手肘微屈，哑铃放在身体两侧','手肘带动手臂向两侧抬起，到与肩同高','顶端停 1 秒，用 2–3 秒慢慢放下'],cue:'想象把哑铃往远处推，而不是往上举',avoid:'耸肩、借身体晃动把哑铃甩起来'},
-  cable_lat:{name:'绳索单侧侧平举',dose:'3 组 × 12–15 次/侧',steps:['侧身站在绳索旁，远端的手握把手','手臂从身体前方向侧上方抬起','控制回落，做完一侧换另一侧'],cue:'全程保持张力，底部不要完全放松',avoid:'身体跟着向另一侧倾斜'},
-  pulldown:{name:'高位下拉',dose:'3–4 组 × 10–12 次',steps:['握距略宽于肩，挺胸坐稳','手肘向下向后拉，横杆拉到锁骨附近','慢慢还原到手臂伸直'],cue:'把手肘往裤兜方向拉',avoid:'身体大幅后仰借力'},
-  straight_arm:{name:'直臂下压',dose:'3 组 × 12–15 次',steps:['面对绳索，手臂伸直握杆','髋略前屈，手臂向下压到大腿前侧','慢慢回到头前方'],cue:'手臂像钟摆，只活动肩关节',avoid:'弯肘，变成练手臂后侧'},
-  reverse_fly:{name:'反向飞鸟',dose:'3 组 × 15–20 次',steps:['俯身约 45°，背部保持平直','双臂向两侧打开到与身体平齐','顶端夹一下肩胛，慢慢放下'],cue:'重量轻一点，感受后肩发力',avoid:'耸肩，用斜方肌代偿'},
-  face_pull:{name:'面拉',dose:'3 组 × 15 次',steps:['绳索与眼睛同高，双手握绳','向脸部方向拉，手肘向外打开','停 1 秒后慢慢还原'],cue:'拉到最后双手在耳朵两侧',avoid:'腰向后仰'},
-  neck_stretch:{name:'颈侧拉伸',dose:'每侧 2 × 30 秒',steps:['坐直，一只手放到背后','头向另一侧慢慢倾斜','另一只手轻扶头部加深拉伸'],cue:'肩膀往下沉',avoid:'用力拉扯头部'},
-  pushup:{name:'俯卧撑',dose:'2–3 组 × 8–12 次',steps:['双手略宽于肩，身体成一条直线','屈肘下降，胸口接近地面','推起到手臂伸直'],cue:'手肘与身体约成 45°',avoid:'塌腰或撅臀'},
-  db_press:{name:'哑铃卧推',dose:'2–3 组 × 10 次',steps:['仰卧，哑铃放在胸部两侧','向上推起到手臂接近伸直','慢慢放回起始位置'],cue:'肩胛骨收紧，贴住凳面',avoid:'肩膀向前耸起'},
-  dead_bug:{name:'死虫',dose:'3 组 × 8 次/侧',steps:['仰卧，手臂向上，屈髋屈膝 90°','对侧手脚同时慢慢伸远','还原后换另一侧'],cue:'腰始终贴住地面',avoid:'憋气、腰离开地面'},
-  plank:{name:'平板支撑',dose:'3 组 × 30–45 秒',steps:['前臂撑地，手肘在肩膀正下方','身体成一条直线，收紧臀部','保持均匀呼吸'],cue:'骨盆微微向后卷',avoid:'塌腰或撅臀'},
-  hip_thrust:{name:'臀推',dose:'3–4 组 × 10–12 次',steps:['上背靠凳，杠铃或哑铃放在髋部','脚跟发力，把髋推到与身体平齐','顶端夹紧臀部 1 秒，再慢慢放下'],cue:'下巴微收，肋骨下压',avoid:'用腰往上顶'},
-  sl_bridge:{name:'单腿臀桥',dose:'3 组 × 10 次/侧',steps:['仰卧屈膝，一条腿伸直抬起','支撑腿的脚跟发力把髋抬起','两侧髋保持水平，慢慢放下'],cue:'先做较弱的一侧',avoid:'髋部一侧下沉'},
-  rdl:{name:'罗马尼亚硬拉',dose:'3 组 × 8–10 次',steps:['双脚与髋同宽，膝盖微屈','髋向后推，哑铃沿大腿下滑','大腿后侧有拉伸感时站起'],cue:'背部全程平直',avoid:'弯腰像捡东西一样往下够'},
-  band_walk:{name:'弹力带侧向走',dose:'3 组 × 15 步/侧',steps:['弹力带套在膝盖上方或脚踝','半蹲，向一侧迈小步','保持弹力带张力，走完换方向'],cue:'膝盖始终往外推',avoid:'身体左右摇晃'},
-  side_leg:{name:'侧卧抬腿',dose:'3 组 × 15 次/侧',steps:['侧卧，下侧腿屈膝','上侧腿伸直，脚尖略朝下','向上抬到约 45°，慢慢放下'],cue:'腿略向后方抬',avoid:'髋向后翻转'},
-  leg_curl:{name:'俯卧腿弯举',dose:'3 组 × 12 次',steps:['俯卧在器械上，脚踝在垫子下','屈膝把垫子拉向臀部','慢慢放回'],cue:'髋部贴紧垫子',avoid:'抬起臀部借力'},
-  goblet:{name:'高脚杯深蹲',dose:'3 组 × 10 次',steps:['双手在胸前捧住哑铃，脚略宽于肩','屈髋屈膝向下蹲到大腿接近水平','脚掌发力站起'],cue:'膝盖朝脚尖方向',avoid:'膝盖内扣'},
-  split_squat:{name:'分腿蹲',dose:'3 组 × 8 次/侧',steps:['前后分腿站立，后脚跟抬起','身体垂直向下，后膝接近地面','前脚发力站起'],cue:'上身保持直立',avoid:'前膝过度前冲'},
-  hipflex_stretch:{name:'弓步髋屈肌拉伸',dose:'每侧 2 × 30 秒',steps:['单膝跪地，前腿屈膝 90°','收紧后侧臀部，骨盆微微后卷','身体向前移，感受大腿前侧上方的拉伸'],cue:'先卷骨盆，再前移',avoid:'腰向前塌'}
+const EX={
+  lat_raise:{name:'哑铃侧平举',reps:'12–15 次',steps:['站直，手肘微屈，哑铃在身体两侧','手肘带动手臂向两侧抬到与肩同高','顶端停 1 秒，2–3 秒慢慢放下'],cue:'想象把哑铃往远处推，而不是往上举',avoid:'耸肩、甩起来'},
+  cable_lat:{name:'绳索单侧侧平举',reps:'12–15 次/侧',steps:['侧身站在绳索旁，远端的手握把手','手臂从身前向侧上方抬起','控制回落，做完换另一侧'],cue:'底部不要完全放松',avoid:'身体跟着倾斜'},
+  band_lat:{name:'弹力带侧平举',reps:'15–20 次',steps:['双脚踩住弹力带中间','双手握两端，向两侧抬到与肩同高','慢慢放下'],cue:'适合在家练',avoid:'耸肩'},
+  pulldown:{name:'高位下拉',reps:'10–12 次',steps:['握距略宽于肩，挺胸坐稳','手肘向下向后拉，横杆到锁骨附近','慢慢还原'],cue:'把手肘往裤兜方向拉',avoid:'身体大幅后仰'},
+  db_row:{name:'单臂哑铃划船',reps:'10–12 次/侧',steps:['一手一膝撑凳，背部平直','另一手把哑铃拉向髋部','慢慢放下'],cue:'手肘贴着身体往后走',avoid:'转身借力'},
+  face_pull:{name:'面拉',reps:'15 次',steps:['绳索与眼睛同高，双手握绳','向脸部方向拉，手肘向外打开','停 1 秒后还原'],cue:'拉到最后双手在耳朵两侧',avoid:'腰向后仰'},
+  reverse_fly:{name:'反向飞鸟',reps:'15–20 次',steps:['俯身约 45°，背部平直','双臂向两侧打开到与身体平齐','夹一下肩胛，慢慢放下'],cue:'重量轻，感受后肩',avoid:'耸肩代偿'},
+  band_pull:{name:'弹力带拉开',reps:'15–20 次',steps:['双手与肩同宽握弹力带，手臂前伸','向两侧拉开到胸前','慢慢还原'],cue:'肩膀往下沉',avoid:'耸肩'},
+  pushup:{name:'俯卧撑',reps:'8–12 次',steps:['双手略宽于肩，身体成一条直线','屈肘下降，胸口接近地面','推起到手臂伸直'],cue:'手肘与身体约成 45°',avoid:'塌腰'},
+  dead_bug:{name:'死虫',reps:'8 次/侧',steps:['仰卧，手臂向上，屈髋屈膝 90°','对侧手脚同时慢慢伸远','还原后换另一侧'],cue:'腰始终贴地',avoid:'憋气、腰离地'},
+  plank:{name:'平板支撑',reps:'30–45 秒',steps:['前臂撑地，手肘在肩膀正下方','身体成直线，收紧臀部','均匀呼吸'],cue:'骨盆微微后卷',avoid:'塌腰或撅臀'},
+  hip_thrust:{name:'臀推',reps:'10–12 次',steps:['上背靠凳，哑铃放在髋部','脚跟发力，把髋推到与身体平齐','顶端夹紧 1 秒再放下'],cue:'下巴微收，肋骨下压',avoid:'用腰往上顶'},
+  glute_bridge:{name:'臀桥',reps:'15 次',steps:['仰卧屈膝，双脚与髋同宽','脚跟发力把髋抬起','顶端夹紧臀部，慢慢放下'],cue:'适合在家练',avoid:'腰拱起'},
+  band_walk:{name:'弹力带侧向走',reps:'15 步/侧',steps:['弹力带套在膝盖上方','半蹲，向一侧迈小步','走完换方向'],cue:'膝盖始终往外推',avoid:'身体左右晃'},
+  side_leg:{name:'侧卧抬腿',reps:'15 次/侧',steps:['侧卧，下侧腿屈膝','上侧腿伸直，脚尖略朝下','向上抬到约 45°，慢慢放下'],cue:'腿略向后方抬',avoid:'髋向后翻'},
+  rdl:{name:'罗马尼亚硬拉',reps:'8–10 次',steps:['双脚与髋同宽，膝盖微屈','髋向后推，哑铃沿大腿下滑','大腿后侧有拉伸感时站起'],cue:'背部全程平直',avoid:'弯腰去够'},
+  leg_curl:{name:'俯卧腿弯举',reps:'12 次',steps:['俯卧，脚踝在垫子下','屈膝把垫子拉向臀部','慢慢放回'],cue:'髋部贴紧垫子',avoid:'抬臀借力'},
+  goblet:{name:'高脚杯深蹲',reps:'10 次',steps:['胸前捧住哑铃，脚略宽于肩','蹲到大腿接近水平','脚掌发力站起'],cue:'膝盖朝脚尖方向',avoid:'膝盖内扣'},
+  split_squat:{name:'分腿蹲',reps:'8 次/侧',steps:['前后分腿，后脚跟抬起','身体垂直下降','前脚发力站起'],cue:'上身直立',avoid:'前膝过度前冲'},
+  hipflex_stretch:{name:'髋屈肌拉伸',reps:'每侧 2×30 秒',steps:['单膝跪地，前腿屈膝 90°','收紧后侧臀部，骨盆微微后卷','身体前移，感受大腿前侧上方拉伸'],cue:'先卷骨盆，再前移',avoid:'腰向前塌'},
+  chest_stretch:{name:'门框胸部拉伸',reps:'2×30 秒',steps:['前臂贴住门框，手肘与肩同高','身体慢慢向前','感受胸前拉伸'],cue:'肩膀不要耸起',avoid:'拉到疼'}
 };
-const MUSCLES = {
-  delt_side:{name:'三角肌中束', area:'肩部外侧', ex:['lat_raise','cable_lat'], base:'维持现有训练量即可'},
-  lats:{name:'背阔肌', area:'上背两侧', ex:['pulldown','straight_arm'], base:'划船、下拉类动作正常做'},
-  rear:{name:'后束 · 中下斜方', area:'肩后侧与肩胛之间', ex:['face_pull','reverse_fly'], base:'作为肩部健康的常规训练'},
-  traps_up:{name:'斜方肌上束', area:'脖子两侧', ex:['neck_stretch'], base:'硬拉、划船时会被动练到，不需要单独加量'},
-  pecs:{name:'胸大肌', area:'胸部', ex:['pushup','db_press'], base:'正常训练'},
-  core:{name:'核心', area:'腹部', ex:['dead_bug','plank'], base:'正常训练'},
-  glute_max:{name:'臀大肌', area:'臀部后侧', ex:['hip_thrust','sl_bridge'], base:'正常训练'},
-  glute_med:{name:'臀中肌', area:'臀部外侧上方', ex:['band_walk','side_leg','sl_bridge'], base:'正常训练'},
-  hams:{name:'腘绳肌', area:'大腿后侧', ex:['rdl','leg_curl'], base:'正常训练'},
-  quads:{name:'股四头肌', area:'大腿前侧', ex:['goblet','split_squat'], base:'不要跳过：膝关节稳定和基础力量都靠它，新手也很难把腿练粗'},
-  hipflex:{name:'髋屈肌', area:'大腿前侧上方', ex:['hipflex_stretch'], base:''}
+const MUSCLES={
+  delt:{name:'三角肌中束',area:'肩部外侧',ex:['lat_raise','cable_lat','band_lat']},
+  lats:{name:'背阔肌',area:'上背两侧',ex:['pulldown','db_row']},
+  rear:{name:'后束 · 中下斜方',area:'肩后侧',ex:['face_pull','reverse_fly','band_pull']},
+  pecs:{name:'胸大肌',area:'胸部',ex:['pushup']},
+  core:{name:'核心',area:'腹部',ex:['dead_bug','plank']},
+  gmax:{name:'臀大肌',area:'臀部',ex:['hip_thrust','glute_bridge']},
+  gmed:{name:'臀中肌',area:'臀部外侧',ex:['band_walk','side_leg']},
+  hams:{name:'腘绳肌',area:'大腿后侧',ex:['rdl','leg_curl']},
+  quads:{name:'股四头肌',area:'大腿前侧',ex:['goblet','split_squat']}
 };
-const LV = {
-  focus:{label:'重点',rank:4,w:3}, boost:{label:'加强',rank:3,w:2},
-  keep:{label:'保持',rank:2,w:1}, less:{label:'少分配',rank:1,w:0.5}, stretch:{label:'拉伸',rank:0,w:0}
-};
-const WEEKLY_SETS = 36;
-const UPPER=['delt_side','lats','rear','pecs','traps_up'], LOWER=['glute_max','glute_med','hams','quads'];
+const W={focus:3,boost:2,keep:1,less:.5};
+const LVNAME={focus:'重点',boost:'加强',keep:'保持',less:'少量'};
+const UPPER=['delt','lats','rear','pecs'], LOWER=['gmax','gmed','hams','quads'];
+const DOW=['日','一','二','三','四','五','六'];
+const SCHED={1:'A',3:'B',5:'C'}; // 周一 / 周三 / 周五
 
-/* ================= state ================= */
-const KEY='bodynav.v2';
-const S = {mode:'a', target:'square', rounded:true, apt:false, photoM:null, history:[], done:{}};
-const T = {photoURL:null, photoPts:null, mapView:'back', day:'A'}; // transient, not saved
-try{ const raw=localStorage.getItem(KEY); if(raw) Object.assign(S, JSON.parse(raw)); }catch(e){}
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+/* ---------------- state ---------------- */
+const KEY='bodynav.v3';
+const S={mode:'a',target:'square',rounded:true,apt:false,photoM:null,done:{},swap:{}};
+const T={photoURL:null,pts:null,photoM:null};
+try{const r=localStorage.getItem(KEY); if(r) Object.assign(S,JSON.parse(r));}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
 
-/* ================= rule engine ================= */
-function analyze(m, flags, t){
-  const out = {}; const trace = []; const notes = [];
-  const raise = (id,lv,why)=>{ const c=out[id]; if(!c){out[id]={level:lv,reasons:[why]};return;}
-    if(LV[lv].rank>LV[c.level].rank) c.level=lv; c.reasons.push(why); };
-  const lower = (id,why)=>{ const c=out[id]; if(!c){out[id]={level:'less',reasons:[why]};return;}
-    if(c.level==='keep') c.level='less'; c.reasons.push(why); };
-  const dS = t.swr - m.swr, dH = t.hwr - m.hwr;
-  const rule = (id,cond,calc,fired,effect)=>trace.push({id,cond,calc,fired,effect});
-
-  const c1 = `目标 ${f2(t.swr)} − 现在 ${f2(m.swr)} = ${sgn(dS)}`;
-  rule('R1a','肩腰比差距 ≥ 0.10',c1,dS>=0.10,'三角肌中束 → 重点；背阔肌 → 加强');
-  rule('R1b','0.04 ≤ 肩腰比差距 < 0.10',c1,dS>=0.04&&dS<0.10,'三角肌中束、背阔肌 → 加强');
-  rule('R1c','肩腰比差距 ≤ −0.04',c1,dS<=-0.04,'肩已够宽：中束保持，上斜方少分配');
-  if(dS>=0.10){
-    raise('delt_side','focus',`肩腰比差 ${f2(dS)}。肩部的视觉宽度主要来自三角肌中束，它是缩小差距最直接的肌肉`);
-    raise('lats','boost','背阔肌让上背从腋下展开，配合肩宽形成倒三角');
-  }else if(dS>=0.04){
-    raise('delt_side','boost',`肩腰比差 ${f2(dS)}，适度加量就够`);
-    raise('lats','boost','背阔肌让上背从腋下展开');
-  }else if(dS<=-0.04){
-    raise('delt_side','keep',`肩腰比已比目标高 ${f2(-dS)}，不需要再加宽`);
-    lower('traps_up','肩已够宽，避免上斜方继续变厚让肩线变斜');
-  }
-
-  const c2 = `目标 ${f2(t.hwr)} − 现在 ${f2(m.hwr)} = ${sgn(dH)}`;
-  rule('R2a','臀腰比差距 ≥ 0.10',c2,dH>=0.10,'臀中肌、臀大肌 → 重点');
-  rule('R2b','0.04 ≤ 臀腰比差距 < 0.10',c2,dH>=0.04&&dH<0.10,'臀中肌、臀大肌 → 加强');
-  rule('R2c','臀腰比差距 ≤ −0.04',c2,dH<=-0.04,'臀部已够宽：臀部训练保持');
-  if(dH>=0.10){
-    raise('glute_med','focus',`臀腰比差 ${f2(dH)}。髋部外侧的宽度主要来自臀中肌`);
-    raise('glute_max','focus','臀大肌决定臀部的饱满度和侧面轮廓');
-  }else if(dH>=0.04){
-    raise('glute_med','boost',`臀腰比差 ${f2(dH)}，适度加量`);
-    raise('glute_max','boost','臀大肌决定臀部的饱满度');
-  }else if(dH<=-0.04){
-    raise('glute_med','keep',`臀腰比已比目标高 ${f2(-dH)}`);
-    raise('glute_max','keep','维持即可');
-  }
-
-  rule('R3','圆肩 = 是',flags.rounded?'是':'否',flags.rounded,'后束·中下斜方 → 重点；胸、上斜方 → 少分配');
-  if(flags.rounded){
-    raise('rear','focus','圆肩：后束和中下斜方负责把肩膀拉回中立位，先纠正再谈加宽');
-    lower('pecs','圆肩：推类动作减量，每次练完做胸部拉伸');
-    lower('traps_up','圆肩人群上斜方常常代偿发力，不额外加量');
-  }
-
-  rule('R4','骨盆前倾 = 是',flags.apt?'是':'否',flags.apt,'臀大肌、腘绳肌、核心 → 至少加强；髋屈肌 → 拉伸');
-  if(flags.apt){
-    raise('glute_max','boost','骨盆前倾：臀大肌负责把骨盆往后拉正');
-    raise('hams','boost','骨盆前倾：腘绳肌和臀大肌一起控制骨盆后倾');
-    raise('core','boost','骨盆前倾：腹部负责防止腰椎过度前凸，死虫比卷腹更合适');
-    raise('hipflex','stretch','骨盆前倾：髋屈肌通常偏紧，需要拉伸而不是加练');
-  }
-
-  const st = m.sTilt||0;
-  rule('R5','肩线倾斜 ≥ 3%',`${(st*100).toFixed(1)}%`,st>=0.03,'侧平举改为单侧，从低侧开始');
-  if(st>=0.03){
-    raise('delt_side', out.delt_side?out.delt_side.level:'keep','高低肩：侧平举改单侧做，从较低一侧开始，组数两侧相同');
-    lower('traps_up','高低肩：高侧上斜方常偏紧，不加练，做颈侧拉伸');
-  }
-
-  const ht = m.hTilt||0;
-  rule('R6','髋线倾斜 ≥ 3%',`${(ht*100).toFixed(1)}%`,ht>=0.03,'臀中肌加入单腿训练');
-  if(ht>=0.03){
-    raise('glute_med', out.glute_med && LV[out.glute_med.level].rank>=LV.boost.rank ? out.glute_med.level : 'boost','髋线不平：加入单腿臀桥，左右分开练');
-  }
-
-  const r7 = t.id==='ballet' && dH<=0;
-  rule('R7','目标为纤长芭蕾，且臀腰比已达标',r7?'是':'否',r7,'股四头肌 → 少分配（不是不练）');
-  if(r7) lower('quads','目标偏纤长，下肢以臀和腿后侧为主，股四头比例上少分配，但不要停练');
-
-  const r8 = dS>=0.06 && dH>=0.06;
-  rule('R8','肩腰比、臀腰比都差 ≥ 0.06',`${sgn(dS)} / ${sgn(dH)}`,r8,'提示：腰围是两个比例共同的分母');
-  if(r8) notes.push('两个比例都偏低时，腰围也是原因之一。腰围变化主要靠整体体脂下降，练腹不能局部瘦腰。');
-
-  for(const id in MUSCLES){
-    if(id==='hipflex') continue;
-    if(!out[id]) out[id]={level:'keep',reasons:[MUSCLES[id].base]};
-    else if(id==='quads' && out[id].level!=='less') out[id].reasons.push(MUSCLES.quads.base);
-  }
-
-  const ids = Object.keys(out).filter(id=>out[id].level!=='stretch');
-  const wsum = ids.reduce((a,id)=>a+LV[out[id].level].w,0);
-  ids.forEach(id=>{ out[id].sets = Math.max(1,Math.round(WEEKLY_SETS*LV[out[id].level].w/wsum)); });
-
-  let headline;
-  if(Math.max(dS,dH)<0.04) headline='比例已接近目标，重点是维持和纠正体态';
-  else if(dS>=dH) headline='主要差在肩部宽度';
-  else headline='主要差在臀部外侧';
-  if(st>=0.03 || ht>=0.03) notes.push('检测到左右不平：本页只给训练侧重点，如有疼痛或明显不对称，先找康复师评估。');
-
-  return {muscles:out, trace, notes, dS, dH, headline};
+/* ---------------- logic ---------------- */
+const target=()=>TARGETS.find(t=>t.id===S.target)||TARGETS[0];
+const cur=()=>S.mode==='photo'?S.photoM:SAMPLES[S.mode].m;
+function analyze(){
+  const m=cur(); if(!m) return null; const t=target();
+  const dS=t.swr-m.swr, dH=t.hwr-m.hwr, L={};
+  const up=(id,lv)=>{ if(!L[id]||W[lv]>W[L[id]]) L[id]=lv; };
+  if(dS>=0.10){up('delt','focus');up('lats','boost');} else if(dS>=0.04){up('delt','boost');up('lats','boost');}
+  if(dH>=0.10){up('gmed','focus');up('gmax','focus');} else if(dH>=0.04){up('gmed','boost');up('gmax','boost');}
+  if(S.rounded){up('rear','focus'); L.pecs='less';}
+  if(S.apt){up('gmax','boost');up('hams','boost');up('core','boost');}
+  if(t.id==='ballet'&&dH<=0) L.quads='less';
+  for(const id in MUSCLES) if(!L[id]) L[id]='keep';
+  const wsum=Object.values(L).reduce((a,lv)=>a+W[lv],0);
+  const sets={}; for(const id in L) sets[id]=Math.max(1,Math.round(36*W[L[id]]/wsum));
+  const focus=Object.keys(L).filter(id=>L[id]==='focus');
+  let head;
+  if(Math.max(dS,dH)<0.04) head='已经很接近目标了';
+  else if(dS>=dH) head='主要差在肩部宽度';
+  else head='主要差在臀部外侧';
+  return {m,t,dS,dH,L,sets,focus,head};
 }
-
-/* ================= derived ================= */
-const target = () => TARGETS.find(x=>x.id===S.target) || TARGETS[0];
-const currentM = () => S.mode==='photo' ? S.photoM : SAMPLES[S.mode].m;
-function getRes(){ const m=currentM(); return m ? analyze(m,{rounded:S.rounded,apt:S.apt},target()) : null; }
-const sourceLabel = () => S.mode==='photo' ? '我的照片' : SAMPLES[S.mode].label+' · '+SAMPLES[S.mode].tag;
-const sortedMuscles = res => Object.entries(res.muscles).sort((a,b)=>LV[b[1].level].rank-LV[a[1].level].rank || (b[1].sets||0)-(a[1].sets||0));
-
-function weekPlan(res){
-  const days={A:{name:'上肢日',items:[]},B:{name:'下肢日',items:[]},C:{name:'重点 + 核心',items:[]}};
-  for(const [id,v] of sortedMuscles(res)){
-    const mu=MUSCLES[id];
-    if(v.level==='stretch'){ days.B.items.push({id,ex:mu.ex[0],sets:'拉伸',lv:v.level}); days.C.items.push({id,ex:mu.ex[0],sets:'拉伸',lv:v.level}); continue; }
-    const grp = UPPER.includes(id)?'A':LOWER.includes(id)?'B':'C';
-    if((v.level==='focus'||v.level==='boost') && v.sets>=4 && grp!=='C'){
-      const s1=Math.ceil(v.sets/2);
-      days[grp].items.push({id,ex:mu.ex[0],sets:s1+' 组',lv:v.level});
-      days.C.items.push({id,ex:mu.ex[1]||mu.ex[0],sets:(v.sets-s1)+' 组',lv:v.level});
-    }else days[grp].items.push({id,ex:mu.ex[0],sets:v.sets+' 组',lv:v.level});
+function weekPlan(r){
+  const D={A:{name:'上肢',items:[]},B:{name:'下肢',items:[]},C:{name:'重点强化',items:[]}};
+  const order=Object.keys(r.L).sort((a,b)=>W[r.L[b]]-W[r.L[a]]);
+  for(const id of order){
+    const lv=r.L[id], s=r.sets[id], g=UPPER.includes(id)?'A':LOWER.includes(id)?'B':'C';
+    if(g!=='C' && (lv==='focus'||lv==='boost') && s>=4){
+      const a=Math.ceil(s/2); D[g].items.push({mu:id,lv,sets:a}); D.C.items.push({mu:id,lv,sets:s-a,alt:1});
+    } else D[g].items.push({mu:id,lv,sets:s});
   }
-  return days;
+  if(S.rounded) D.A.items.push({mu:null,ex:'chest_stretch',lv:'keep',sets:1,stretch:1});
+  if(S.apt) D.B.items.push({mu:null,ex:'hipflex_stretch',lv:'keep',sets:1,stretch:1});
+  for(const k in D){ D[k].sets=D[k].items.reduce((a,it)=>a+(it.stretch?0:it.sets),0); D[k].min=Math.max(15,Math.round((D[k].sets*2.6+(D[k].items.some(i=>i.stretch)?3:0))/5)*5); }
+  return D;
 }
+const exOf=(k,it)=>it.ex || S.swap[k+':'+it.mu] || MUSCLES[it.mu].ex[it.alt&&MUSCLES[it.mu].ex[1]?1:0];
+function weekDates(){
+  const now=new Date(); const mon=new Date(now); mon.setDate(now.getDate()-((now.getDay()+6)%7)); mon.setHours(0,0,0,0);
+  return [0,1,2,3,4,5,6].map(i=>{const d=new Date(mon); d.setDate(mon.getDate()+i); return d;});
+}
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const todayISO=()=>iso(new Date());
+function dayProgress(date,key,plan){ const its=plan[key].items; const n=its.filter(it=>S.done[date+':'+exOf(key,it)]).length; return {n,total:its.length}; }
 
-/* ================= figures ================= */
-function smoothClosed(p){
-  const F=v=>v.toFixed(1); const n=p.length; let d=`M${F(p[0][0])},${F(p[0][1])}`;
-  for(let i=0;i<n;i++){
-    const p0=p[(i-1+n)%n],p1=p[i],p2=p[(i+1)%n],p3=p[(i+2)%n];
-    d+=`C${F(p1[0]+(p2[0]-p0[0])/6)},${F(p1[1]+(p2[1]-p0[1])/6)} ${F(p2[0]-(p3[0]-p1[0])/6)},${F(p2[1]-(p3[1]-p1[1])/6)} ${F(p2[0])},${F(p2[1])}`;
-  }
+/* ---------------- drawing ---------------- */
+function smooth(p){
+  const F=v=>v.toFixed(1),n=p.length; let d=`M${F(p[0][0])},${F(p[0][1])}`;
+  for(let i=0;i<n;i++){const a=p[(i-1+n)%n],b=p[i],c=p[(i+1)%n],e=p[(i+2)%n];
+    d+=`C${F(b[0]+(c[0]-a[0])/6)},${F(b[1]+(c[1]-a[1])/6)} ${F(c[0]-(e[0]-b[0])/6)},${F(c[1]-(e[1]-b[1])/6)} ${F(c[0])},${F(c[1])}`;}
   return d+'Z';
 }
-function bodyPath(cx, halfW, swr, hwr, sOff=0, hOff=0){
-  const hS=halfW*swr, hH=halfW*hwr, ua=halfW+(hS-halfW)*0.55;
-  const right = (k)=>[
-    [9,62,0],[hS*0.6,76,k*sOff*0.6],[hS,92,k*sOff],[hS*0.94,114,k*sOff*0.6],[ua,135,0],[halfW,185,0],
-    [hH,232,k*hOff],[hH*0.93,268,k*hOff*0.5],[hH*0.68,330,0],[hH*0.5,372,0],[hH*0.44,410,0],[hH*0.2,414,0],
-    [hH*0.17,372,0],[hH*0.16,320,0],[4,280,0]
-  ];
-  const R = right(1).map(([x,y,o])=>[cx+x,y+o]);
-  const L = right(-1).map(([x,y,o])=>[cx-x,y+o]).reverse();
-  return smoothClosed(R.concat(L));
+function bodyPath(cx,hw,swr,hwr){
+  const hS=hw*swr,hH=hw*hwr,ua=hw+(hS-hw)*.55;
+  const R=[[9,62],[hS*.6,76],[hS,92],[hS*.94,114],[ua,135],[hw,185],[hH,232],[hH*.93,268],[hH*.68,330],[hH*.5,372],[hH*.44,410],[hH*.2,414],[hH*.17,372],[hH*.16,320],[4,280]];
+  return smooth(R.map(([x,y])=>[cx+x,y]).concat(R.map(([x,y])=>[cx-x,y]).reverse()));
 }
-function silSVG(m,t){
-  const W=34, cx=120;
-  const sOff=(m.sTilt||0)*W*m.swr*2, hOff=(m.hTilt||0)*W*m.hwr*2;
-  const cur=bodyPath(cx,W,m.swr,m.hwr,sOff,hOff), tgt=bodyPath(cx,W,t.swr,t.hwr);
-  const arrows=[];
-  const mk=(y,from,to,label)=>{
-    if(Math.abs(to-from)<1.2) return;
-    [1,-1].forEach(k=>{
-      const x1=cx+k*from, x2=cx+k*to, dir=Math.sign(x2-x1);
-      arrows.push(`<line x1="${x1.toFixed(1)}" y1="${y}" x2="${x2.toFixed(1)}" y2="${y}" style="stroke:var(--warm)" stroke-width="3" stroke-linecap="round"/><path d="M${x2.toFixed(1)},${y} l${(-dir*5).toFixed(1)},-4 l0,8z" style="fill:var(--warm)"/>`);
-    });
-    arrows.push(`<text x="${(cx+to+6).toFixed(1)}" y="${y+4}" style="fill:var(--warm);font:600 11px var(--mono)">${label}</text>`);
-  };
-  const dS=t.swr-m.swr, dH=t.hwr-m.hwr;
-  if(dS>0) mk(92, W*m.swr, W*t.swr, '肩 '+sgn(dS));
-  if(dH>0) mk(232, W*m.hwr, W*t.hwr, '臀 '+sgn(dH));
-  return `<svg viewBox="0 0 240 430" role="img" aria-label="现在与目标的轮廓叠加">
-    <circle cx="${cx}" cy="40" r="20" style="fill:var(--body)"/>
-    <path d="${cur}" style="fill:var(--body);stroke:var(--body-line)" stroke-width="1"/>
-    <path d="${tgt}" style="fill:none;stroke:var(--accent)" stroke-width="2" stroke-dasharray="5 4"/>
-    <line x1="${cx-W}" y1="185" x2="${cx+W}" y2="185" style="stroke:var(--muted)" stroke-width="1" stroke-dasharray="2 3"/>
-    <text x="${cx}" y="200" text-anchor="middle" style="fill:var(--muted);font:11px var(--mono)">腰 = 1.00</text>
-    ${arrows.join('')}</svg>`;
+function figure(m,t){
+  const w=34,cx=120;
+  const lab=(y,d,x)=> d>=0.04?`<text x="${x.toFixed(1)}" y="${y+4}" style="fill:var(--warm);font:600 19px var(--mono)">+${f2(d)}</text>`:'';
+  const arr=(y,a,b)=> b-a>1.2?[1,-1].map(k=>`<line x1="${(cx+k*a).toFixed(1)}" y1="${y}" x2="${(cx+k*b).toFixed(1)}" y2="${y}" style="stroke:var(--warm)" stroke-width="2.5" stroke-linecap="round"/>`).join(''):'';
+  return `<svg viewBox="0 0 260 430" role="img" aria-label="实线为现在的身材，虚线为目标身材">
+    <circle cx="${cx}" cy="40" r="20" style="fill:var(--body);stroke:var(--ink)" stroke-width="1.5"/>
+    <path d="${bodyPath(cx,w,m.swr,m.hwr)}" style="fill:var(--body);stroke:var(--ink)" stroke-width="1.5"/>
+    <path d="${bodyPath(cx,w,t.swr,t.hwr)}" style="fill:none;stroke:var(--accent)" stroke-width="2.2" stroke-dasharray="6 5"/>
+    ${arr(92,w*m.swr,w*t.swr)}${arr(232,w*m.hwr,w*t.hwr)}
+    ${lab(92,t.swr-m.swr,cx+w*Math.max(m.swr,t.swr)+8)}${lab(232,t.hwr-m.hwr,cx+w*Math.max(m.hwr,t.hwr)+8)}
+  </svg>`;
 }
-const REGIONS = {
-  front:[
-    ['traps_up','e',83,74,9,4,-20],['traps_up','e',117,74,9,4,20],
-    ['delt_side','e',64,97,7,12,0],['delt_side','e',136,97,7,12,0],
-    ['pecs','e',86,113,13,10,0],['pecs','e',114,113,13,10,0],
-    ['core','r',88,130,24,58,8],
-    ['hipflex','e',82,246,6,11,-15],['hipflex','e',118,246,6,11,15],
-    ['quads','e',81,302,11,34,0],['quads','e',119,302,11,34,0]
-  ],
-  back:[
-    ['traps_up','e',83,74,9,4,-20],['traps_up','e',117,74,9,4,20],
-    ['delt_side','e',63,97,6,12,0],['delt_side','e',137,97,6,12,0],
-    ['rear','e',71,101,7,9,0],['rear','e',129,101,7,9,0],['rear','r',91,96,18,30,5],
-    ['lats','e',79,152,9,26,-10],['lats','e',121,152,9,26,10],
-    ['glute_med','e',69,226,8,11,0],['glute_med','e',131,226,8,11,0],
-    ['glute_max','e',85,242,14,15,0],['glute_max','e',115,242,14,15,0],
-    ['hams','e',81,302,10,32,0],['hams','e',119,302,10,32,0]
-  ]
-};
-function regionStyle(lv){
-  switch(lv){
-    case 'focus': return 'fill:var(--accent)';
-    case 'boost': return 'fill:var(--boost)';
-    case 'less': return 'fill:url(#hatch);stroke:var(--less);stroke-width:1';
-    case 'stretch': return 'fill:transparent;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 2';
-    default: return 'fill:var(--keep);stroke:var(--body-line);stroke-width:.6';
-  }
-}
-function mapSVG(view,res){
-  const base=bodyPath(100,28,1.4,1.38);
-  const rs=REGIONS[view].map(([id,type,x,y,a,b,r])=>{
-    const mm=res.muscles[id]; if(!mm) return '';
-    const attrs=`class="region" data-go="muscle" data-arg="${id}" style="${regionStyle(mm.level)}"`;
-    const tt=`<title>${MUSCLES[id].name}：${LV[mm.level].label}</title>`;
-    return type==='e' ? `<ellipse ${attrs} cx="${x}" cy="${y}" rx="${a}" ry="${b}" transform="rotate(${r} ${x} ${y})">${tt}</ellipse>`
-                      : `<rect ${attrs} x="${x}" y="${y}" width="${a}" height="${b}" rx="${r}">${tt}</rect>`;
-  }).join('');
-  return `<svg viewBox="0 0 200 430" role="img" aria-label="${view==='front'?'正面':'背面'}肌群图">
-    <defs><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" style="stroke:var(--less)" stroke-width="1.4"/></pattern></defs>
-    <circle cx="100" cy="40" r="18" style="fill:var(--surface);stroke:var(--body-line)"/>
-    <path d="${base}" style="fill:var(--surface);stroke:var(--body-line)" stroke-width="1"/>${rs}</svg>`;
+const mini=t=>`<svg class="mini" viewBox="60 15 120 410" aria-hidden="true"><circle cx="120" cy="40" r="18" style="fill:none;stroke:var(--accent)" stroke-width="5" stroke-dasharray="10 8"/><path d="${bodyPath(120,34,t.swr,t.hwr)}" style="fill:none;stroke:var(--accent)" stroke-width="6" stroke-dasharray="14 10"/></svg>`;
+function gapRow(name,c,tg){
+  const lo=1.0,hi=1.6,pc=v=>Math.max(0,Math.min(100,(v-lo)/(hi-lo)*100)); const d=tg-c;
+  return `<div class="gap"><span class="n">${name}</span>
+    <div class="track"><span class="fill" style="width:${pc(c)}%"></span><span class="tgt" style="left:${pc(tg)}%"></span></div>
+    <span class="v"><b>${f2(c)}</b> / ${f2(tg)}</span>
+    <span class="d ${Math.abs(d)<0.04?'ok':''}">${Math.abs(d)<0.04?'已达标':(d>0?'还差 ':'超出 ')+f2(Math.abs(d))}</span></div>`;
 }
 
-/* ================= ui helpers ================= */
-const pill = lv => `<span class="pill ${lv}">${LV[lv].label}</span>`;
-const li = (o) => `<button class="li" type="button" ${o.go?`data-go="${o.go}"`:''} ${o.arg!=null?`data-arg="${o.arg}"`:''} ${o.act?`data-act="${o.act}"`:''}>
-  ${o.lead||'<span></span>'}<span style="min-width:0"><div class="t">${o.t}</div>${o.s?`<div class="s">${o.s}</div>`:''}</span>
-  <span class="r">${o.r||''}${o.noChev?'':I.chev}</span></button>`;
-const stat = (k,cur,tg,d) => `<div class="stat"><div class="k">${k}</div><div class="v">${f2(cur)} <span>→ ${f2(tg)}</span></div><div class="d ${Math.abs(d)<0.04?'ok':''}">${Math.abs(d)<0.04?'已接近目标':'差距 '+sgn(d)}</div></div>`;
-const emptyNoData = () => `<div class="card empty">${I.camera}<h3>还没有你的测量数据</h3><p class="muted small">上传一张正面全身照，或者先用样例看看效果。</p><button class="btn" type="button" data-go="photo">去拍照测量</button><button class="btn ghost" type="button" data-act="useSample">先用样例 A</button></div>`;
-const todayKey = () => new Date().toISOString().slice(0,10);
-function fmtDate(iso){ const d=new Date(iso); return `${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
-
-/* ================= pages ================= */
-const PAGES = {
-  /* ---------- tab: 首页 ---------- */
-  home:{title:'身材导航', lvl:1, render(){
-    const res=getRes(); const t=target();
-    if(!res) return emptyNoData();
-    const m=currentM();
-    const focus=sortedMuscles(res).filter(([,v])=>v.level==='focus');
+/* ---------------- pages ---------------- */
+const P={
+  home:{root:1,title:'我的身材',render(){
+    const r=analyze();
+    if(!r) return `<div class="card" style="text-align:center;display:flex;flex-direction:column;gap:12px"><p class="big">先测一下你现在的身材</p><p class="muted small">上传一张正面全身照，30 秒得到你和目标的差距。</p><button class="btn" data-go="measure" type="button">开始测量</button></div>`;
+    const plan=weekPlan(r), dates=weekDates(), today=todayISO();
+    const strip=dates.map(d=>{const k=SCHED[d.getDay()], di=iso(d);
+      let cls='rest', inner='·';
+      if(k){ const p=dayProgress(di,k,plan); cls=(p.total&&p.n===p.total)?'done':'train'; inner=cls==='done'?I.check:plan[k].name[0]; }
+      return `<div class="d"><span>${DOW[d.getDay()]}</span><span class="dot ${cls} ${di===today?'today':''}">${inner}</span></div>`;}).join('');
+    const tk=SCHED[new Date().getDay()];
+    let todayLine, btn;
+    if(tk){ const p=dayProgress(today,tk,plan); todayLine=`<p><b>今天 · ${plan[tk].name}</b><span class="muted small">　${plan[tk].items.length} 个动作 · 约 ${plan[tk].min} 分钟${p.n?` · 已完成 ${p.n}`:''}</span></p>`; btn=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn" type="button" data-go="day" data-arg="${today}">开始今天训练</button><button class="btn ghost" type="button" data-go="plan">本周计划</button></div>`; }
+    else { const nd=dates.find(d=>d>new Date()&&SCHED[d.getDay()]); todayLine=`<p><b>今天休息</b><span class="muted small">　${nd?'下次：周'+DOW[nd.getDay()]+' · '+plan[SCHED[nd.getDay()]].name:'下周一继续'}</span></p>`; btn=`<button class="btn" type="button" data-go="plan">查看训练计划</button>`; }
     return `
-    <section class="card hero stack">
-      <p class="eyebrow">${sourceLabel()} → ${t.name}</p>
-      <h2>${res.headline}</h2>
-      <div class="row2">${stat('肩腰比',m.swr,t.swr,res.dS)}${stat('臀腰比',m.hwr,t.hwr,res.dH)}</div>
-      <button class="btn light" type="button" data-go="report">查看差距报告</button>
+    <section class="card">
+      <p class="label">现在 vs 目标：${r.t.name}</p>
+      <p class="big" style="margin-top:4px">${r.head}</p>
+      <div class="bodyfig">${figure(r.m,r.t)}</div>
+      <div class="legend"><span><i></i>现在</span><span><i class="dash"></i>目标</span></div>
+      <div style="margin-top:10px">${gapRow('肩腰比',r.m.swr,r.t.swr)}${gapRow('臀腰比',r.m.hwr,r.t.hwr)}</div>
     </section>
-    <div class="section-h"><b>本周重点</b><button class="link" type="button" data-tab="plan">全部路线</button></div>
-    <div class="list">${focus.length?focus.map(([id,v])=>li({go:'muscle',arg:id,lead:`<span class="badge">${v.sets}</span>`,t:MUSCLES[id].name,s:MUSCLES[id].area+' · 每周 '+v.sets+' 组'})).join(''):li({go:'plan',t:'没有需要重点加量的部位',s:'以保持为主，看看完整路线',noChev:false})}</div>
-    <div class="row2">
-      <button class="btn ghost" type="button" data-go="week">本周安排</button>
-      <button class="btn ghost" type="button" data-go="library">动作库</button>
-    </div>
-    ${S.mode!=='photo'?`<p class="muted small" style="text-align:center">当前显示的是样例数据。<button class="link" type="button" data-go="photo">换成我的照片</button></p>`:''}`;
+    <section class="card" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><p class="label">本周训练</p><span class="muted small">练 3 天 · 休 4 天</span></div>
+      <div class="week">${strip}</div>
+      ${todayLine}
+      ${btn}
+    </section>`;
   }},
-  report:{title:'差距报告', lvl:2, render(){
-    const res=getRes(); if(!res) return emptyNoData();
-    const m=currentM(), t=target();
-    const fired=res.trace.filter(r=>r.fired);
-    return `
-    <section class="card stack">
-      <p class="eyebrow">结论</p>
-      <h2>${res.headline}</h2>
-      <div class="row2">${stat('肩腰比',m.swr,t.swr,res.dS)}${stat('臀腰比',m.hwr,t.hwr,res.dH)}</div>
+  plan:{title:'本周训练计划',render(){
+    const r=analyze(); if(!r) return '';
+    const plan=weekPlan(r), today=todayISO();
+    const focusTxt=r.focus.length?r.focus.map(id=>MUSCLES[id].name).join('、'):'整体保持';
+    const rows=weekDates().map(d=>{const k=SCHED[d.getDay()], di=iso(d), isT=di===today;
+      const dayCell=`<span class="day"><b>周${DOW[d.getDay()]}</b><span>${d.getMonth()+1}/${d.getDate()}</span></span>`;
+      if(!k) return `<button class="row" type="button" disabled>${dayCell}<span><span class="t muted" style="font-weight:400">休息${isT?'<span class="tag today">今天</span>':''}</span></span><span></span></button>`;
+      const p=dayProgress(di,k,plan);
+      const names=[...new Set(plan[k].items.filter(i=>!i.stretch).slice(0,3).map(i=>MUSCLES[i.mu].name))].join('、');
+      return `<button class="row" type="button" data-go="day" data-arg="${di}">${dayCell}<span style="min-width:0"><span class="t">${plan[k].name}${isT?'<span class="tag today">今天</span>':''}${p.total&&p.n===p.total?'<span class="tag">已完成</span>':''}</span><span class="s">${names} · ${plan[k].items.length} 个动作 · ${plan[k].min} 分钟</span>${p.n&&p.n<p.total?`<div class="prog" style="margin-top:6px"><i style="width:${p.n/p.total*100}%"></i></div>`:''}</span><span class="r">${I.chev}</span></button>`;}).join('');
+    return `<section class="card" style="display:flex;flex-direction:column;gap:6px">
+      <p class="label">本周重点</p><p class="big">${focusTxt}</p>
+      <p class="muted small">按「${r.t.name}」和你现在的差距安排，每周约 ${Object.values(r.sets).reduce((a,b)=>a+b,0)} 组。</p>
     </section>
-    <section class="card stack">
-      <div class="sil">${silSVG(m,t)}</div>
-      <div class="legend"><span><i style="background:var(--body)"></i>现在</span><span><i style="border:2px dashed var(--accent)"></i>目标</span><span><i style="background:var(--warm)"></i>需要补的宽度</span></div>
+    <div class="rows">${rows}</div>`;
+  }},
+  day:{title:a=>{const d=new Date(a+'T00:00'); return `周${DOW[d.getDay()]} · ${{1:'上肢',3:'下肢',5:'重点强化'}[d.getDay()]||'训练'}`;},render(a){
+    const r=analyze(); const d=new Date(a+'T00:00'); const k=SCHED[d.getDay()]; const plan=weekPlan(r); const day=plan[k];
+    const p=dayProgress(a,k,plan);
+    const rows=day.items.map((it,i)=>{const e=exOf(k,it), done=!!S.done[a+':'+e];
+      const sub=it.stretch?'拉伸 · 练完做':`${MUSCLES[it.mu].name} · ${LVNAME[it.lv]}`;
+      return `<button class="row" type="button" data-act="openEx" data-arg="${a}|${k}|${i}"><span class="num ${done?'done':''}">${done?I.check:i+1}</span><span style="min-width:0"><span class="t">${EX[e].name}</span><span class="s">${sub}</span></span><span class="r mono">${it.stretch?'':it.sets+' 组'}${I.chev}</span></button>`;}).join('');
+    return `<section class="card" style="display:flex;flex-direction:column;gap:10px">
+      <p class="label">${d.getMonth()+1}月${d.getDate()}日 · 约 ${day.min} 分钟</p>
+      <p class="big">完成 ${p.n} / ${p.total}</p>
+      <div class="prog"><i style="width:${p.total?p.n/p.total*100:0}%"></i></div>
+      <p class="muted small">点动作看做法，也可以从动作库换成同部位的其他动作。</p>
     </section>
-    ${res.notes.map(n=>`<div class="note">${n}</div>`).join('')}
-    <div class="section-h"><b>触发了 ${fired.length} 条规则</b></div>
-    <div class="list">${fired.map(r=>li({go:'trace',t:r.id+' · '+r.cond,s:r.effect})).join('')}</div>
-    <button class="btn" type="button" data-tab="plan">看训练路线</button>`;
+    <div class="rows">${rows}</div>`;
   }},
-  trace:{title:'规则轨迹', lvl:3, render(){
-    const res=getRes(); if(!res) return emptyNoData();
-    return `<p class="muted small">每条结论都由下面的规则算出。同样的输入，永远得到同样的结果。</p>
-    <section class="card stack">${res.trace.slice().sort((a,b)=>b.fired-a.fired).map(r=>`
-      <div class="rule ${r.fired?'on':''}"><div class="id">${r.id} · ${r.fired?'触发':'未触发'}</div><div><b>${r.cond}</b></div><div class="calc">${r.calc}</div><div class="small muted">${r.effect}</div></div>`).join('')}</section>`;
-  }},
-  library:{title:'动作库', lvl:2, render(){
-    return Object.entries(MUSCLES).map(([id,mu])=>`<div class="section-h"><b>${mu.name}</b><span class="muted small">${mu.area}</span></div>
-      <div class="list">${mu.ex.map(e=>li({go:'exercise',arg:e,t:EX[e].name,s:EX[e].dose,r:S.done[todayKey()+e]?'<span class="pill focus">今天已练</span>':''})).join('')}</div>`).join('');
-  }},
-
-  /* ---------- tab: 测量 ---------- */
-  measure:{title:'测量', lvl:1, render(){
-    const t=target(); const posture=[S.rounded&&'圆肩',S.apt&&'骨盆前倾'].filter(Boolean).join('、')||'未勾选';
-    const hasData=!!currentM();
-    return `<p class="muted">三步完成：你现在的比例、体态、想要的身材。</p>
-    <div class="list">
-      ${li({go:'source',lead:'<span class="badge">1</span>',t:'现在的你',s:sourceLabel()+(S.mode==='photo'&&!S.photoM?'（未完成）':'')})}
-      ${li({go:'posture',lead:'<span class="badge">2</span>',t:'体态自查',s:posture})}
-      ${li({go:'targets',lead:'<span class="badge">3</span>',t:'目标身材',s:`${t.name} · 肩腰 ${f2(t.swr)} · 臀腰 ${f2(t.hwr)}`})}
-    </div>
-    <button class="btn" type="button" data-act="generate" ${hasData?'':'disabled style="opacity:.5"'}>生成我的路线</button>
-    ${hasData?'':'<p class="status err" style="text-align:center">先完成第 1 步的照片测量</p>'}
-    <div class="note ok small">照片只在你的手机里处理，不会上传。2D 照片只能算相对比例，算不出精确围度。</div>`;
-  }},
-  source:{title:'现在的你', lvl:2, render(){
-    const opt=(id,t,s)=>`<button class="opt" type="button" role="radio" aria-checked="${S.mode===id}" data-act="setMode" data-arg="${id}"><span><b>${t}</b></span><span class="tick">${S.mode===id?I.check:''}</span><span class="s">${s}</span></button>`;
-    return `<div class="stack" role="radiogroup" aria-label="数据来源">
-      ${opt('a','样例 A · 窄肩 + 圆肩','肩腰比 1.22、臀腰比 1.31，右肩高约 3.6%')}
-      ${opt('b','样例 B · 臀部偏平 + 骨盆前倾','肩腰比 1.37、臀腰比 1.17，髋线倾斜约 3.4%')}
-      ${opt('photo','我的照片',S.photoM?`已测量：肩腰比 ${f2(S.photoM.swr)} · 臀腰比 ${f2(S.photoM.hwr)}`:'还没有测量，选择后去拍照')}
-    </div>
-    <button class="btn ${S.mode==='photo'?'':'ghost'}" type="button" data-go="photo">${I.camera}${S.photoM?'重新拍照测量':'拍照测量'}</button>`;
-  }},
-  photo:{title:'拍照测量', lvl:3, render(){
-    return `<div class="note ok small">穿贴身衣服，正面站直，双臂稍微离开身体，全身入镜。</div>
-    <label class="drop" id="drop" ${T.photoURL?'hidden':''}><input type="file" id="file" accept="image/*">${I.camera}<b>上传或拍摄正面全身照</b><span class="muted small">照片不会离开你的设备</span></label>
-    <div id="photoArea" ${T.photoURL?'':'hidden'}>
-      <div class="stage" id="stage"><img id="photo" alt="你上传的照片" ${T.photoURL?`src="${T.photoURL}"`:''}><svg class="lines" id="lines" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div>
-    </div>
-    <p class="status" id="photoStatus">${T.photoURL?'把 6 个点拖到肩外侧、腰最细处、臀最宽处':''}</p>
-    <div class="stack" id="photoBtns" ${T.photoURL?'':'hidden'}>
-      <button class="btn ghost" type="button" data-act="autoDetect">自动识别关键点</button>
-      <button class="btn" type="button" data-act="usePhoto">使用这组数据</button>
-      <button class="link" type="button" data-act="rePhoto">换一张照片</button>
+  me:{root:1,title:'我的',render(){
+    const r=analyze(), t=target();
+    const src=S.mode==='photo'?'我的照片':SAMPLES[S.mode].label+'（演示数据）';
+    return `<section class="card" style="display:flex;flex-direction:column;gap:4px">
+      <p class="label">我的身材数据</p>
+      <p class="big">${r?`肩腰比 ${f2(r.m.swr)} · 臀腰比 ${f2(r.m.hwr)}`:'还没有测量'}</p>
+      <p class="muted small">来源：${src}</p>
+    </section>
+    <p class="label" style="margin:4px 4px -8px">设置</p>
+    <div class="rows">
+      <button class="row" type="button" data-go="target"><span></span><span><span class="t">目标身材</span><span class="s">${t.name} · 肩腰 ${f2(t.swr)} · 臀腰 ${f2(t.hwr)}</span></span><span class="r">${I.chev}</span></button>
+      <button class="row" type="button" data-go="measure"><span></span><span><span class="t">更新身材数据</span><span class="s">拍照测量、体态</span></span><span class="r">${I.chev}</span></button>
+      <button class="row" type="button" data-go="about"><span></span><span><span class="t">关于</span><span class="s">怎么算的、隐私</span></span><span class="r">${I.chev}</span></button>
     </div>`;
-  }, after: setupPhoto},
-  posture:{title:'体态自查', lvl:2, render(){
-    const opt=(key,t,s,test)=>`<button class="opt" type="button" role="checkbox" aria-checked="${S[key]}" data-act="toggle" data-arg="${key}"><span><b>${t}</b></span><span class="tick">${S[key]?I.check:''}</span><span class="s">${s}<br><span style="color:var(--ink)">自测：</span>${test}</span></button>`;
-    return `<p class="muted small">这两项需要侧面才能看出来，照片识别不到，所以手动勾选。</p>
-    <div class="stack">
-      ${opt('rounded','圆肩','肩膀向前扣、含胸，侧面看耳朵在肩膀前面。','自然站立、手臂放松，手背朝前说明大概率有圆肩。')}
-      ${opt('apt','骨盆前倾','腰下陷、小腹前突，臀部看起来往后翘。','靠墙站，后脑勺、肩胛、臀部贴墙，腰后能塞进一个拳头。')}
-    </div>
-    <button class="btn" type="button" data-back="1">完成</button>`;
   }},
-  targets:{title:'目标身材', lvl:2, render(){
-    return `<p class="muted small">比较的是比例，不是体重。点进去可以看和你现在的差距。</p>
-    <div class="list">${TARGETS.map(t=>li({go:'targetDetail',arg:t.id,lead:S.target===t.id?`<span class="badge done">${I.check}</span>`:'<span class="badge">·</span>',t:t.name,s:t.note,r:`<span class="ratio">${f2(t.swr)} / ${f2(t.hwr)}</span>`})).join('')}</div>
-    <p class="muted small">比例为演示设定值，正式版应基于真实样本校准。</p>`;
+  target:{title:'目标身材',render(){
+    const m=cur();
+    return `<p class="muted small" style="padding:0 4px">比较的是比例，不是体重。选好后，首页的虚线和训练计划会一起更新。</p>
+    <div class="rows" role="radiogroup" aria-label="目标身材">${TARGETS.map(t=>`<button class="opt" type="button" role="radio" aria-checked="${S.target===t.id}" data-act="setTarget" data-arg="${t.id}">${mini(t)}<span style="min-width:0"><b>${t.name}</b><br><span class="muted small">${t.note}</span><br><span class="mono small muted">肩腰 ${f2(t.swr)} · 臀腰 ${f2(t.hwr)}</span></span><span class="radio">${S.target===t.id?I.check:''}</span></button>`).join('')}</div>`;
   }},
-  targetDetail:{title:a=>(TARGETS.find(x=>x.id===a)||{}).name||'目标', lvl:3, render(a){
-    const t=TARGETS.find(x=>x.id===a); const m=currentM();
-    const chosen=S.target===t.id;
-    return `<section class="card stack">
-      <p class="eyebrow">目标比例</p>
-      <div class="row2"><div class="stat"><div class="k">肩腰比</div><div class="v">${f2(t.swr)}</div></div><div class="stat"><div class="k">臀腰比</div><div class="v">${f2(t.hwr)}</div></div></div>
-      <p>${t.note}。适合${t.who}。</p>
-      <p class="small muted">主要靠练：${t.key}</p>
-    </section>
-    ${m?`<section class="card stack"><p class="eyebrow">和现在的你对比</p><div class="sil">${silSVG(m,t)}</div>
-      <div class="row2">${stat('肩腰比',m.swr,t.swr,t.swr-m.swr)}${stat('臀腰比',m.hwr,t.hwr,t.hwr-m.hwr)}</div></section>`:''}
-    <button class="btn ${chosen?'ghost':''}" type="button" data-act="chooseTarget" data-arg="${t.id}">${chosen?'当前目标':'选这个目标'}</button>`;
-  }},
-
-  /* ---------- tab: 路线 ---------- */
-  plan:{title:'训练路线', lvl:1, render(){
-    const res=getRes(); if(!res) return emptyNoData();
-    const max=Math.max(...Object.values(res.muscles).map(v=>v.sets||0));
-    return `<section class="card stack">
-      <div class="seg" role="group" aria-label="视角"><button type="button" data-act="mapView" data-arg="front" aria-pressed="${T.mapView==='front'}">正面</button><button type="button" data-act="mapView" data-arg="back" aria-pressed="${T.mapView==='back'}">背面</button></div>
-      <div class="mapbox">${mapSVG(T.mapView,res)}</div>
-      <div class="keyrow"><span><i class="sw" style="background:var(--accent)"></i>重点</span><span><i class="sw" style="background:var(--boost)"></i>加强</span><span><i class="sw" style="background:var(--keep);box-shadow:inset 0 0 0 1px var(--line)"></i>保持</span><span><i class="sw" style="box-shadow:inset 0 0 0 1px var(--less)"></i>少分配</span><span><i class="sw" style="border:1px dashed var(--accent)"></i>拉伸</span></div>
-      <p class="muted small" style="text-align:center">点肌肉看详情</p>
-    </section>
-    <button class="btn" type="button" data-go="week">本周安排 · 3 天</button>
-    <div class="section-h"><b>每周组数分配</b><span class="muted small">共约 ${Object.values(res.muscles).reduce((a,v)=>a+(v.sets||0),0)} 组</span></div>
-    <div class="list">${sortedMuscles(res).map(([id,v])=>li({go:'muscle',arg:id,lead:pill(v.level),t:MUSCLES[id].name,s:v.level==='stretch'?'每天拉伸':`<span class="bar"><i style="width:${((v.sets||0)/max*100).toFixed(0)}%"></i></span>`,r:v.level==='stretch'?'':v.sets+' 组'})).join('')}</div>`;
-  }},
-  muscle:{title:a=>MUSCLES[a]?MUSCLES[a].name:'肌群', lvl:2, render(a){
-    const res=getRes(); if(!res) return emptyNoData();
-    const v=res.muscles[a], mu=MUSCLES[a];
-    if(!v) return `<div class="card">这个部位在当前路线中不需要单独安排。</div>`;
-    return `<section class="card stack">
-      <div style="display:flex;justify-content:space-between;align-items:center">${pill(v.level)}<span class="ratio">${v.level==='stretch'?'每天':'每周 '+v.sets+' 组'}</span></div>
-      <p class="muted small">位置：${mu.area}</p>
-      <h3>为什么这样安排</h3>
-      <ul class="reasons">${v.reasons.map(r=>`<li>${r}</li>`).join('')}</ul>
-    </section>
-    <div class="section-h"><b>推荐动作</b></div>
-    <div class="list">${mu.ex.map(e=>li({go:'exercise',arg:e,t:EX[e].name,s:EX[e].dose})).join('')}</div>`;
-  }},
-  week:{title:'本周安排', lvl:2, render(){
-    const res=getRes(); if(!res) return emptyNoData();
-    const days=weekPlan(res); const d=days[T.day];
-    const doneN=d.items.filter(it=>S.done[todayKey()+it.ex]).length;
-    return `<div class="seg" role="group" aria-label="训练日">${Object.entries(days).map(([k,v])=>`<button type="button" data-act="day" data-arg="${k}" aria-pressed="${T.day===k}">第 ${'ABC'.indexOf(k)+1} 天</button>`).join('')}</div>
-    <section class="card stack"><p class="eyebrow">第 ${'ABC'.indexOf(T.day)+1} 天</p><h2>${d.name}</h2><p class="muted small">今天已完成 ${doneN} / ${d.items.length} 个动作 · 建议隔天练，每周 3 次</p></section>
-    <div class="list">${d.items.map((it,i)=>li({go:'exercise',arg:it.ex,lead:`<span class="badge ${S.done[todayKey()+it.ex]?'done':''}">${S.done[todayKey()+it.ex]?I.check:i+1}</span>`,t:EX[it.ex].name,s:MUSCLES[it.id].name+' · '+LV[it.lv].label,r:it.sets})).join('')}</div>`;
-  }},
-  exercise:{title:a=>EX[a]?EX[a].name:'动作', lvl:3, render(a){
-    const e=EX[a]; const mid=Object.keys(MUSCLES).find(k=>MUSCLES[k].ex.includes(a));
-    const done=!!S.done[todayKey()+a];
-    return `<section class="card stack"><p class="eyebrow">${MUSCLES[mid].name} · ${MUSCLES[mid].area}</p><h2>${e.name}</h2><p class="ratio">${e.dose}</p></section>
-    <section class="card stack"><h3>动作步骤</h3><ol class="steps">${e.steps.map(s=>`<li><span>${s}</span></li>`).join('')}</ol></section>
-    <div class="note ok"><b>要点：</b>${e.cue}</div>
-    <div class="note"><b>常见错误：</b>${e.avoid}</div>
-    <button class="btn ${done?'ghost':''}" type="button" data-act="toggleDone" data-arg="${a}">${done?I.check+' 今天已完成':'标记今天已完成'}</button>`;
-  }},
-
-  /* ---------- tab: 我的 ---------- */
-  me:{title:'我的', lvl:1, render(){
-    const t=target();
-    return `<section class="card stack"><p class="eyebrow">当前导航</p><h2>${t.name}</h2><p class="muted small">数据来源：${sourceLabel()}</p></section>
-    <div class="list">
-      ${li({go:'history',lead:`<span class="badge">${S.history.length}</span>`,t:'测量记录',s:S.history.length?'最近一次：'+fmtDate(S.history[0].t):'还没有记录'})}
-      ${li({go:'method',lead:`<span class="badge">${I.list}</span>`,t:'方法说明',s:'测量指标与规则表'})}
-      ${li({go:'about',lead:`<span class="badge">${I.info}</span>`,t:'关于与免责声明',s:'隐私、适用范围'})}
-    </div>
-    <button class="btn danger" type="button" data-act="askReset">清除本机数据</button>`;
-  }},
-  history:{title:'测量记录', lvl:2, render(){
-    if(!S.history.length) return `<div class="card empty">${I.list}<h3>还没有记录</h3><p class="muted small">在「测量」里点「生成我的路线」后，会在这里留一条记录。</p><button class="btn" type="button" data-tab="measure">去测量</button></div>`;
-    return `<p class="muted small">点一条记录可以重新载入。</p><div class="list">${S.history.map((h,i)=>li({act:'loadHistory',arg:i,t:fmtDate(h.t)+' · '+h.targetName,s:`${h.src} · 肩腰 ${f2(h.m.swr)} · 臀腰 ${f2(h.m.hwr)}`,r:''})).join('')}</div>`;
-  }},
-  method:{title:'方法说明', lvl:2, render(){
-    return `<section class="card stack"><h3>测量了什么</h3><div class="scroll-x"><table class="tbl"><tr><th>指标</th><th>算法</th></tr>
-      <tr><td>肩腰比</td><td>两肩外侧距离 ÷ 腰最细处宽度</td></tr><tr><td>臀腰比</td><td>臀最宽处宽度 ÷ 腰最细处宽度</td></tr>
-      <tr><td>肩线倾斜</td><td>两肩高度差 ÷ 肩宽</td></tr><tr><td>髋线倾斜</td><td>两侧臀点高度差 ÷ 臀宽</td></tr></table></div></section>
-    <section class="card stack"><h3>怎么得出结论</h3><p class="small">差距 = 目标比例 − 当前比例。差距越大，对应肌群的优先级越高；体态问题会额外调整优先级。每周约 36 组，按 重点 3 : 加强 2 : 保持 1 : 少分配 0.5 分配。</p></section>
-    <button class="btn ghost" type="button" data-go="trace">查看当前的规则轨迹</button>`;
-  }},
-  about:{title:'关于与免责声明', lvl:2, render(){
-    return `<section class="card stack"><h3>隐私</h3><p class="small">照片只在你的浏览器里处理，不会上传到任何服务器。测量记录只保存在这台设备上。</p></section>
-    <section class="card stack"><h3>适用范围</h3><p class="small">本工具给出的是训练侧重点，不是医疗诊断。如有疼痛、明显不对称或伤病史，请先咨询医生或康复师。</p></section>
-    <section class="card stack"><h3>局限</h3><p class="small">2D 照片只能算相对比例。目标比例为演示设定值，正式版需要用真实样本校准。</p></section>`;
+  measure:{title:'更新身材数据',render(){
+    const sw=(key,t,s)=>`<button class="opt" type="button" role="switch" aria-checked="${S[key]}" data-act="toggle" data-arg="${key}"><span></span><span><b>${t}</b><br><span class="muted small">${s}</span></span><span class="switch"></span></button>`;
+    return `<div class="seg" role="group" aria-label="数据来源">${[['photo','我的照片'],['a','样例 A'],['b','样例 B']].map(([k,l])=>`<button type="button" data-act="mode" data-arg="${k}" aria-pressed="${S.mode===k}">${l}</button>`).join('')}</div>
+    ${S.mode==='photo'?`
+      <label class="drop" id="drop" ${T.photoURL?'hidden':''}><input type="file" id="file" accept="image/*"><b>上传正面全身照</b><span class="muted small">穿贴身衣服，站直，全身入镜。照片不会离开你的设备。</span></label>
+      <div id="photoArea" ${T.photoURL?'':'hidden'}><div class="stage" id="stage"><img id="photo" alt="你的照片" ${T.photoURL?`src="${T.photoURL}"`:''}><svg id="lines" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div></div>
+      <p class="status" id="pstatus">${S.photoM&&!T.photoURL?`当前：肩腰比 ${f2(S.photoM.swr)} · 臀腰比 ${f2(S.photoM.hwr)}`:''}</p>
+      <div id="pbtns" style="display:flex;flex-direction:column;gap:10px" ${T.photoURL?'':'hidden'}>
+        <button class="btn ghost" type="button" data-act="auto">自动识别关键点</button>
+        <button class="btn" type="button" data-act="usePhoto">保存这组数据</button>
+      </div>`
+    :`<div class="card"><p class="muted small">${SAMPLES[S.mode].label}：肩腰比 ${f2(SAMPLES[S.mode].m.swr)} · 臀腰比 ${f2(SAMPLES[S.mode].m.hwr)}。用于演示，换成「我的照片」可以测你自己。</p></div>`}
+    <p class="label" style="margin:4px 4px -8px">体态（照片看不出来，手动勾选）</p>
+    <div class="rows">${sw('rounded','圆肩','肩膀前扣、含胸；自然站立时手背朝前')}${sw('apt','骨盆前倾','靠墙站，腰后能塞进一个拳头')}</div>`;
+  },after:setupPhoto},
+  about:{title:'关于',render(){
+    return `<section class="card" style="display:flex;flex-direction:column;gap:12px;font-size:14px">
+      <p><b>怎么算的</b><br>肩腰比 = 肩宽 ÷ 腰宽，臀腰比 = 臀宽 ÷ 腰宽。和目标差得越多，对应肌群的训练量越多；圆肩、骨盆前倾会加入纠正动作。</p>
+      <p><b>隐私</b><br>照片只在你的浏览器里处理，数据只保存在这台设备上。</p>
+      <p><b>说明</b><br>2D 照片只能算相对比例，目标比例为演示设定值。训练建议不替代专业教练或医疗意见。</p>
+    </section>`;
   }}
 };
-const TAB_OF = {home:'home',report:'home',trace:'home',library:'home',measure:'measure',source:'measure',photo:'measure',posture:'measure',targets:'measure',targetDetail:'measure',plan:'plan',muscle:'plan',week:'plan',exercise:'plan',me:'me',history:'me',method:'me',about:'me'};
-const TABS = [['home','首页',I.home],['measure','测量',I.scan],['plan','路线',I.route],['me','我的',I.me]];
 
-/* ================= router ================= */
+/* ---------------- router ---------------- */
 let stack=[{p:'home'}];
 function render(dir){
-  const cur=stack[stack.length-1]; const pg=PAGES[cur.p];
-  const title=typeof pg.title==='function'?pg.title(cur.a):pg.title;
-  const lvl=Math.min(stack.length,3);
-  $('top').className='top lvl'+lvl;
-  $('top').innerHTML = lvl===1
-    ? `<h1>${title}</h1><span></span>`
-    : `<button class="iconbtn" type="button" data-back="1" aria-label="返回">${I.back}</button><h1>${title}</h1><span></span>`;
-  const v=$('view'); v.className='view '+(dir||'fade'); v.innerHTML=pg.render(cur.a); v.scrollTop=0;
-  const tab=stack[0].p;
-  $('tabs').innerHTML=TABS.map(([id,l,ic])=>`<button type="button" data-tab="${id}" ${tab===id?'aria-current="page"':''}>${ic}<span>${l}</span></button>`).join('');
-  if(pg.after) pg.after(cur.a);
+  const c=stack[stack.length-1], pg=P[c.p];
+  const title=typeof pg.title==='function'?pg.title(c.a):pg.title;
+  const root=stack.length===1;
+  $('top').className='top'+(root?' root':'');
+  $('top').innerHTML=root?`<h1>${title}</h1>`:`<button class="iconbtn" type="button" data-back="1" aria-label="返回">${I.back}</button><h1>${title}</h1><span></span>`;
+  const v=$('view'); v.className='view'+(dir?' '+dir:''); v.innerHTML=pg.render(c.a);
+  if(dir) v.scrollTop=0;
+  $('tabs').innerHTML=[['home','首页',I.home],['me','我的',I.me]].map(([id,l,ic])=>`<button type="button" data-tab="${id}" ${stack[0].p===id?'aria-current="page"':''}>${ic}<span>${l}</span></button>`).join('');
+  if(pg.after) pg.after(c.a);
 }
-function go(p,a){ stack.push({p,a}); render('fwd'); }
-function back(){ if(stack.length>1){ stack.pop(); render('back'); } }
-function tab(id){ stack=[{p:id}]; render('fade'); }
-function refresh(){ const v=$('view'); const y=v.scrollTop; render('none'); v.className='view'; v.scrollTop=y; }
+const go=(p,a)=>{stack.push({p,a});render('fwd');};
+const back=()=>{if(stack.length>1){stack.pop();render('back');}};
+const tab=id=>{stack=[{p:id}];render('fwd');};
+const refresh=()=>{const y=$('view').scrollTop; render(); $('view').scrollTop=y;};
+function toast(msg){document.querySelectorAll('.toast').forEach(n=>n.remove()); const t=document.createElement('div'); t.className='toast'; t.setAttribute('role','status'); t.textContent=msg; $('app').appendChild(t); setTimeout(()=>t.remove(),1700);}
 
-function toast(msg){
-  const old=document.querySelector('.toast'); if(old) old.remove();
-  const el=document.createElement('div'); el.className='toast'; el.setAttribute('role','status'); el.textContent=msg;
-  $('app').appendChild(el); setTimeout(()=>el.remove(),1800);
-}
-function sheet(html){
-  const s=document.createElement('div'); s.className='scrim'; s.innerHTML=`<div class="sheet" role="dialog" aria-modal="true">${html}</div>`;
-  s.addEventListener('click',e=>{ if(e.target===s||e.target.closest('[data-close]')) s.remove(); });
-  $('app').appendChild(s); return s;
+/* exercise sheet */
+function openEx(arg){
+  const [date,k,i]=arg.split('|'); const plan=weekPlan(analyze()); const it=plan[k].items[+i];
+  const sc=document.createElement('div'); sc.className='scrim'; sc.innerHTML='<div class="sheet" role="dialog" aria-modal="true" aria-label="动作详情"></div>';
+  const draw=()=>{
+    const e=exOf(k,it), ex=EX[e], done=!!S.done[date+':'+e];
+    const alts=it.mu?MUSCLES[it.mu].ex:[];
+    sc.querySelector('.sheet').innerHTML=`<div class="grab"></div>
+      <div><p class="label">${it.mu?MUSCLES[it.mu].name+' · '+MUSCLES[it.mu].area:'拉伸'}</p><p class="big">${ex.name}</p><p class="mono small muted">${it.stretch?ex.reps:it.sets+' 组 × '+ex.reps}</p></div>
+      <ol class="steps">${ex.steps.map(s=>`<li><span>${s}</span></li>`).join('')}</ol>
+      <div class="tip"><b>要点</b>　${ex.cue}</div>
+      <div class="tip warn"><b>避免</b>　${ex.avoid}</div>
+      ${alts.length>1?`<div><p class="label" style="margin-bottom:8px">动作库 · 同部位可替换</p><div class="alts">${alts.map(x=>`<button class="alt" type="button" data-alt="${x}" aria-pressed="${x===e}">${EX[x].name}</button>`).join('')}</div></div>`:''}
+      <button class="btn ${done?'ghost':''}" type="button" data-done="1">${done?I.check+' 已完成':'完成这个动作'}</button>`;
+  };
+  sc.addEventListener('click',ev=>{
+    if(ev.target===sc){ sc.remove(); refresh(); return; }
+    const a=ev.target.closest('[data-alt]'); if(a){ S.swap[k+':'+it.mu]=a.dataset.alt; save(); draw(); return; }
+    if(ev.target.closest('[data-done]')){ const key=date+':'+exOf(k,it); const now=!S.done[key]; if(now) S.done[key]=1; else delete S.done[key]; save(); sc.remove(); refresh(); if(now) toast('完成：'+EX[exOf(k,it)].name); }
+  });
+  $('app').appendChild(sc); draw();
 }
 
-/* ================= actions ================= */
-const ACT = {
-  useSample(){ S.mode='a'; S.rounded=SAMPLES.a.rounded; S.apt=SAMPLES.a.apt; save(); refresh(); },
-  setMode(a){ S.mode=a; if(a!=='photo'){ S.rounded=SAMPLES[a].rounded; S.apt=SAMPLES[a].apt; } save(); refresh(); if(a==='photo'&&!S.photoM) go('photo'); },
-  toggle(a){ S[a]=!S[a]; save(); refresh(); },
-  chooseTarget(a){ S.target=a; save(); toast('已设为目标：'+target().name); back(); },
-  generate(){
-    const m=currentM(); if(!m) return;
-    const res=getRes();
-    S.history.unshift({t:new Date().toISOString(), src:S.mode==='photo'?'我的照片':SAMPLES[S.mode].label, mode:S.mode, m, rounded:S.rounded, apt:S.apt, target:S.target, targetName:target().name});
-    S.history=S.history.slice(0,20); save();
-    tab('plan'); toast(res.headline);
-  },
-  mapView(a){ T.mapView=a; refresh(); },
-  day(a){ T.day=a; refresh(); },
-  toggleDone(a){ const k=todayKey()+a; if(S.done[k]) delete S.done[k]; else S.done[k]=1; save(); refresh(); if(S.done[k]) toast('已记录，继续加油'); },
-  loadHistory(i){ const h=S.history[+i]; if(!h) return; S.mode=h.mode; if(h.mode==='photo') S.photoM=h.m; S.rounded=h.rounded; S.apt=h.apt; S.target=h.target; save(); tab('home'); toast('已载入 '+fmtDate(h.t)+' 的记录'); },
-  askReset(){
-    const s=sheet(`<div class="grab"></div><h3>清除本机数据？</h3><p class="muted small">会删除测量记录、照片测量结果和训练打卡，无法恢复。</p><button class="btn danger" type="button" id="doReset">清除</button><button class="btn ghost" type="button" data-close="1">取消</button>`);
-    s.querySelector('#doReset').addEventListener('click',()=>{ S.history=[]; S.done={}; S.photoM=null; S.mode='a'; S.target='square'; S.rounded=true; S.apt=false; save(); s.remove(); tab('me'); toast('已清除'); });
-  },
-  usePhoto(){ if(!T.photoM){ toast('先放好 6 个点'); return; } S.photoM=T.photoM; S.mode='photo'; save(); toast('已使用照片数据'); stack=[{p:'measure'}]; render('back'); },
-  rePhoto(){ T.photoURL=null; T.photoPts=null; T.photoM=null; refresh(); },
-  autoDetect: autoDetect
+const ACT={
+  openEx,
+  setTarget(a){S.target=a;save();refresh();toast('目标已改为 '+target().name);},
+  toggle(a){S[a]=!S[a];save();refresh();},
+  mode(a){S.mode=a; if(a!=='photo'){S.rounded=SAMPLES[a].rounded;S.apt=SAMPLES[a].apt;} save(); refresh();},
+  usePhoto(){ if(!T.photoM){toast('先放好 6 个点');return;} S.photoM=T.photoM; S.mode='photo'; save(); toast('已保存'); stack=[{p:'home'}]; render('back'); },
+  auto:autoDetect
 };
-
 document.addEventListener('click',e=>{
-  const el=e.target.closest('[data-go],[data-tab],[data-act],[data-back]'); if(!el || el.disabled) return;
-  if(el.closest('.sheet') && !el.dataset.act) return;
-  if(el.dataset.back){ back(); return; }
-  if(el.dataset.tab){ tab(el.dataset.tab); return; }
-  if(el.dataset.act){ const f=ACT[el.dataset.act]; if(f) f(el.dataset.arg); return; }
-  if(el.dataset.go){ if(PAGES[el.dataset.go].lvl===1) tab(el.dataset.go); else go(el.dataset.go, el.dataset.arg); }
+  if(e.target.closest('.scrim')) return;
+  const el=e.target.closest('[data-go],[data-tab],[data-act],[data-back]'); if(!el||el.disabled) return;
+  if(el.dataset.back) back();
+  else if(el.dataset.tab) tab(el.dataset.tab);
+  else if(el.dataset.act) ACT[el.dataset.act]&&ACT[el.dataset.act](el.dataset.arg);
+  else if(el.dataset.go) go(el.dataset.go,el.dataset.arg);
 });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ const s=document.querySelector('.scrim'); if(s) s.remove(); else back(); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ const s=document.querySelector('.scrim'); if(s){s.remove();refresh();} else back(); } });
 
-/* ================= photo ================= */
-const PT_LABELS={sl:'肩',sr:'肩',wl:'腰',wr:'腰',hl:'臀',hr:'臀'};
-const defaultPts=()=>({sl:[.32,.25],sr:[.68,.25],wl:[.41,.44],wr:[.59,.44],hl:[.36,.53],hr:[.64,.53]});
-function measureFromPts(p){
-  const img=$('photo'); const ar=(img&&img.naturalHeight||1)/(img&&img.naturalWidth||1);
-  const w=(a,b)=>Math.abs(p[b][0]-p[a][0]);
-  const sw=w('sl','sr'), ww=w('wl','wr'), hw=w('hl','hr');
-  if(ww<0.02||sw<0.02||hw<0.02) return null;
-  const tilt=(a,b,width)=>Math.abs((p[a][1]-p[b][1])*ar)/width;
-  return {swr:sw/ww, hwr:hw/ww, sTilt:tilt('sl','sr',sw), hTilt:tilt('hl','hr',hw)};
+/* ---------------- photo ---------------- */
+const LBL={sl:'肩',sr:'肩',wl:'腰',wr:'腰',hl:'臀',hr:'臀'};
+const defPts=()=>({sl:[.32,.25],sr:[.68,.25],wl:[.41,.44],wr:[.59,.44],hl:[.36,.53],hr:[.64,.53]});
+function measure(){
+  const p=T.pts, w=(a,b)=>Math.abs(p[b][0]-p[a][0]); const s=w('sl','sr'),wa=w('wl','wr'),h=w('hl','hr');
+  T.photoM=(wa<.02||s<.02||h<.02)?null:{swr:s/wa,hwr:h/wa};
+  const st=$('pstatus'); if(!st) return;
+  st.className='status'+(T.photoM?'':' err');
+  st.textContent=T.photoM?`肩腰比 ${f2(T.photoM.swr)} · 臀腰比 ${f2(T.photoM.hwr)}　拖动圆点可微调`:'左右两点太近了，请拉开';
 }
-function drawLines(){
-  const p=T.photoPts; if(!p||!$('lines')) return;
-  const L=(a,b)=>`<line x1="${p[a][0]*100}" y1="${p[a][1]*100}" x2="${p[b][0]*100}" y2="${p[b][1]*100}" stroke="white" vector-effect="non-scaling-stroke" style="stroke-width:2px"/>`;
-  $('lines').innerHTML=L('sl','sr')+L('wl','wr')+L('hl','hr');
-}
-function drawPts(){
-  const st=$('stage'); if(!st) return; st.querySelectorAll('.pt').forEach(n=>n.remove());
-  const p=T.photoPts;
-  for(const k in p){
-    const d=document.createElement('div'); d.className='pt'; d.dataset.k=k; d.textContent=PT_LABELS[k];
-    d.style.left=(p[k][0]*100)+'%'; d.style.top=(p[k][1]*100)+'%';
-    d.setAttribute('aria-label',PT_LABELS[k]+(k.endsWith('l')?'（左）':'（右）'));
-    d.addEventListener('pointerdown',startDrag); st.appendChild(d);
-  }
-  drawLines();
-}
-function updatePhotoM(){
-  const m=measureFromPts(T.photoPts); T.photoM=m;
-  const s=$('photoStatus'); if(!s) return;
-  s.className='status'+(m?'':' err');
-  s.textContent = m ? `肩腰比 ${f2(m.swr)} · 臀腰比 ${f2(m.hwr)}。拖动圆点可以微调。` : '两点距离太近，算不出比例。请把左右两个点拉开。';
-}
-let drag=null;
-function startDrag(e){
-  e.preventDefault(); drag=e.currentTarget.dataset.k; e.currentTarget.setPointerCapture(e.pointerId);
-  e.currentTarget.addEventListener('pointermove',onDrag);
-  e.currentTarget.addEventListener('pointerup',ev=>{ ev.currentTarget.removeEventListener('pointermove',onDrag); drag=null; },{once:true});
-}
-function onDrag(e){
-  if(!drag) return; const r=$('stage').getBoundingClientRect();
-  const x=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)), y=Math.min(1,Math.max(0,(e.clientY-r.top)/r.height));
-  T.photoPts[drag]=[x,y]; e.currentTarget.style.left=(x*100)+'%'; e.currentTarget.style.top=(y*100)+'%';
-  drawLines(); updatePhotoM();
+function lines(){ const p=T.pts; $('lines').innerHTML=[['sl','sr'],['wl','wr'],['hl','hr']].map(([a,b])=>`<line x1="${p[a][0]*100}" y1="${p[a][1]*100}" x2="${p[b][0]*100}" y2="${p[b][1]*100}" stroke="white" vector-effect="non-scaling-stroke" style="stroke-width:2px"/>`).join(''); }
+function pts(){
+  const st=$('stage'); st.querySelectorAll('.pt').forEach(n=>n.remove());
+  for(const k in T.pts){ const d=document.createElement('div'); d.className='pt'; d.textContent=LBL[k];
+    d.style.left=T.pts[k][0]*100+'%'; d.style.top=T.pts[k][1]*100+'%';
+    d.addEventListener('pointerdown',ev=>{ ev.preventDefault(); d.setPointerCapture(ev.pointerId);
+      const mv=e2=>{ const r=st.getBoundingClientRect(); const x=Math.min(1,Math.max(0,(e2.clientX-r.left)/r.width)), y=Math.min(1,Math.max(0,(e2.clientY-r.top)/r.height));
+        T.pts[k]=[x,y]; d.style.left=x*100+'%'; d.style.top=y*100+'%'; lines(); measure(); };
+      d.addEventListener('pointermove',mv); d.addEventListener('pointerup',()=>d.removeEventListener('pointermove',mv),{once:true}); });
+    st.appendChild(d); }
+  lines(); measure();
 }
 function setupPhoto(){
-  const f=$('file');
-  if(f) f.addEventListener('change',e=>{
-    const file=e.target.files&&e.target.files[0]; if(!file) return;
-    if(T.photoURL) URL.revokeObjectURL(T.photoURL);
-    T.photoURL=URL.createObjectURL(file); T.photoPts=defaultPts();
-    $('drop').hidden=true; $('photoArea').hidden=false; $('photoBtns').hidden=false;
-    const img=$('photo');
-    img.onload=()=>{ drawPts(); updatePhotoM(); };
-    img.onerror=()=>{ const s=$('photoStatus'); s.className='status err'; s.textContent='这张图片打不开，请换一张 JPG 或 PNG。'; };
-    img.src=T.photoURL;
-  });
-  if(T.photoURL){ const img=$('photo'); const run=()=>{ drawPts(); updatePhotoM(); }; if(img.complete) run(); else img.onload=run; }
+  const f=$('file'); if(!f) return;
+  f.addEventListener('change',e=>{ const file=e.target.files&&e.target.files[0]; if(!file) return;
+    if(T.photoURL) URL.revokeObjectURL(T.photoURL); T.photoURL=URL.createObjectURL(file); T.pts=defPts();
+    $('drop').hidden=true; $('photoArea').hidden=false; $('pbtns').hidden=false;
+    const img=$('photo'); img.onload=pts; img.onerror=()=>{ $('pstatus').className='status err'; $('pstatus').textContent='这张图片打不开，换一张 JPG 或 PNG'; }; img.src=T.photoURL; });
+  if(T.photoURL){ const img=$('photo'); if(img.complete) pts(); else img.onload=pts; }
 }
-const MP='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
-let landmarker=null;
-async function getLandmarker(){
-  if(landmarker) return landmarker;
-  const v=await import(MP+'/vision_bundle.mjs');
-  const fs=await v.FilesetResolver.forVisionTasks(MP+'/wasm');
-  landmarker=await v.PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task'},runningMode:'IMAGE',numPoses:1});
-  return landmarker;
-}
+const MP='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14'; let lmk=null;
 async function autoDetect(){
-  const st=$('photoStatus'); st.className='status'; st.textContent='正在加载识别模型…';
+  const st=$('pstatus'); st.className='status'; st.textContent='正在识别…';
   try{
-    const lm=await Promise.race([getLandmarker(), new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),15000))]);
-    const r=lm.detect($('photo')); const L=r.landmarks&&r.landmarks[0];
-    if(!L) throw new Error('nopose');
+    if(!lmk){ const v=await import(MP+'/vision_bundle.mjs'); const fs=await v.FilesetResolver.forVisionTasks(MP+'/wasm');
+      lmk=await v.PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task'},runningMode:'IMAGE',numPoses:1}); }
+    const L=(lmk.detect($('photo')).landmarks||[])[0]; if(!L) throw new Error('nopose');
     const sh=[L[11],L[12]].sort((a,b)=>a.x-b.x), hp=[L[23],L[24]].sort((a,b)=>a.x-b.x);
-    const sj=sh[1].x-sh[0].x, hj=hp[1].x-hp[0].x, hy=(hp[0].y+hp[1].y)/2, sy=(sh[0].y+sh[1].y)/2;
-    const hcx=(hp[0].x+hp[1].x)/2, wy=sy+(hy-sy)*0.68, whalf=hj*0.62;
-    T.photoPts={sl:[sh[0].x-sj*0.12,sh[0].y],sr:[sh[1].x+sj*0.12,sh[1].y],wl:[hcx-whalf,wy],wr:[hcx+whalf,wy],hl:[hp[0].x-hj*0.38,hp[0].y],hr:[hp[1].x+hj*0.38,hp[1].y]};
-    drawPts(); updatePhotoM();
-    st.textContent='已自动放好关键点。腰和臀是估算位置，请拖到实际最细、最宽处。';
-  }catch(err){
-    st.className='status err';
-    st.textContent = err.message==='nopose' ? '没有识别到人体，换一张全身正面照试试，或手动拖动 6 个点。' : '当前环境加载不了识别模型，请手动拖动 6 个点。';
-  }
+    const sj=sh[1].x-sh[0].x, hj=hp[1].x-hp[0].x, sy=(sh[0].y+sh[1].y)/2, hy=(hp[0].y+hp[1].y)/2, cx=(hp[0].x+hp[1].x)/2, wy=sy+(hy-sy)*.68;
+    T.pts={sl:[sh[0].x-sj*.12,sh[0].y],sr:[sh[1].x+sj*.12,sh[1].y],wl:[cx-hj*.62,wy],wr:[cx+hj*.62,wy],hl:[hp[0].x-hj*.38,hp[0].y],hr:[hp[1].x+hj*.38,hp[1].y]};
+    pts();
+  }catch(err){ st.className='status err'; st.textContent=err.message==='nopose'?'没识别到人体，换一张全身正面照，或手动拖动圆点':'识别模型加载失败，请手动拖动圆点'; }
 }
 
-render('fade');
+render();
 })();
 </script>
 </body>
