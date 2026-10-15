@@ -44,7 +44,7 @@ p,h1,h2,h3{margin:0}
 @keyframes inL{from{transform:translateX(-24px);opacity:.4}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion: reduce){.view,.sheet{animation:none!important}}
 
-.tabs{flex:none;display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border-top:1px solid var(--line)}
+.tabs{flex:none;display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border-top:1px solid var(--line)}
 .tabs button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 10px;font-size:11px;color:var(--muted);cursor:pointer}
 .tabs button svg{width:24px;height:24px}
 .tabs button[aria-current="page"]{color:var(--accent);font-weight:600}
@@ -150,6 +150,46 @@ ol.steps li::before{content:counter(s);width:26px;height:26px;border-radius:50%;
 .alt{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-size:14px;cursor:pointer}
 .alt[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);font-weight:600}
 .toast{position:absolute;left:50%;bottom:84px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;white-space:nowrap;z-index:30}
+
+/* coach */
+.app.immersive .top,.app.immersive .tabs{display:none}
+.app.immersive .view{padding:0;gap:0;overflow:hidden}
+.sess{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;background:var(--surface)}
+.cam{position:relative;flex:1 1 55%;min-height:220px;background:#0b0f0e;overflow:hidden}
+.cam video,.cam canvas{position:absolute;inset:0;width:100%;height:100%;transform:scaleX(-1)}
+.cam video{object-fit:cover}
+.camtop{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding-top:12px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));z-index:3}
+.camtop button{width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.45);color:#fff;display:grid;place-items:center;cursor:pointer}
+.camtop svg{width:20px;height:20px}
+.chip{background:rgba(0,0,0,.5);color:#fff;font-size:12.5px;padding:6px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:6px}
+.chip i{width:8px;height:8px;border-radius:50%;background:#9aa6a3}
+.chip.live i{background:#4ade80}
+.chip.warn i{background:#f0a347}
+.bigcount{position:absolute;left:max(16px,env(safe-area-inset-left,0px));bottom:14px;color:#fff;font-family:var(--mono);font-size:58px;font-weight:600;line-height:1;text-shadow:0 2px 12px rgba(0,0,0,.55);z-index:2;transition:transform .12s}
+.bigcount small{font-size:19px;opacity:.85;margin-left:6px;font-weight:400}
+.bigcount.pop{transform:scale(1.18)}
+.camfb{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;padding:64px 28px 90px;color:#e7eeec;text-align:center;font-size:13.5px;line-height:1.6;z-index:1}
+.camfb b{font-size:16px}
+.camfb .ok{font-size:64px;line-height:1}
+.panel{flex:0 0 auto;padding-block:14px 16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px}
+.cue{border-radius:14px;padding:11px 14px;font-size:14.5px;background:var(--soft);min-height:44px}
+.cue.bad{background:var(--warm-soft);font-weight:600}
+.nextup{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--muted);padding:0 2px}
+.nextup b{color:var(--ink);text-align:right}
+.pdots{display:flex;gap:4px}
+.pdots i{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.pdots i.on{background:var(--accent)}
+.pdots i.cur{background:var(--ink)}
+.ctrl{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:8px}
+.ctrl .btn{min-height:48px;font-size:15px}
+.coach-hero{background:var(--accent);color:var(--accent-ink);display:flex;flex-direction:column;gap:10px}
+.coach-hero .label,.coach-hero .muted{color:inherit;opacity:.85}
+.coach-hero .btn{background:var(--surface);color:var(--accent)}
+.coach-hero .seg{background:rgba(255,255,255,.18)}
+.coach-hero .seg button{color:inherit}
+.coach-hero .seg button[aria-pressed="true"]{color:var(--ink)}
+.mtag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:999px;background:var(--soft);color:var(--accent);margin-left:6px;vertical-align:1px;font-weight:600}
+.mtag.t{background:var(--line);color:var(--muted)}
 </style>
 </head>
 <body>
@@ -166,6 +206,11 @@ const $=id=>document.getElementById(id);
 const f2=v=>(Math.round(v*100)/100).toFixed(2);
 
 const I={
+  coach:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2.5"/><path d="M16 10.5l5-3v9l-5-3"/><circle cx="9.5" cy="12" r="2.2"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  vol:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5v14l-4.5-4.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
+  mute:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5v14l-4.5-4.5H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>',
+  checkBig:'<svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="#4cbcae" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>',
   home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20H14.5v-6h-5v6H4z"/></svg>',
   me:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c1-3.8 4-6 7.5-6s6.5 2.2 7.5 6"/></svg>',
   back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
@@ -227,8 +272,8 @@ const SCHED={1:'A',3:'B',5:'C'}; // 周一 / 周三 / 周五
 
 /* ---------------- state ---------------- */
 const KEY='bodynav.v3';
-const S={mode:'a',target:'square',rounded:true,apt:false,photoM:null,done:{},swap:{}};
-const T={photoURL:null,pts:null,photoM:null};
+const S={mode:'a',target:'square',rounded:true,apt:false,photoM:null,done:{},swap:{},voice:true,countVoice:true};
+const T={photoURL:null,pts:null,photoM:null,coachKey:'A'};
 try{const r=localStorage.getItem(KEY); if(r) Object.assign(S,JSON.parse(r));}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
 
@@ -366,9 +411,32 @@ const P={
       <p class="big">完成 ${p.n} / ${p.total}</p>
       <div class="prog"><i style="width:${p.total?p.n/p.total*100:0}%"></i></div>
       <p class="muted small">点动作看做法，也可以从动作库换成同部位的其他动作。</p>
+      <button class="btn ghost" type="button" data-act="startCoach" data-arg="${k}">${I.coach}AI 教练跟练</button>
     </section>
     <div class="rows">${rows}</div>`;
   }},
+  coach:{root:1,title:'AI 教练',render(){
+    const r=analyze();
+    if(!r) return `<div class="card" style="text-align:center;display:flex;flex-direction:column;gap:12px"><p class="big">先测一下你的身材</p><p class="muted small">有了身材数据，教练才知道今天该练什么。</p><button class="btn" data-go="measure" type="button">开始测量</button></div>`;
+    const plan=weekPlan(r), tk=SCHED[new Date().getDay()], k=tk||T.coachKey||'A', q=buildQueue(k);
+    const sw=(key,t,d)=>`<button class="opt" type="button" role="switch" aria-checked="${S[key]}" data-act="toggle" data-arg="${key}"><span></span><span><b>${t}</b><br><span class="muted small">${d}</span></span><span class="switch"></span></button>`;
+    const tip=(n,t,d)=>`<div class="row" style="cursor:default"><span class="num">${n}</span><span><span class="t">${t}</span><span class="s">${d}</span></span><span></span></div>`;
+    return `<section class="card coach-hero">
+      <p class="label">${tk?'今天的训练':'今天休息 · 想练的话选一天'}</p>
+      <p class="big">${plan[k].name} · ${q.length} 个动作 · 约 ${plan[k].min} 分钟</p>
+      ${tk?'':`<div class="seg" role="group" aria-label="选择训练日">${[['A','上肢'],['B','下肢'],['C','重点强化']].map(([x,l])=>`<button type="button" data-act="coachKey" data-arg="${x}" aria-pressed="${k===x}">${l}</button>`).join('')}</div>`}
+      <p class="small muted">AI 看着你练：自动数次数、实时纠正动作、语音提醒休息和下一个动作。</p>
+      <button class="btn" type="button" data-act="startCoach" data-arg="${k}">开始跟练</button>
+    </section>
+    <p class="label" style="margin:4px 4px -8px">开始前</p>
+    <div class="rows">${tip(1,'手机竖放在地上或桌上','靠墙或用水杯挡住，别让它倒')}${tip(2,'退后 2–3 米','头到脚都在画面里，识别最准')}${tip(3,'光线充足','衣服颜色和背景别太接近')}</div>
+    <p class="label" style="margin:4px 4px -8px">语音</p>
+    <div class="rows">${sw('voice','语音提醒','动作纠正、休息、下一个动作')}${sw('countVoice','语音报数','每完成一次报一个数')}</div>
+    <p class="label" style="margin:4px 4px -8px">这次的动作</p>
+    <div class="rows">${q.map((x,i)=>`<div class="row" style="cursor:default"><span class="num">${i+1}</span><span style="min-width:0"><span class="t">${EX[x.e].name}<span class="mtag ${x.trk==='hold'?'t':''}">${MODE_LABEL(x.trk)}</span></span><span class="s">${x.sets} 组 · ${x.tg.hold?x.tg.secs+' 秒':x.tg.reps+' 次'}</span></span><span></span></div>`).join('')}</div>
+    <p class="muted small" style="text-align:center">画面只在你的手机上实时分析，不录制、不上传。</p>`;
+  }},
+  session:{title:'跟练',immersive:true,render(){ return SESSION_HTML(); },after:a=>startSession(a)},
   me:{root:1,title:'我的',render(){
     const r=analyze(), t=target();
     const src=S.mode==='photo'?'我的照片':SAMPLES[S.mode].label+'（演示数据）';
@@ -417,13 +485,15 @@ const P={
 let stack=[{p:'home'}];
 function render(dir){
   const c=stack[stack.length-1], pg=P[c.p];
+  if(c.p!=='session') stopSession();
+  $('app').classList.toggle('immersive',!!pg.immersive);
   const title=typeof pg.title==='function'?pg.title(c.a):pg.title;
   const root=stack.length===1;
   $('top').className='top'+(root?' root':'');
   $('top').innerHTML=root?`<h1>${title}</h1>`:`<button class="iconbtn" type="button" data-back="1" aria-label="返回">${I.back}</button><h1>${title}</h1><span></span>`;
   const v=$('view'); v.className='view'+(dir?' '+dir:''); v.innerHTML=pg.render(c.a);
   if(dir) v.scrollTop=0;
-  $('tabs').innerHTML=[['home','首页',I.home],['me','我的',I.me]].map(([id,l,ic])=>`<button type="button" data-tab="${id}" ${stack[0].p===id?'aria-current="page"':''}>${ic}<span>${l}</span></button>`).join('');
+  $('tabs').innerHTML=[['home','首页',I.home],['coach','教练',I.coach],['me','我的',I.me]].map(([id,l,ic])=>`<button type="button" data-tab="${id}" ${stack[0].p===id?'aria-current="page"':''}>${ic}<span>${l}</span></button>`).join('');
   if(pg.after) pg.after(c.a);
 }
 const go=(p,a)=>{stack.push({p,a});render('fwd');};
@@ -455,7 +525,244 @@ function openEx(arg){
   $('app').appendChild(sc); draw();
 }
 
+
+/* ---------------- AI coach ---------------- */
+const MODEL='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task';
+const TRK_OF={lat_raise:'abd',cable_lat:'abd',band_lat:'abd',reverse_fly:'abd',pulldown:'elbow',db_row:'elbow',face_pull:'elbow',band_pull:'spread',pushup:'push',goblet:'squat',split_squat:'split',rdl:'hinge',hip_thrust:'bridge',glute_bridge:'bridge',sl_bridge:'bridge',leg_curl:'curl',side_leg:'legabd',band_walk:'steps',plank:'plank',dead_bug:'hold',hipflex_stretch:'hold',chest_stretch:'hold'};
+const MODE_LABEL=k=>({plank:'计时 · 体态检测',hold:'计时'}[k]||'自动计数');
+let AR=1;
+const pt=(L,i)=>({x:L[i].x*AR,y:L[i].y});
+const seen=(L,ids)=>ids.every(i=>(L[i].visibility??1)>0.5);
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+function ang(a,b,c){const ux=a.x-b.x,uy=a.y-b.y,vx=c.x-b.x,vy=c.y-b.y;return Math.abs(Math.atan2(ux*vy-uy*vx,ux*vx+uy*vy)*180/Math.PI);}
+function side(L){const l=[11,13,15,23,25,27],r=[12,14,16,24,26,28];const sc=s=>s.reduce((a,i)=>a+(L[i].visibility??1),0);return (sc(l)>=sc(r)?l:r).map(i=>pt(L,i));}
+const okIds=ids=>L=>seen(L,ids);
+const okSide=L=>seen(L,[11,23,25,27])||seen(L,[12,24,26,28]);
+const shrugGap=L=>((L[11].y-L[7].y)+(L[12].y-L[8].y))/2/Math.max(.01,Math.abs(L[11].x-L[12].x));
+/* form checks: return a spoken correction or null */
+const tooHigh=L=>(Math.min(L[11].y,L[12].y)-Math.min(L[15].y,L[16].y))>0.06?'到肩膀高度就停，别举太高':null;
+const shrug=(L,c)=>(c.base&&seen(L,[7,8])&&shrugGap(L)<c.base*0.72)?'肩膀往下沉，别耸肩':null;
+const bodyLine=L=>{const[s,,,h,,a]=side(L);return ang(s,h,a)<155?'收紧核心，身体保持一条直线':null;};
+const valgus=(L,c,m)=>{if(m>135||!seen(L,[25,26,27,28]))return null;return Math.abs(L[25].x-L[26].x)<Math.abs(L[27].x-L[28].x)*0.8?'膝盖往外推，别内扣':null;};
+const torso=L=>{const[s,,,h]=side(L);return Math.abs(Math.atan2(s.x-h.x,h.y-s.y)*180/Math.PI)>25?'上身保持直立':null;};
+const kneeBend=L=>{const[,,,h,k,a]=side(L);return ang(h,k,a)<135?'膝盖微屈就好，髋往后推':null;};
+const TRK={
+  abd:{ok:okIds([11,12,13,14,23,24]),start:'lo',lo:30,hi:65,m:L=>(ang(pt(L,23),pt(L,11),pt(L,13))+ang(pt(L,24),pt(L,12),pt(L,14)))/2,checks:[tooHigh,shrug]},
+  elbow:{ok:L=>seen(L,[11,13,15])||seen(L,[12,14,16]),start:'hi',lo:85,hi:145,m:L=>Math.min(ang(pt(L,11),pt(L,13),pt(L,15)),ang(pt(L,12),pt(L,14),pt(L,16)))},
+  spread:{ok:okIds([11,12,15,16]),start:'lo',lo:1.5,hi:2.3,m:L=>dist(pt(L,15),pt(L,16))/dist(pt(L,11),pt(L,12)),checks:[shrug]},
+  push:{ok:okSide,start:'hi',lo:95,hi:150,m:L=>{const[s,e,w]=side(L);return ang(s,e,w);},checks:[bodyLine]},
+  squat:{ok:okSide,start:'hi',lo:110,hi:155,m:L=>{const[,,,h,k,a]=side(L);return ang(h,k,a);},checks:[valgus]},
+  split:{ok:okSide,start:'hi',lo:110,hi:155,m:L=>{const[,,,h,k,a]=side(L);return ang(h,k,a);},checks:[torso]},
+  hinge:{ok:okSide,start:'hi',lo:125,hi:160,m:L=>{const[s,,,h,k]=side(L);return ang(s,h,k);},checks:[kneeBend]},
+  bridge:{ok:okSide,start:'lo',lo:145,hi:165,m:L=>{const[s,,,h,k]=side(L);return ang(s,h,k);}},
+  curl:{ok:okSide,start:'hi',lo:100,hi:150,m:L=>{const[,,,h,k,a]=side(L);return ang(h,k,a);}},
+  legabd:{ok:okIds([23,24,25,26]),start:'lo',lo:15,hi:30,m:L=>{const a=pt(L,23),b=pt(L,24);return ang(pt(L,25),{x:(a.x+b.x)/2,y:(a.y+b.y)/2},pt(L,26));}},
+  steps:{ok:okIds([23,24,27,28]),start:'lo',lo:1.15,hi:1.6,m:L=>dist(pt(L,27),pt(L,28))/dist(pt(L,23),pt(L,24))},
+  plank:{hold:true,ok:okSide,checks:[bodyLine]},
+  hold:{hold:true,noPose:true,ok:()=>true}
+};
+function targetOf(e){
+  const r=EX[e].reps, t=TRK[TRK_OF[e]]||TRK.hold, per=/侧/.test(r);
+  if(t.hold){ const m=r.match(/(\d+)(?:–\d+)?\s*秒/); const s=m?+m[1]:40; return {hold:true,secs:per?s*2:s}; }
+  const n=+((r.match(/\d+/)||[10])[0]); return {hold:false,reps:per?n*2:n};
+}
+function buildQueue(k){ const plan=weekPlan(analyze()); return plan[k].items.map(it=>{const e=exOf(k,it);return {e,sets:it.stretch?1:it.sets,tg:targetOf(e),trk:TRK_OF[e]||'hold'};}); }
+
+/* voice */
+const VLAST={};
+function say(text,o={}){
+  if(!S.voice||!('speechSynthesis' in window)) return;
+  const now=Date.now(); if(o.key){ if(VLAST[o.key]&&now-VLAST[o.key]<(o.gap||6000)) return; VLAST[o.key]=now; }
+  try{ if(o.urgent) speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang='zh-CN'; u.rate=1.08;
+    const v=speechSynthesis.getVoices().find(x=>/zh[-_](CN|Hans)/i.test(x.lang)); if(v) u.voice=v; speechSynthesis.speak(u); }catch(e){}
+}
+
+/* session */
+let C=null, lmkV=null;
+const EDGES=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
+const SESSION_HTML=()=>`<div class="sess">
+  <div class="cam" id="cam"><video id="cv" playsinline muted autoplay></video><canvas id="cc"></canvas><div class="camfb" id="cfb" hidden></div>
+    <div class="camtop"><button type="button" data-act="endCoach" aria-label="结束跟练">${I.x}</button><span class="chip" id="cstat"><i></i><span>正在打开摄像头…</span></span><button type="button" data-act="voiceToggle" aria-label="语音开关" id="cvoice">${S.voice?I.vol:I.mute}</button></div>
+    <div class="bigcount" id="ccount"></div></div>
+  <div class="panel" id="cpanel">
+    <div class="pdots" id="cdots"></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px"><div style="min-width:0"><p class="label" id="cset"></p><p class="big" id="cname"></p></div><span class="mono small muted" id="ctarget" style="white-space:nowrap"></span></div>
+    <div class="cue" id="ccue" role="status"></div>
+    <div class="nextup" id="cnext"></div>
+    <div class="ctrl"><button class="btn ghost" type="button" data-act="pauseCoach" id="cpause">暂停</button><button class="btn" type="button" data-act="plusOne" id="cplus">+1 次</button><button class="btn ghost" type="button" data-act="skipCoach">跳过</button></div>
+  </div></div>`;
+function setStat(text,cls){ const s=$('cstat'); if(!s) return; s.className='chip'+(cls?' '+cls:''); s.innerHTML=`<i></i><span>${text}</span>`; }
+function setCue(text,bad){ if(!C) return; C.cue=text; C.cueBad=!!bad; if(bad) C.cueAt=Date.now(); const el=$('ccue'); if(el){ el.textContent=text; el.className='cue'+(bad?' bad':''); } }
+function ui(){
+  if(!C||!$('cname')) return;
+  const cur=C.q[C.i], tg=cur.tg, nx=C.q[C.i+1];
+  $('cdots').innerHTML=C.q.map((_,j)=>`<i class="${C.completed.has(j)?'on':j===C.i?'cur':''}"></i>`).join('');
+  $('cname').textContent=EX[cur.e].name;
+  $('cset').textContent=`第 ${C.set} / ${cur.sets} 组 · ${MODE_LABEL(cur.trk)}`;
+  $('ctarget').textContent=tg.hold?`${tg.secs} 秒`:`目标 ${tg.reps} 次`;
+  let big='';
+  if(C.phase==='prep') big=C.prepShow?String(C.prepShow):'<small>准备</small>';
+  else if(C.phase==='work') big=tg.hold?`${C.holdLeft}<small>秒</small>`:`${C.reps}<small>/ ${tg.reps}</small>`;
+  else if(C.phase==='rest') big=`${C.restLeft}<small>秒 休息</small>`;
+  $('ccount').innerHTML=big;
+  let next;
+  if(C.phase==='rest' && C.set<cur.sets) next=`<span>接下来</span><b>第 ${C.set+1} 组 · ${EX[cur.e].name}</b>`;
+  else next=`<span>${C.phase==='rest'?'接下来':'下一个'}</span><b>${(C.phase==='rest'||C.set===cur.sets)&&nx?EX[nx.e].name+' · '+nx.sets+' 组':(C.set<cur.sets?'第 '+(C.set+1)+' 组 · '+EX[cur.e].name:(nx?EX[nx.e].name+' · '+nx.sets+' 组':'这是最后一个动作'))}</b>`;
+  $('cnext').innerHTML=next;
+  $('cplus').textContent={prep:'直接开始',work:tg.hold?'完成这组':'+1 次',rest:'跳过休息'}[C.phase]||'+1 次';
+  $('cpause').textContent=C.paused?'继续':'暂停';
+  if(!C.cueBad||Date.now()-C.cueAt>2500){
+    const d={prep:'准备开始，站到画面中间',work:'要点：'+EX[cur.e].cue,rest:'喝口水，调整呼吸'}[C.phase];
+    if(d&&C.cue!==d) setCue(d,false);
+  }
+}
+function startSession(k){
+  stopSession();
+  C={k,q:buildQueue(k),i:0,set:1,reps:0,phase:'prep',prep:5,prepShow:0,holdLeft:0,restLeft:0,paused:false,manual:false,state:'start',ema:null,cue:'',cueBad:false,cueAt:0,lastSeen:0,ctx:{},t0:Date.now(),completed:new Set(),setsDone:0};
+  C.timer=setInterval(tick,1000);
+  ui();
+  const first=C.q[0];
+  say(`跟练开始。第一个动作，${EX[first.e].name}，${first.sets} 组`,{urgent:true});
+  try{ navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>{ if(C) C.wl=w; else w.release(); }).catch(()=>{}); }catch(e){}
+  initCam();
+}
+function stopCam(){ if(!C) return; if(C.raf) cancelAnimationFrame(C.raf); C.raf=null; if(C.stream){ C.stream.getTracks().forEach(t=>t.stop()); C.stream=null; } }
+function stopSession(){ if(!C) return; clearInterval(C.timer); stopCam(); try{ C.wl&&C.wl.release(); }catch(e){} try{ speechSynthesis.cancel(); }catch(e){} C=null; }
+function manualMode(reason,camOk){
+  if(!C) return; C.manual=true;
+  setStat('手动模式','warn');
+  if(!camOk){ const fb=$('cfb'); if(fb){ fb.hidden=false; fb.innerHTML=`<b>${reason}</b><span>用手机浏览器打开 anyali-1015.github.io/bodynav，可以开启实时动作识别。</span><span>现在先用手动模式跟练：每做完一次，点下方的「+1 次」。语音提醒照常工作。</span>`; } }
+}
+async function initCam(){
+  const me=C;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ manualMode('这里打不开摄像头'); return; }
+  let stream;
+  try{ stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false}); }
+  catch(e){ manualMode(e&&e.name==='NotAllowedError'?'没有拿到摄像头权限':'这里打不开摄像头'); return; }
+  if(C!==me){ stream.getTracks().forEach(t=>t.stop()); return; }
+  C.stream=stream; const v=$('cv'); v.srcObject=stream; try{ await v.play(); }catch(e){}
+  setStat('正在加载 AI 模型…');
+  try{
+    await Promise.race([loadVideoModel(), new Promise((_,j)=>setTimeout(()=>j(new Error('timeout')),20000))]);
+  }catch(e){ if(C===me){ manualMode('AI 模型加载失败',true); setStat('手动模式 · 模型未加载','warn'); } return; }
+  if(C!==me) return;
+  setStat('AI 识别中','live'); loop();
+}
+async function loadVideoModel(){
+  if(lmkV) return lmkV;
+  const v=await import(MP+'/vision_bundle.mjs'); const fs=await v.FilesetResolver.forVisionTasks(MP+'/wasm');
+  const mk=d=>v.PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:MODEL,delegate:d},runningMode:'VIDEO',numPoses:1});
+  try{ lmkV=await mk('GPU'); }catch(e){ lmkV=await mk('CPU'); }
+  return lmkV;
+}
+function loop(){
+  if(!C||!lmkV) return;
+  const v=$('cv'); if(!v) return;
+  if(v.readyState>=2 && v.currentTime!==C.lastT){
+    C.lastT=v.currentTime; AR=(v.videoWidth||4)/(v.videoHeight||3);
+    let r=null; try{ r=lmkV.detectForVideo(v,performance.now()); }catch(e){}
+    const L=r&&r.landmarks&&r.landmarks[0];
+    draw(L,v);
+    if(L) onPose(L);
+  }
+  C.raf=requestAnimationFrame(loop);
+}
+function draw(L,v){
+  const c=$('cc'); if(!c) return; const dpr=window.devicePixelRatio||1;
+  const cw=c.clientWidth, ch=c.clientHeight; if(c.width!==Math.round(cw*dpr)){ c.width=Math.round(cw*dpr); c.height=Math.round(ch*dpr); }
+  const g=c.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,cw,ch); if(!L) return;
+  const vw=v.videoWidth, vh=v.videoHeight, s=Math.max(cw/vw,ch/vh), ox=(cw-vw*s)/2, oy=(ch-vh*s)/2;
+  const P=i=>[L[i].x*vw*s+ox, L[i].y*vh*s+oy];
+  const col=C&&C.cueBad&&Date.now()-C.cueAt<2500?'#f0a347':'#4cbcae';
+  g.lineWidth=4; g.lineCap='round'; g.strokeStyle=col;
+  for(const [a,b] of EDGES){ if((L[a].visibility??1)<.5||(L[b].visibility??1)<.5) continue; const p=P(a),q=P(b); g.beginPath(); g.moveTo(p[0],p[1]); g.lineTo(q[0],q[1]); g.stroke(); }
+  g.fillStyle='#ffffff';
+  for(const i of [11,12,13,14,15,16,23,24,25,26,27,28]){ if((L[i].visibility??1)<.5) continue; const p=P(i); g.beginPath(); g.arc(p[0],p[1],5,0,7); g.fill(); }
+}
+function onPose(L){
+  const cur=C.q[C.i], t=TRK[cur.trk]||TRK.hold;
+  const ok=t.ok(L); if(ok) C.lastSeen=Date.now();
+  if((C.phase==='prep'||C.phase==='rest') && seen(L,[7,8,11,12])){ const g=shrugGap(L); C.ctx.base=C.ctx.base?C.ctx.base*0.9+g*0.1:g; }
+  if(C.paused||C.phase!=='work'||!ok) return;
+  if(!t.hold){
+    const raw=t.m(L); C.ema=C.ema==null?raw:C.ema*0.6+raw*0.4; const m=C.ema; C.m=m;
+    if(t.start==='lo'){ if(C.state==='start'&&m>=t.hi) C.state='peak'; else if(C.state==='peak'&&m<=t.lo){ C.state='start'; onRep(); if(!C||C.phase!=='work') return; } }
+    else { if(C.state==='start'&&m<=t.lo) C.state='peak'; else if(C.state==='peak'&&m>=t.hi){ C.state='start'; onRep(); if(!C||C.phase!=='work') return; } }
+  }
+  if(t.checks) for(const f of t.checks){ const msg=f(L,C.ctx,C.m); if(msg){ setCue(msg,true); say(msg,{key:msg,gap:8000}); break; } }
+}
+function onRep(){
+  C.reps++; const tg=C.q[C.i].tg.reps;
+  const b=$('ccount'); if(b){ b.classList.add('pop'); setTimeout(()=>b.classList.remove('pop'),140); }
+  if(C.reps>=tg){ endSet(); return; }
+  if(S.countVoice) say(String(C.reps),{urgent:true});
+  if(tg-C.reps===3) say('还剩 3 个');
+  ui();
+}
+function beginWork(){
+  const cur=C.q[C.i]; C.phase='work'; C.reps=0; C.state='start'; C.ema=null; C.prepShow=0;
+  if(cur.tg.hold) C.holdLeft=cur.tg.secs;
+  setCue('要点：'+EX[cur.e].cue,false);
+  say(cur.tg.hold?`开始，坚持 ${cur.tg.secs} 秒`:'开始',{urgent:true}); ui();
+}
+function markDone(e){ S.done[todayISO()+':'+e]=1; save(); }
+function endSet(){
+  const cur=C.q[C.i]; C.setsDone++;
+  if(C.set<cur.sets){ C.phase='rest'; C.restLeft=cur.tg.hold?15:40; say(`第 ${C.set} 组完成，休息 ${C.restLeft} 秒`,{urgent:true}); }
+  else{
+    C.completed.add(C.i); markDone(cur.e);
+    if(C.i<C.q.length-1){ const nx=C.q[C.i+1]; C.phase='rest'; C.restLeft=60; say(`${EX[cur.e].name}完成。休息一分钟，下一个动作，${EX[nx.e].name}`,{urgent:true}); }
+    else { finish(); return; }
+  }
+  ui();
+}
+function nextAfterRest(){
+  const cur=C.q[C.i];
+  if(C.set<cur.sets){ C.set++; C.prep=3; }
+  else { C.i++; C.set=1; C.prep=4; const n=C.q[C.i]; say(`${EX[n.e].name}，${n.sets} 组，准备`,{urgent:true}); }
+  C.phase='prep'; C.prepShow=0; ui();
+}
+function tick(){
+  if(!C||C.paused||C.phase==='done') return;
+  const cur=C.q[C.i], t=TRK[cur.trk]||TRK.hold, now=Date.now();
+  const inView=C.manual||t.noPose||now-C.lastSeen<900;
+  if(C.phase==='prep'){
+    if(!inView&&C.prep<=3){ C.prep=3; C.prepShow=0; setCue('退后一点，让头到脚都在画面里',true); say('退后一点，让全身入镜',{key:'frame',gap:7000}); ui(); return; }
+    if(C.prep>3){ C.prep--; ui(); return; }
+    if(C.prep===0){ beginWork(); return; }
+    C.prepShow=C.prep; say(String(C.prep),{urgent:true}); C.prep--; ui(); return;
+  }
+  if(C.phase==='work'){
+    if(t.hold){ if(inView){ C.holdLeft--; if(C.holdLeft===10&&cur.tg.secs>15) say('还剩 10 秒'); if(C.holdLeft<=0){ endSet(); return; } } }
+    else if(!inView){ setCue('退后一点，让全身入镜',true); say('退后一点，让全身入镜',{key:'frame',gap:8000}); }
+    ui(); return;
+  }
+  if(C.phase==='rest'){ C.restLeft--; if(C.restLeft===3) say('准备',{urgent:true}); if(C.restLeft<=0){ nextAfterRest(); return; } ui(); }
+}
+function finish(){
+  C.phase='done'; clearInterval(C.timer); stopCam();
+  const mins=Math.max(1,Math.round((Date.now()-C.t0)/60000));
+  say('今天的训练全部完成，做得很好',{urgent:true});
+  setStat('完成','live'); $('ccount').innerHTML='';
+  const fb=$('cfb'); fb.hidden=false; fb.innerHTML=`<span class="ok">${I.checkBig}</span><b>今天的训练完成了</b>`;
+  $('cpanel').innerHTML=`<div class="pdots">${C.q.map(()=>'<i class="on"></i>').join('')}</div>
+    <p class="big">完成 ${C.completed.size} 个动作 · ${C.setsDone} 组</p><p class="muted small">用时约 ${mins} 分钟，已记入本周计划。</p>
+    <button class="btn" type="button" data-tab="home">回到首页</button><button class="btn ghost" type="button" data-go="plan">看本周计划</button>`;
+}
+const COACH_ACT={
+  startCoach(k){ try{ const u=new SpeechSynthesisUtterance(' '); u.volume=0; speechSynthesis.speak(u); }catch(e){} go('session',k); },
+  coachKey(a){ T.coachKey=a; refresh(); },
+  endCoach(){ const n=C?C.completed.size:0; stopSession(); tab('coach'); if(n) toast(`已记录 ${n} 个完成的动作`); },
+  voiceToggle(){ S.voice=!S.voice; save(); if(!S.voice){ try{speechSynthesis.cancel();}catch(e){} } const b=$('cvoice'); if(b) b.innerHTML=S.voice?I.vol:I.mute; },
+  pauseCoach(){ if(!C||C.phase==='done') return; C.paused=!C.paused; say(C.paused?'已暂停':'继续',{urgent:true}); if(!C.manual&&C.stream) setStat(C.paused?'已暂停':'AI 识别中',C.paused?'warn':'live'); ui(); },
+  plusOne(){ if(!C||C.paused) return; const cur=C.q[C.i];
+    if(C.phase==='prep') beginWork(); else if(C.phase==='work'){ if(cur.tg.hold) endSet(); else onRep(); } else if(C.phase==='rest'){ C.restLeft=0; nextAfterRest(); } },
+  skipCoach(){ if(!C||C.phase==='done') return; if(C.i>=C.q.length-1){ finish(); return; } C.i++; C.set=1; C.phase='prep'; C.prep=4; C.prepShow=0; say('跳过。下一个动作，'+EX[C.q[C.i].e].name,{urgent:true}); ui(); }
+};
+document.addEventListener('visibilitychange',()=>{ if(document.hidden&&C&&!C.paused&&C.phase!=='done'){ C.paused=true; try{speechSynthesis.cancel();}catch(e){} ui(); } });
+
 const ACT={
+  ...COACH_ACT,
   openEx,
   setTarget(a){S.target=a;save();refresh();toast('目标已改为 '+target().name);},
   toggle(a){S[a]=!S[a];save();refresh();},
