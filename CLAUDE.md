@@ -37,7 +37,8 @@ python3 -m http.server 8000
 - `P` 页面表：home、plan、train、library、ex、me、target、posture、about、session、measure 等；`render()`/`go()`/`back()`/`tab()` 是简单的栈式路由，底部三个 tab：身材 / 训练 / 我的
 - 3D 首页：`fitBody()` 按测量值拟合形变（测量用）→ `dispMesh()` 只改外观（蛋形人台头 `eggHead`、平滑、`poseArms` 收手臂、`loopSub` 细分一次）→ `build3D()` 顶点色渲染（肌群软渐变 + 凹处暗化 + 边缘菲涅尔）。WebGL 不可用时退回 2D `figureSVG()`
 - 测量页两种方式（`T.mtab`）：「手动输入」软尺围度 → `manualMeas()`（围度按 `DEPTH_K` 反推宽度）；「拍照扫描」只用一张正面照 → `scanMeas()`，拖点 `PTDEF.front`、`autoDetect()` 自动放点。参考照片页 `refphoto` 复用同一套（`T.step==='ref'`，`PTDEF.ref` = 正面点位）。`S.meas.src` 记录来源。侧面照相关代码（`PTDEF.side` 等）已不在界面中使用
-- 跟练 session：`TRK`（每个动作的计数角度与纠错规则，如耸肩、塌腰、膝内扣）、`say()` 语音播报、`NOTE_RULES` 把用户笔记映射成额外检测
+- 跟练 session：`TRK`（每个动作的计数角度与纠错规则，如耸肩、塌腰、膝内扣）、`say()` 语音播报、`NOTE_RULES` 把用户笔记映射成额外检测。两种入口：训练页整体跟练（`startCoach('A'|'B'|'C')`）和动作详情单独跟练（`startCoach('ex:动作:组数')`，`C.single`）。每个 `EX` 动作都要在 `TRK_OF` 里有对应的计数器，没有的会退成计时
+- 语音坑：iOS 必须在点击里同步说出第一句才解锁（别在那之前 `cancel()`）；`cancel()` 后同一时刻 `speak()` 会被丢掉，`say({urgent})` 已改成先 cancel 再延迟 150ms；中文语音等 `voiceschanged` 再选
 - 事件委托：`ACT` / `COACH_ACT` / `MEAS_ACT`，元素上用 `data-act` + `data-arg`
 
 ## 约定

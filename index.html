@@ -1029,22 +1029,34 @@ const P={
     const r=analyze(), plan=weekPlan(r);
     const sel=T.selDay||nextTrainDay(); const d=new Date(sel+'T00:00'); const tk=SCHED[d.getDay()];
     const k=tk||T.coachKey||'A', day=plan[k], p=dayProgress(sel,k,plan), isToday=sel===todayISO();
+    const when=isToday?'今天':'周'+DOW[d.getDay()];
+    // 这一天主练哪些肌群：按等级（重点 > 加强 > 保持）和组数排，取前三个不重复的
+    const main=[...new Set(day.items.filter(it=>it.mu).sort((x,y)=>W[y.lv]-W[x.lv]||y.sets-x.sets).map(it=>MUSCLES[it.mu].name))].slice(0,3);
+    const why=r.reached?'':String(r.head).replace(/<[^>]+>/g,'');
     const rows=day.items.map((it,i)=>{ const e=exOf(k,it), done=!!S.done[sel+':'+e], n=notesOf(e).length;
-      return `<button class="li" type="button" data-go="ex" data-arg="${e}|${sel}|${k}|${i}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span style="min-width:0"><span class="t">${EX[e].name}${n?'<span class="badge">备注</span>':''}</span><span class="s">${it.stretch?'拉伸 · 练完做':it.sets+' 组 × '+EX[e].reps}</span></span><span class="r">${done?`<span class="acc">${I.check}</span>`:''}${I.chev}</span></button>`; }).join('');
+      const tag=it.stretch?'':it.lv==='focus'?'<span class="badge">重点</span>':it.lv==='boost'?'<span class="badge acc">加强</span>':'';
+      return `<button class="li" type="button" data-go="ex" data-arg="${e}|${sel}|${k}|${i}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span style="min-width:0"><span class="t">${EX[e].name}${tag}${n?'<span class="badge">备注</span>':''}</span><span class="s">${it.stretch?'拉伸 · 练完做':it.sets+' 组 × '+EX[e].reps}${it.mu?' · '+MUSCLES[it.mu].name:''}</span></span><span class="r">${done?`<span class="acc">${I.check}</span>`:''}${I.chev}</span></button>`; }).join('');
     return `${weekStrip(plan,sel,'selDay')}
     <div class="stack" style="gap:6px">
-      <p class="eyebrow">${isToday?'今天':'周'+DOW[d.getDay()]} · ${tk?day.name:'休息日'}</p>
-      ${tk?`<p class="h1">${day.items.length} 个动作 · 约 ${day.min} 分钟</p>`:`<p class="h1">今天休息</p><p class="small muted">想练的话，选一组：</p><div class="seg" role="group" aria-label="选择训练">${['A','B','C'].map(x=>`<button type="button" data-act="coachKey" data-arg="${x}" aria-pressed="${k===x}">${DAYNAME[x]}</button>`).join('')}</div>`}
-      ${p.n?`<p class="small muted">已完成 ${p.n} / ${p.total}</p>`:''}
+      <p class="eyebrow">${when} · ${tk?day.name+'日':'休息日'}</p>
+      ${tk?`<p class="h1">主练${main.join('、')}</p>
+        <p class="small muted">${day.items.length} 个动作 · 约 ${day.min} 分钟${p.n?` · 已完成 ${p.n}/${p.total}`:''}${why?` · 为了：${why}`:''}</p>`
+      :`<p class="h1">今天休息</p><p class="small muted">想练的话，选一组：</p><div class="seg" role="group" aria-label="选择训练">${['A','B','C'].map(x=>`<button type="button" data-act="coachKey" data-arg="${x}" aria-pressed="${k===x}">${DAYNAME[x]}</button>`).join('')}</div>
+        <p class="small muted">主练${main.join('、')} · ${day.items.length} 个动作 · 约 ${day.min} 分钟</p>`}
     </div>
-    <button class="btn block" type="button" data-act="startCoach" data-arg="${k}">${I.coach}跟练 · 摄像头自动计数</button>
-    <div class="list">${rows}</div>
-    <div class="between"><button class="link" type="button" data-go="library">动作库${I.chev}</button><button class="link" type="button" data-go="plan">本周计划${I.chev}</button></div>
+    <section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">动作明细 · 点进去看要领，也可以单独跟练</p><div class="list">${rows}</div></section>
+    <div class="stack" style="gap:6px">
+      <button class="btn block" type="button" data-act="startCoach" data-arg="${k}">${I.coach}整体跟练 · 按顺序做完</button>
+      <p class="xs muted" style="text-align:center">摄像头自动计数、纠正体态，组间休息自动计时</p>
+    </div>
+    <div class="between"><button class="link" type="button" data-go="library">动作库 · 自选动作跟练${I.chev}</button><button class="link" type="button" data-go="plan">本周计划${I.chev}</button></div>
     <div class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">跟练语音</p>
-      ${sw('voice','语音提醒','动作纠正、你的备注、休息和下一个动作')}${sw('countVoice','语音报数','每完成一次报一个数')}</div>`;
+      ${sw('voice','语音提醒','动作纠正、你的备注、休息和下一个动作')}${sw('countVoice','语音报数','每完成一次报一个数')}
+      <button class="btn ghost block" type="button" data-act="voiceTest" style="margin-top:12px">试听语音</button>
+      <p class="xs muted" style="margin-top:8px">听不到的话：iPhone 先关掉侧边的静音键、调大媒体音量，再点一次「试听语音」。</p></div>`;
   }},
   library:{title:'动作库',render(){
-    return Object.keys(MUSCLES).map(mu=>`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">${MUSCLES[mu].name} · ${MUSCLES[mu].area}</p><div class="list">${MUSCLES[mu].ex.map(e=>`<button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span><span class="t">${EX[e].name}${notesOf(e).length?'<span class="badge">备注</span>':''}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div></section>`).join('')
+    return `<p class="small muted">点进任意动作，可以单独开摄像头跟练：自动计数、提醒体态、组间计时。</p>`+Object.keys(MUSCLES).map(mu=>`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">${MUSCLES[mu].name} · ${MUSCLES[mu].area}</p><div class="list">${MUSCLES[mu].ex.map(e=>`<button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span><span class="t">${EX[e].name}${notesOf(e).length?'<span class="badge">备注</span>':''}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div></section>`).join('')
       +[['手臂',['db_curl','hammer_curl','pushdown','bench_dip']],['腰腹 · 下背',['side_plank','russian_twist','superman','back_ext']],['大腿内侧 · 小腿',['plie_squat','calf_raise','seated_calf']]].map(([n,l])=>`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">${n}</p><div class="list">${l.map(e=>`<button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span><span class="t">${EX[e].name}${notesOf(e).length?'<span class="badge">备注</span>':''}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div></section>`).join('')
       +`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">拉伸</p><div class="list">${['chest_stretch','hipflex_stretch'].map(e=>`<button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span><span class="t">${EX[e].name}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div></section>`;
   }},
@@ -1062,6 +1074,9 @@ const P={
         <p class="h1">${ex.name}</p>
         <p class="mono small muted">${it&&!it.stretch?it.sets+' 组 × ':''}${ex.reps}</p>
       </div>
+      ${(()=>{ const n=it&&!it.stretch?it.sets:exSets(e), tr=isTracked(e), ck=checksOf(e);
+        return `<div class="stack" style="gap:6px"><button class="btn block" type="button" data-act="startCoach" data-arg="ex:${e}:${n}">${I.coach}单独跟练这个动作 · ${n} 组</button>
+          <p class="xs muted">${tr?`摄像头自动计数${ck.length?'，提醒'+ck.join('、'):''}；`:'计时跟练；'}语音提醒开始、组间休息和下一组。</p></div>`; })()}
       ${ns.length?`<section class="stack" aria-label="我的备注">${ns.map((n,j)=>`<div class="note"><p>${esc(n.txt)}<small>${n.t}</small></p><button type="button" data-act="delNote" data-arg="${e}|${j}" aria-label="删除这条备注">${I.trash}</button></div>`).join('')}</section>`:''}
       <section class="stack" style="gap:10px"><div class="muscles" style="grid-template-columns:repeat(${views.length},1fr)">${views.map(v=>muscleSVG(v,ex.p,ex.s)).join('')}</div>
         <div class="mkey"><span><i style="background:var(--accent)"></i>主要发力 ${ex.p.map(x=>SLUG_CN[x]).join('、')}</span>${ex.s.length?`<span><i style="background:color-mix(in srgb,var(--accent) 38%,var(--body))"></i>辅助 ${ex.s.map(x=>SLUG_CN[x]).join('、')}</span>`:''}</div></section>
@@ -1553,7 +1568,8 @@ async function mkLandmarker(mode){
   mpLog('create');
   try{ return await mk('GPU'); }catch(e){ mpLog('gpu fail '+(e&&e.message)); return await mk('CPU'); }
 }
-const TRK_OF={lat_raise:'abd',cable_lat:'abd',band_lat:'abd',reverse_fly:'abd',pulldown:'elbow',db_row:'elbow',face_pull:'elbow',band_pull:'spread',pushup:'push',goblet:'squat',split_squat:'split',rdl:'hinge',hip_thrust:'bridge',glute_bridge:'bridge',sl_bridge:'bridge',leg_curl:'curl',side_leg:'legabd',band_walk:'steps',plank:'plank',dead_bug:'hold',hipflex_stretch:'hold',chest_stretch:'hold'};
+const TRK_OF={lat_raise:'abd',cable_lat:'abd',band_lat:'abd',reverse_fly:'abd',pulldown:'elbow',db_row:'elbow',face_pull:'elbow',band_pull:'spread',pushup:'push',goblet:'squat',split_squat:'split',rdl:'hinge',hip_thrust:'bridge',glute_bridge:'bridge',sl_bridge:'bridge',leg_curl:'curl',side_leg:'legabd',band_walk:'steps',plank:'plank',dead_bug:'hold',hipflex_stretch:'hold',chest_stretch:'hold',
+  db_curl:'armcurl',hammer_curl:'armcurl',pushdown:'ext',bench_dip:'dip',calf_raise:'calf',seated_calf:'calf',side_plank:'plank',russian_twist:'twist',superman:'lift',back_ext:'backext',plie_squat:'squat'};
 const MODE_LABEL=k=>({plank:'计时 · 体态检测',hold:'计时'}[k]||'自动计数');
 let AR=1;
 const pt=(L,i)=>({x:L[i].x*AR,y:L[i].y});
@@ -1584,22 +1600,51 @@ const TRK={
   legabd:{ok:okIds([23,24,25,26]),start:'lo',lo:15,hi:30,m:L=>{const a=pt(L,23),b=pt(L,24);return ang(pt(L,25),{x:(a.x+b.x)/2,y:(a.y+b.y)/2},pt(L,26));}},
   steps:{ok:okIds([23,24,27,28]),start:'lo',lo:1.15,hi:1.6,m:L=>dist(pt(L,27),pt(L,28))/dist(pt(L,23),pt(L,24))},
   plank:{hold:true,ok:okSide,checks:[bodyLine]},
+  // 以下是动作库里自选动作的计数：弯举 / 下压看肘角，臂屈伸看侧面肘角，提踵看脚跟抬起，转体看肩相对髋的左右偏移
+  armcurl:{ok:L=>seen(L,[11,13,15])||seen(L,[12,14,16]),start:'hi',lo:75,hi:145,m:L=>Math.min(ang(pt(L,11),pt(L,13),pt(L,15)),ang(pt(L,12),pt(L,14),pt(L,16))),checks:[torso]},
+  ext:{ok:L=>seen(L,[11,13,15])||seen(L,[12,14,16]),start:'lo',lo:105,hi:150,m:L=>Math.max(ang(pt(L,11),pt(L,13),pt(L,15)),ang(pt(L,12),pt(L,14),pt(L,16))),checks:[shrug]},
+  dip:{ok:okSide,start:'hi',lo:105,hi:150,m:L=>{const[s,e,w]=side(L);return ang(s,e,w);},checks:[shrug]},
+  calf:{ok:L=>seen(L,[25,27,29,31])||seen(L,[26,28,30,32]),start:'lo',lo:.06,hi:.13,m:L=>{const r=(k,a,h,t)=>((L[t].y-L[h].y))/Math.max(.01,dist(pt(L,k),pt(L,a)));return Math.max(r(25,27,29,31),r(26,28,30,32));}},
+  twist:{ok:okIds([11,12,23,24]),start:'lo',lo:.12,hi:.3,m:L=>Math.abs((L[11].x+L[12].x-L[23].x-L[24].x)/2)/Math.max(.01,Math.abs(L[11].x-L[12].x))},
+  lift:{ok:okSide,start:'lo',lo:.06,hi:.14,m:L=>{const[s,,w,h,,a]=side(L);const t=Math.max(.01,dist(s,h));return Math.max(h.y-w.y,h.y-a.y)/t;}},
+  backext:{ok:okSide,start:'lo',lo:120,hi:160,m:L=>{const[s,,,h,k]=side(L);return ang(s,h,k);}},
   hold:{hold:true,noPose:true,ok:()=>true}
 };
+const CHECK_NAME=new Map([[tooHigh,'举太高'],[shrug,'耸肩'],[bodyLine,'塌腰'],[valgus,'膝盖内扣'],[torso,'上身晃动'],[kneeBend,'膝盖弯太多']]);
+const checksOf=e=>((TRK[TRK_OF[e]]||{}).checks||[]).map(f=>CHECK_NAME.get(f)).filter(Boolean);
 function targetOf(e){
   const r=EX[e].reps, t=TRK[TRK_OF[e]]||TRK.hold, per=/侧/.test(r);
   if(t.hold){ const m=r.match(/(\d+)(?:–\d+)?\s*秒/); const s=m?+m[1]:40; return {hold:true,secs:per?s*2:s}; }
   const n=+((r.match(/\d+/)||[10])[0]); return {hold:false,reps:per?n*2:n};
 }
-function buildQueue(k){ const plan=weekPlan(analyze()); return plan[k].items.map(it=>{const e=exOf(k,it);return {e,sets:it.stretch?1:it.sets,tg:targetOf(e),trk:TRK_OF[e]||'hold'};}); }
+// 单个动作跟练：k = 'ex:动作:组数'
+const exSets=e=>{ const m=EX[e].reps.match(/(\d+)\s*×/); return m?+m[1]:3; };
+const isTracked=e=>!!TRK_OF[e]&&TRK_OF[e]!=='hold';
+function buildQueue(k){ if(k.startsWith('ex:')){ const [,e,n]=k.split(':'); return [{e,sets:+n||exSets(e),tg:targetOf(e),trk:TRK_OF[e]||'hold'}]; }
+  const plan=weekPlan(analyze()); return plan[k].items.map(it=>{const e=exOf(k,it);return {e,sets:it.stretch?1:it.sets,tg:targetOf(e),trk:TRK_OF[e]||'hold'};}); }
 
-/* voice */
+/* voice
+   iOS Safari：必须在一次点击里先真正说出一句话，之后定时器里的播报才有声音。
+   Safari / Chrome：cancel() 之后同一时刻立刻 speak() 会被直接丢掉——所以打断时先 cancel，稍等再说。
+   语音列表是异步加载的，等 voiceschanged 再挑中文语音；utterance 要留引用，否则可能被回收导致中途没声。 */
 const VLAST={};
+const VO={ok:'speechSynthesis' in window,voice:null,ref:null,t:0};
+function pickVoice(){ if(!VO.ok) return; const vs=speechSynthesis.getVoices();
+  VO.voice=vs.find(x=>/^zh[-_]CN/i.test(x.lang))||vs.find(x=>/^zh/i.test(x.lang)&&!/HK|TW/i.test(x.lang))||vs.find(x=>/^zh/i.test(x.lang))||null; }
+if(VO.ok){ pickVoice(); try{ speechSynthesis.addEventListener('voiceschanged',pickVoice); }catch(e){ speechSynthesis.onvoiceschanged=pickVoice; } }
+function speakNow(text){
+  const u=new SpeechSynthesisUtterance(text); u.lang=VO.voice?VO.voice.lang:'zh-CN'; if(VO.voice) u.voice=VO.voice; u.rate=1.05; u.volume=1;
+  VO.ref=u; try{ speechSynthesis.resume(); }catch(e){} speechSynthesis.speak(u);
+}
+const vbusy=()=>VO.ok&&(speechSynthesis.speaking||speechSynthesis.pending);
+function hush(){ if(!VO.ok) return; clearTimeout(VO.t); if(vbusy()) speechSynthesis.cancel(); }
 function say(text,o={}){
-  if(!S.voice||!('speechSynthesis' in window)) return;
+  if(!S.voice||!VO.ok) return;
   const now=Date.now(); if(o.key){ if(VLAST[o.key]&&now-VLAST[o.key]<(o.gap||6000)) return; VLAST[o.key]=now; }
-  try{ if(o.urgent) speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang='zh-CN'; u.rate=1.08;
-    const v=speechSynthesis.getVoices().find(x=>/zh[-_](CN|Hans)/i.test(x.lang)); if(v) u.voice=v; speechSynthesis.speak(u); }catch(e){}
+  try{
+    if(o.urgent&&vbusy()){ speechSynthesis.cancel(); clearTimeout(VO.t); VO.t=setTimeout(()=>speakNow(text),150); }
+    else speakNow(text);
+  }catch(e){ console.warn('[BodyNav] voice',e); }
 }
 
 /* session */
@@ -1643,17 +1688,17 @@ function ui(){
 }
 function startSession(k){
   stopSession();
-  C={k,q:buildQueue(k),i:0,set:1,reps:0,phase:'prep',prep:5,prepShow:0,holdLeft:0,restLeft:0,paused:false,manual:false,state:'start',ema:null,cue:'',cueBad:false,cueAt:0,lastSeen:0,ctx:{},t0:Date.now(),completed:new Set(),setsDone:0};
+  C={k,single:k.startsWith('ex:'),q:buildQueue(k),i:0,set:1,reps:0,phase:'prep',prep:5,prepShow:0,holdLeft:0,restLeft:0,paused:false,manual:false,state:'start',ema:null,cue:'',cueBad:false,cueAt:0,lastSeen:0,ctx:{},t0:Date.now(),completed:new Set(),setsDone:0};
   C.timer=setInterval(tick,1000);
   ui();
   const first=C.q[0];
   const mine=notesOf(first.e)[0];
-  say(`跟练开始。第一个动作，${EX[first.e].name}，${first.sets} 组。`+(mine?`你上次记了：${mine.txt}`:''),{urgent:true});
+  say((C.single?`开始跟练${EX[first.e].name}，${first.sets} 组。`:`跟练开始。第一个动作，${EX[first.e].name}，${first.sets} 组。`)+(mine?`你上次记了：${mine.txt}`:''),{urgent:true});
   try{ navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>{ if(C) C.wl=w; else w.release(); }).catch(()=>{}); }catch(e){}
   initCam();
 }
 function stopCam(){ if(!C) return; if(C.raf) cancelAnimationFrame(C.raf); C.raf=null; if(C.stream){ C.stream.getTracks().forEach(t=>t.stop()); C.stream=null; } }
-function stopSession(){ if(!C) return; clearInterval(C.timer); stopCam(); try{ C.wl&&C.wl.release(); }catch(e){} try{ speechSynthesis.cancel(); }catch(e){} C=null; }
+function stopSession(){ if(!C) return; clearInterval(C.timer); stopCam(); try{ C.wl&&C.wl.release(); }catch(e){} try{ hush(); }catch(e){} C=null; }
 function manualMode(reason,camOk){
   if(!C) return; C.manual=true;
   setStat('手动模式','warn');
@@ -1768,24 +1813,30 @@ function tick(){
 function finish(){
   C.phase='done'; clearInterval(C.timer); stopCam();
   const mins=Math.max(1,Math.round((Date.now()-C.t0)/60000));
-  say('今天的训练全部完成，做得很好',{urgent:true});
+  say(C.single?`${EX[C.q[0].e].name}完成，做得很好`:'今天的训练全部完成，做得很好',{urgent:true});
   setStat('完成','live'); $('ccount').innerHTML='';
-  const fb=$('cfb'); fb.hidden=false; fb.innerHTML=`<span class="ok">${I.checkBig}</span><b>今天的训练完成了</b>`;
+  const fb=$('cfb'); fb.hidden=false; fb.innerHTML=`<span class="ok">${I.checkBig}</span><b>${C.single?EX[C.q[0].e].name+'完成了':'今天的训练完成了'}</b>`;
   $('cpanel').innerHTML=`<div class="pdots">${C.q.map(()=>'<i class="on"></i>').join('')}</div>
     <p class="big">完成 ${C.completed.size} 个动作 · ${C.setsDone} 组</p><p class="muted small">用时约 ${mins} 分钟，已记入本周计划。</p>
-    <button class="btn block" type="button" data-tab="home">回到首页</button><button class="btn ghost block" type="button" data-tab="train">看训练</button>`;
+    ${C.single?`<button class="btn block" type="button" data-act="endCoach">返回动作</button>`:`<button class="btn block" type="button" data-tab="home">回到首页</button><button class="btn ghost block" type="button" data-tab="train">看训练</button>`}`;
 }
 const COACH_ACT={
-  startCoach(k){ try{ const u=new SpeechSynthesisUtterance(' '); u.volume=0; speechSynthesis.speak(u); }catch(e){} go('session',k); },
+  startCoach(k){ go('session',k); }, // 第一句播报在 startSession 里同步说出，借这次点击解锁 iOS 语音
   coachKey(a){ T.coachKey=a; refresh(); },
-  endCoach(){ const n=C?C.completed.size:0; stopSession(); tab('train'); if(n) toast(`已记录 ${n} 个完成的动作`); },
-  voiceToggle(){ S.voice=!S.voice; save(); if(!S.voice){ try{speechSynthesis.cancel();}catch(e){} } const b=$('cvoice'); if(b) b.innerHTML=S.voice?I.vol:I.mute; },
+  voiceTest(){
+    if(!VO.ok){ toast('这个浏览器不支持语音播报'); return; }
+    if(!S.voice){ S.voice=true; save(); refresh(); }
+    say('语音提醒已开启。跟练时会提醒动作要点、报数和休息。',{urgent:true});
+    setTimeout(()=>{ pickVoice(); if(!VO.voice&&speechSynthesis.getVoices().length) toast('这台设备没有中文语音，播报可能听不清'); },600);
+  },
+  endCoach(){ const n=C?C.completed.size:0, single=C?C.single:stack[stack.length-1].a&&String(stack[stack.length-1].a).startsWith('ex:'); stopSession(); if(single&&stack.length>1) back(); else tab('train'); if(n) toast(single?'已记入今天的训练':`已记录 ${n} 个完成的动作`); },
+  voiceToggle(){ S.voice=!S.voice; save(); if(!S.voice) hush(); else say('语音已开启',{urgent:true}); const b=$('cvoice'); if(b) b.innerHTML=S.voice?I.vol:I.mute; },
   pauseCoach(){ if(!C||C.phase==='done') return; C.paused=!C.paused; say(C.paused?'已暂停':'继续',{urgent:true}); if(!C.manual&&C.stream) setStat(C.paused?'已暂停':'AI 识别中',C.paused?'warn':'live'); ui(); },
   plusOne(){ if(!C||C.paused) return; const cur=C.q[C.i];
     if(C.phase==='prep') beginWork(); else if(C.phase==='work'){ if(cur.tg.hold) endSet(); else onRep(); } else if(C.phase==='rest'){ C.restLeft=0; nextAfterRest(); } },
   skipCoach(){ if(!C||C.phase==='done') return; if(C.i>=C.q.length-1){ finish(); return; } C.i++; C.set=1; C.phase='prep'; C.prep=4; C.prepShow=0; say('跳过。下一个动作，'+EX[C.q[C.i].e].name,{urgent:true}); ui(); }
 };
-document.addEventListener('visibilitychange',()=>{ if(document.hidden&&C&&!C.paused&&C.phase!=='done'){ C.paused=true; try{speechSynthesis.cancel();}catch(e){} ui(); } });
+document.addEventListener('visibilitychange',()=>{ if(document.hidden&&C&&!C.paused&&C.phase!=='done'){ C.paused=true; hush(); ui(); } });
 
 
 /* 备注里提到的问题，跟练时优先检查 */
