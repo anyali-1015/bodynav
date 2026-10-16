@@ -31,11 +31,12 @@ python3 -m http.server 8000
 - `EX` 动作库（名称、次数、步骤、要点、易错点、发力肌群）、`MUSCLES` 肌群→可选动作
 - 状态：`S`（持久化到 localStorage `bodynav.v4`）、`T`（临时 UI 状态）；照片存在 IndexedDB `bodynav`/`kv`
 - `derive()` 由宽度/厚度推算围度（椭圆周长，缺厚度时用 `DEPTH_K` 估算）
+- 性别：`S.sex`（'f' / 'm' / 未选），`sx()` 取值（未选按女）。`TARGETS`、`SAMPLES` 都带 `sex`；`DEPTH_KS` / `NORMS` 按性别给厚宽比和骨架上限；`S.tgt.sex`、`S.meas.sex` 记录生成时的性别。切换走 `ACT.setSex`。3D 只有女性基础网格，男性显示时 `smoothChest` 用大半径把胸部压平
 - 目标：`TARGETS` 预设只有比例；`S.target==='mine'` 时用 `S.tgt`（kind: auto / custom / ref，存四项 cm）。`target()` 统一返回 `{name, swr, hwr, cm?}`。`capOf()` 骨架上限、`autoCm()` 下一阶段生成、`refCalc()/refToCm()` 参考照片提取与换算、`gapRows()` 逐项差距表
 - `analyze()` **规则引擎**：预设按比例差距、「我的目标」按每项 cm 差距（阈值 `TOL` / `GAP_TH`，显示和规则共用），加圆肩/骨盆前倾 → 各肌群等级（focus/boost/keep/less，权重 3/2/1/0.5）→ 按约 36 组/周分配；返回 `reached`、`notes`。规则表见 README
 - `weekPlan()` 把肌群分到 A 上肢 / B 下肢 / C 重点强化，`SCHED` 固定在周一/三/五
 - `P` 页面表：home、plan、train、library、ex、me、target、posture、about、session、measure 等；`render()`/`go()`/`back()`/`tab()` 是简单的栈式路由，底部三个 tab：身材 / 训练 / 我的
-- 3D 首页：`fitBody()` 按测量值拟合形变（测量用）→ `dispMesh()` 只改外观（蛋形人台头 `eggHead`、平滑、`poseArms` 收手臂、`loopSub` 细分一次）→ `build3D()` 顶点色渲染（肌群软渐变 + 凹处暗化 + 边缘菲涅尔）。WebGL 不可用时退回 2D `figureSVG()`
+- 3D 首页：`fitBody()` 按测量值拟合形变（测量用）→ `dispMesh()` 只改外观（人台头 `eggHead`：脖子扶正加粗、头按真实比例、头颈接口松弛成圆角；`smoothChest` 抹平乳头；`poseArms` 收手臂；`loopSub` 细分一次；按性别分别缓存）→ `build3D()` 顶点色渲染（肌群软渐变 + 凹处暗化 + 边缘菲涅尔）。WebGL 不可用时退回 2D `figureSVG()`
 - 测量页两种方式（`T.mtab`）：「手动输入」软尺围度 → `manualMeas()`（围度按 `DEPTH_K` 反推宽度）；「拍照扫描」只用一张正面照 → `scanMeas()`，拖点 `PTDEF.front`、`autoDetect()` 自动放点。参考照片页 `refphoto` 复用同一套（`T.step==='ref'`，`PTDEF.ref` = 正面点位）。`S.meas.src` 记录来源。侧面照相关代码（`PTDEF.side` 等）已不在界面中使用
 - 跟练 session：`TRK`（每个动作的计数角度与纠错规则，如耸肩、塌腰、膝内扣）、`say()` 语音播报、`NOTE_RULES` 把用户笔记映射成额外检测。两种入口：训练页整体跟练（`startCoach('A'|'B'|'C')`）和动作详情单独跟练（`startCoach('ex:动作:组数')`，`C.single`）。每个 `EX` 动作都要在 `TRK_OF` 里有对应的计数器，没有的会退成计时
 - 语音坑：iOS 必须在点击里同步说出第一句才解锁（别在那之前 `cancel()`）；`cancel()` 后同一时刻 `speak()` 会被丢掉，`say({urgent})` 已改成先 cancel 再延迟 150ms；中文语音等 `voiceschanged` 再选

@@ -345,18 +345,29 @@ const I={
 };
 
 /* ---------------- data ---------------- */
+/* 预设模板（演示设定值）。sex 区分男女；emph 是这个风格自带的侧重，在比例规则之外额外加强（规则 R9） */
 const TARGETS=[
-  {id:'square',name:'直角肩薄背',swr:1.45,hwr:1.30,note:'肩线清晰，背部有宽度'},
-  {id:'peach',name:'蜜桃线条',swr:1.34,hwr:1.45,note:'臀部饱满，腰臀差明显'},
-  {id:'balanced',name:'均衡薄肌',swr:1.40,hwr:1.38,note:'上下比例匀称'},
-  {id:'athletic',name:'运动 X 型',swr:1.50,hwr:1.45,note:'肩和臀都有明显宽度'},
-  {id:'ballet',name:'纤长芭蕾',swr:1.30,hwr:1.30,note:'整体线条纤细'}
+  {id:'square',sex:'f',name:'直角肩薄背',swr:1.45,hwr:1.30,note:'肩线清晰，背部有宽度'},
+  {id:'peach',sex:'f',name:'蜜桃线条',swr:1.34,hwr:1.45,note:'臀部饱满，腰臀差明显'},
+  {id:'balanced',sex:'f',name:'均衡薄肌',swr:1.40,hwr:1.38,note:'上下比例匀称'},
+  {id:'athletic',sex:'f',name:'运动 X 型',swr:1.50,hwr:1.45,note:'肩和臀都有明显宽度'},
+  {id:'ballet',sex:'f',name:'纤长芭蕾',swr:1.30,hwr:1.30,note:'整体线条纤细'},
+  {id:'m_lean',sex:'m',name:'薄肌少年感',swr:1.48,hwr:1.08,note:'线条干净利落，不追求块头'},
+  {id:'m_bal',sex:'m',name:'均衡匀称',swr:1.55,hwr:1.10,note:'上下协调，穿衣好看'},
+  {id:'m_v',sex:'m',name:'双开门倒三角',swr:1.70,hwr:1.08,note:'宽肩宽背、腰线收紧',emph:{pecs:'boost',lats:'focus'}},
+  {id:'m_ath',sex:'m',name:'运动型',swr:1.58,hwr:1.15,note:'肩背和腿臀都有力量感',emph:{quads:'boost',hams:'boost',gmax:'boost'}}
 ];
+const sx=()=>S.sex==='m'?'m':'f';
+const DEF_TARGET={f:'square',m:'m_bal'};
+const targetsOf=x=>TARGETS.filter(t=>t.sex===x);
 /* 演示数据：正面宽度 / 侧面厚度，单位 cm */
 const SAMPLES={
-  a:{label:'样例 A',h:163,raw:{shoulderW:34.5,waistW:27.5,hipW:35.6,thighW:16.4,waistD:19.6,hipD:23.8,thighD:16.2},legR:.47,rounded:true,apt:false},
-  b:{label:'样例 B',h:168,raw:{shoulderW:39.4,waistW:28.6,hipW:33.4,thighW:15.6,waistD:20.4,hipD:21.2,thighD:15.0},legR:.49,rounded:false,apt:true}
+  a:{sex:'f',label:'样例 A',h:163,raw:{shoulderW:34.5,waistW:27.5,hipW:35.6,thighW:16.4,waistD:19.6,hipD:23.8,thighD:16.2},legR:.47,rounded:true,apt:false},
+  b:{sex:'f',label:'样例 B',h:168,raw:{shoulderW:39.4,waistW:28.6,hipW:33.4,thighW:15.6,waistD:20.4,hipD:21.2,thighD:15.0},legR:.49,rounded:false,apt:true},
+  c:{sex:'m',label:'样例 C',h:176,raw:{shoulderW:41.5,waistW:29.5,hipW:33.2,thighW:17.8,waistD:21.5,hipD:23.0,thighD:17.5},legR:.48,rounded:true,apt:false},
+  d:{sex:'m',label:'样例 D',h:172,raw:{shoulderW:43.5,waistW:32.5,hipW:34.0,thighW:18.5,waistD:25.0,hipD:24.0,thighD:18.0},legR:.47,rounded:false,apt:true}
 };
+const samplesOf=x=>Object.keys(SAMPLES).filter(k=>SAMPLES[k].sex===x);
 /* img = free-exercise-db 图片 id；p/s = 主要/辅助发力肌群（MuscleMap 区块） */
 const EX={
   lat_raise:{name:'哑铃侧平举',reps:'12–15 次',img:'Side_Lateral_Raise',p:['deltoids'],s:['trapezius'],steps:['站直，手肘微屈，哑铃在身体两侧','手肘带动手臂向两侧抬到与肩同高','顶端停 1 秒，2–3 秒慢慢放下'],cue:'想象把哑铃往远处推，而不是往上举',avoid:'耸肩、甩起来'},
@@ -431,7 +442,7 @@ const DAYNAME={A:'上肢',B:'下肢',C:'重点强化'};
 
 /* ---------------- state ---------------- */
 const KEY='bodynav.v4';
-const S={mode:'a',target:'square',tgt:null,af:{frame:'m',foci:['shoulder','hip','waist']},rounded:true,apt:false,meas:null,done:{},swap:{},notes:{},voice:true,countVoice:true,h:null};
+const S={mode:'a',sex:null,target:'square',tgt:null,af:{frame:'m',foci:['shoulder','hip','waist']},rounded:true,apt:false,meas:null,done:{},swap:{},notes:{},voice:true,countVoice:true,h:null};
 const T={ph:{front:null,side:null,ref:null},step:'front',mtab:S.meas&&S.meas.src==='scan'?'scan':'manual',man:null,coachKey:'A',draft:null,hFocus:null,selDay:null,muscle:null};
 try{
   const r=localStorage.getItem(KEY);
@@ -444,10 +455,11 @@ const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
 // 椭圆周长（Ramanujan 近似），宽 w、厚 d
 const ellipse=(w,d)=>{ const a=w/2,b=d/2; return Math.PI*(3*(a+b)-Math.sqrt((3*a+b)*(a+3*b))); };
 // 没有侧面照时，按常见体型的厚宽比估算
-const DEPTH_K={waist:.72,hip:.70,thigh:1.0};
+const DEPTH_KS={f:{waist:.72,hip:.70,thigh:1.0},m:{waist:.80,hip:.72,thigh:1.0}}; // 厚 ÷ 宽：男性腰更「圆」
+const DK=()=>DEPTH_KS[sx()];
 function derive(raw,h,legR){
   const est=[];
-  const d=k=>{ if(raw[k+'D']) return raw[k+'D']; est.push(k); return raw[k+'W']*DEPTH_K[k]; };
+  const d=k=>{ if(raw[k+'D']) return raw[k+'D']; est.push(k); return raw[k+'W']*DK()[k]; };
   const waistD=d('waist'), hipD=d('hip'), thighD=d('thigh');
   const cm={shoulder:raw.shoulderW,waistW:raw.waistW,hipW:raw.hipW,thighW:raw.thighW,waistD,hipD,thighD,
     waist:ellipse(raw.waistW,waistD),hip:ellipse(raw.hipW,hipD),thigh:ellipse(raw.thighW,thighD)};
@@ -458,12 +470,12 @@ function derive(raw,h,legR){
    「我的目标」（进阶生成 / 自定义 / 参考照片）直接给出四个围度（cm），规则按每项的 cm 差距判断。
    骨架上限 = 身高 × 系数 × 骨架系数，是自然训练大致能到的范围，用来给进阶目标和参考照片封顶。 */
 const FRAMES={s:{name:'偏小',k:.96},m:{name:'适中',k:1},l:{name:'偏大',k:1.04}};
-const NORM={shoulder:.25,hip:.60,thigh:.34,waist:.40};   // × 身高；腰围是理想下限，其余是上限
+const NORMS={f:{shoulder:.25,hip:.60,thigh:.34,waist:.40},m:{shoulder:.275,hip:.56,thigh:.34,waist:.43}}; // × 身高；腰围是理想下限，其余是上限
 const STEP={shoulder:1,hip:2.5,thigh:1.5,waist:3};       // 一个阶段（约 12 周）的合理变化，cm
 const TOL={shoulder:.5,waist:1,hip:1,thigh:1};           // 差距在这以内算达标（显示和规则共用）
 const DIMS=[['shoulder','肩宽'],['waist','腰围'],['hip','臀围'],['thigh','腿围']];
 const DIM_MU={shoulder:'三角肌中束、背阔肌',hip:'臀大肌、臀中肌',thigh:'股四头肌、腘绳肌',waist:'整体体脂'};
-const capOf=(h,fr)=>{ const k=(FRAMES[fr]||FRAMES.m).k; return {shoulder:NORM.shoulder*h*k,hip:NORM.hip*h*k,thigh:NORM.thigh*h*k,waist:NORM.waist*h*(.75+.25*k)}; };
+const capOf=(h,fr)=>{ const k=(FRAMES[fr]||FRAMES.m).k, N=NORMS[sx()]; return {shoulder:N.shoulder*h*k,hip:N.hip*h*k,thigh:N.thigh*h*k,waist:N.waist*h*(.75+.25*k)}; };
 // 下一阶段：选中的部位往前走一步（不超过骨架上限），腰围高于理想值才往下收
 function autoCm(m,o){
   const c=m.cm, cap=capOf(m.h||163,o.frame), f=new Set(o.foci), t={};
@@ -472,15 +484,15 @@ function autoCm(m,o){
   return t;
 }
 const cm1=cm=>Object.fromEntries(Object.entries(cm).map(([k,v])=>[k,Math.round(v*10)/10]));
-const cmRatios=cm=>{ const ww=cm.waist/ellipse(1,DEPTH_K.waist); return {swr:cm.shoulder/ww,hwr:cm.hip/ellipse(1,DEPTH_K.hip)/ww}; };
+const cmRatios=cm=>{ const ww=cm.waist/ellipse(1,DK().waist); return {swr:cm.shoulder/ww,hwr:cm.hip/ellipse(1,DK().hip)/ww}; };
 const MINE_NOTE={auto:'按你的身高和骨架生成的下一阶段',custom:'你手动设定的四项尺寸',ref:'从参考照片提取的比例，换算到你的身高'};
 const target=()=>{
-  if(S.target==='mine'&&S.tgt&&S.tgt.cm) return {id:'mine',kind:S.tgt.kind,name:S.tgt.name,note:MINE_NOTE[S.tgt.kind]||'',cm:S.tgt.cm,...cmRatios(S.tgt.cm)};
-  return TARGETS.find(t=>t.id===S.target)||TARGETS[0];
+  if(S.target==='mine'&&S.tgt&&S.tgt.cm&&(S.tgt.sex||'f')===sx()) return {id:'mine',kind:S.tgt.kind,name:S.tgt.name,note:MINE_NOTE[S.tgt.kind]||'',cm:S.tgt.cm,...cmRatios(S.tgt.cm)};
+  return targetsOf(sx()).find(t=>t.id===S.target)||TARGETS.find(t=>t.id===DEF_TARGET[sx()]);
 };
 function cur(){
   if(S.mode==='photo'&&S.meas) return S.meas;
-  const s=SAMPLES[S.mode==='photo'?'a':S.mode]||SAMPLES.a; return derive(s.raw,s.h,s.legR);
+  const k=SAMPLES[S.mode]&&SAMPLES[S.mode].sex===sx()?S.mode:samplesOf(sx())[0], s=SAMPLES[k]; return derive(s.raw,s.h,s.legR);
 }
 const isApp=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 const isSample=()=>!(S.mode==='photo'&&S.meas);
@@ -503,7 +515,8 @@ function analyze(){
     if(dH>=0.10){up('gmed','focus');up('gmax','focus');} else if(dH>=0.04){up('gmed','boost');up('gmax','boost');}
     if(t.id==='ballet'&&dH<=0) L.quads='less';
   }
-  if(S.rounded){up('rear','focus'); L.pecs='less';}
+  if(t.emph) for(const id in t.emph) up(id,t.emph[id]);   // R9 预设自带的侧重
+  if(S.rounded){up('rear','focus'); L.pecs=L.pecs==='boost'?'keep':'less';} // 圆肩时胸先放松，倒三角模板的加强胸也降为保持
   if(S.apt){up('gmax','boost');up('hams','boost');up('core','boost');}
   for(const id in MUSCLES) if(!L[id]) L[id]='keep';
   const wsum=Object.values(L).reduce((a,lv)=>a+W[lv],0);
@@ -722,21 +735,55 @@ function poseArms(M,X,H){
     X[i*3]=px+dx*c-dy*sn; X[i*3+1]=py+ny*cb-dz*sb; X[i*3+2]=pz+ny*sb+dz*cb;
   }
 }
-// 头部投影到一个上圆下收的蛋形上，去掉五官和耳朵，像人台
+// 人台头：上半是蛋形；下半两侧收成下颌，前面留出下巴，后脑勺顺着弧线收进脖子。
+// 先把脖子上段略加粗（避免细脖子顶着大头），投影后再把头颈接口单独松弛成圆角，看起来是一体的而不是两块拼接。
 function eggHead(M,X,H){
-  const hd=[]; let cx=0,cz=0,y0=1e9,y1=-1e9,zx=0,z0=1e9,z1=-1e9;
-  for(let i=0;i<M.nv;i++){ const y=X[i*3+1]/H; if(M.part[i]!==4||y<.885) continue; hd.push(i); cx+=X[i*3]; y0=Math.min(y0,X[i*3+1]); y1=Math.max(y1,X[i*3+1]); z0=Math.min(z0,X[i*3+2]); z1=Math.max(z1,X[i*3+2]); }
-  if(!hd.length) return; cx/=hd.length; cz=(z0+z1)/2;
-  const ry=(y1-y0)/2, cy=y0+ry*1.05, rz=(z1-z0)/2*.84, rx=Math.min(rz*.9,ry*.74); cz+=rz*.18; // 头往前一点坐在脖子上
-  const wv=new Float32Array(M.nv); for(let i=0;i<M.nv;i++) if(M.part[i]===4) wv[i]=sstep(.848,.888,X[i*3+1]/H);
+  let cx=0,n=0,y0=1e9,y1=-1e9,z0=1e9,z1=-1e9,ncx=0,ncz=0,nn=0;
+  for(let i=0;i<M.nv;i++){ if(M.part[i]!==4) continue; const y=X[i*3+1]/H;
+    if(y>=.885){ cx+=X[i*3]; n++; y0=Math.min(y0,X[i*3+1]); y1=Math.max(y1,X[i*3+1]); z0=Math.min(z0,X[i*3+2]); z1=Math.max(z1,X[i*3+2]); }
+    else if(y>.855&&y<.875){ ncx+=X[i*3]; ncz+=X[i*3+2]; nn++; } }
+  if(!n||!nn) return; cx/=n; ncx/=nn; ncz/=nn;
+  const A=MESH.adj;
+  // 原始脖子明显前倾：颈根以上往后推（剪切），头跟着整体后移，脖子更挺直
+  const lean=.32;
+  for(let i=0;i<M.nv;i++){ const y=X[i*3+1]/H; if(y<.8) continue; const p=M.part[i]; if(p!==4&&!(p===0&&Math.abs(X[i*3])<.08*H)) continue;
+    const wx=p===4?1:1-sstep(.04,.08,Math.abs(X[i*3])/H); X[i*3+2]-=lean*(Math.min(y,.89)-.8)*H*sstep(.8,.84,y)*wx; }
+  // 脖子加粗一点，上端再略微放开去接下颌
+  ncz-=lean*(.865-.8)*H;
+  for(let i=0;i<M.nv;i++){ if(M.part[i]!==4) continue; const y=X[i*3+1]/H; if(y<.8||y>.9) continue;
+    const f=1+.12*sstep(.8,.83,y)+.2*sstep(.84,.878,y)*(1-sstep(.878,.9,y)); X[i*3]=ncx+(X[i*3]-ncx)*f; X[i*3+2]=ncz+(X[i*3+2]-ncz)*f; }
+  z0=1e9; z1=-1e9; for(let i=0;i<M.nv;i++){ if(M.part[i]!==4||X[i*3+1]/H<.885) continue; z0=Math.min(z0,X[i*3+2]); z1=Math.max(z1,X[i*3+2]); }
+  // 头的比例：高 ≈ 1.2 × 深，宽 ≈ 0.8 × 深（原来高、深几乎相等，侧面看像个球）
+  const ry=(y1-y0)/2*.92, rz=ry*.82, rx=ry*.68, cy=y0+ry*1.12, cz=(z0+z1)/2+rz*.05;
+  const wv=new Float32Array(M.nv); for(let i=0;i<M.nv;i++) if(M.part[i]===4) wv[i]=sstep(.85,.89,X[i*3+1]/H);
   const project=()=>{ for(let i=0;i<M.nv;i++){ if(!wv[i]) continue;
-    const dx=X[i*3]-cx, dy=X[i*3+1]-cy, dz=X[i*3+2]-cz, u=Math.max(-1,Math.min(1,dy/ry));
-    const tp=u<0?1-.34*u*u:1;                       // 下半部收窄成下巴
-    const sx=rx*tp, sz=rz*tp, sy=ry*(u<0?1.22:1);
+    const dx=X[i*3]-cx, dy=X[i*3+1]-cy, dz=X[i*3+2]-cz, u=Math.max(-1,Math.min(1,dy/ry)), lo=u<0?u*u:0;
+    const sx=rx*(1-.2*lo), sz=rz*(dz>=0?1-.06*lo:1-.36*lo), sy=ry*(u<0?1.1:1);
     const k=1/Math.sqrt((dx/sx)**2+(dy/sy)**2+(dz/sz)**2||1);
     X[i*3]+=dx*(k-1)*wv[i]; X[i*3+1]+=dy*(k-1)*wv[i]; X[i*3+2]+=dz*(k-1)*wv[i]; } };
   // 眼窝、嘴里的点投影后会折叠：投影和松弛交替几轮，让网格在蛋形上铺平
-  const A=MESH.adj; for(let r=0;r<6;r++){ project(); for(let i=0;i<4;i++) relax(X,A,wv,.6,3); } project();
+  for(let r=0;r<6;r++){ project(); for(let i=0;i<4;i++) relax(X,A,wv,.6,3); } project();
+  const wf=new Float32Array(M.nv); for(let i=0;i<M.nv;i++) if(M.part[i]===4){ const y=X[i*3+1]/H; wf[i]=sstep(.835,.86,y)*(1-sstep(.89,.915,y)); }
+  for(let i=0;i<12;i++) relax(X,A,wf,.5,3);
+}
+// 胸部：以每侧最靠前的点（乳头）为中心，用外圈一环的表面拟合一个二次曲面 z=f(x,y)，把内圈的点按权重贴到这个曲面上。
+// 只改 z（前后方向），不会让网格折叠。r1/r2 是内圈半径和外圈半径（× 身高）：小半径抹掉乳头，大半径把整个胸部压平（男性人台）。
+function solve6(A,b){ const n=6, M=A.map((r,i)=>[...r,b[i]]);
+  for(let c=0;c<n;c++){ let p=c; for(let r=c+1;r<n;r++) if(Math.abs(M[r][c])>Math.abs(M[p][c])) p=r; [M[c],M[p]]=[M[p],M[c]]; if(Math.abs(M[c][c])<1e-12) return null;
+    for(let r=0;r<n;r++){ if(r===c) continue; const f=M[r][c]/M[c][c]; for(let k=c;k<=n;k++) M[r][k]-=f*M[c][k]; } }
+  return M.map((r,i)=>r[n]/r[i]); }
+function smoothChest(M,X,H,r1,r2,dz){
+  const R1=r1*H, R2=r2*H, DZ=dz*H;
+  for(const sg of [1,-1]){
+    let b=-1; for(let i=0;i<M.nv;i++){ if(M.part[i]!==0) continue; const y=X[i*3+1]/H; if(y<.7||y>.77||X[i*3]*sg<.04*H) continue; if(b<0||X[i*3+2]>X[b*3+2]) b=i; }
+    if(b<0) continue; const cx=X[b*3], cy=X[b*3+1];
+    const AtA=[...Array(6)].map(()=>Array(6).fill(0)), Atz=Array(6).fill(0), inner=[];
+    for(let i=0;i<M.nv;i++){ if(M.part[i]!==0||X[i*3+2]<X[b*3+2]-DZ) continue; const x=X[i*3]-cx, y=X[i*3+1]-cy, d=Math.hypot(x,y);
+      if(d<R1) inner.push(i); else if(d<R2){ const v=[1,x,y,x*x,x*y,y*y]; for(let p=0;p<6;p++){ Atz[p]+=v[p]*X[i*3+2]; for(let q=0;q<6;q++) AtA[p][q]+=v[p]*v[q]; } } }
+    const c=solve6(AtA,Atz); if(!c) continue;
+    for(const i of inner){ const x=X[i*3]-cx, y=X[i*3+1]-cy, d=Math.hypot(x,y), w=1-sstep(R1*.55,R1,d);
+      X[i*3+2]+=(c[0]+c[1]*x+c[2]*y+c[3]*x*x+c[4]*x*y+c[5]*y*y-X[i*3+2])*w; }
+  }
 }
 function loopSub(M,X,A){
   const nv=M.nv, I=M.idx, emap=new Map(), E=[], eid=new Uint32Array(I.length); let ne=0;
@@ -756,15 +803,19 @@ function loopSub(M,X,A){
     idx.set([a,ab,ca, ab,b,bc, ca,bc,c, ab,bc,ca],t); }
   return {nv:N,idx,sv,part,X:Y,adj:adjOf(N,idx)};
 }
-function dispMesh(M,F){
-  if(F.disp) return F.disp;
+// sex='m'：基础网格是女性，男性人台把整个胸部压平（同一个曲面拟合，半径放大）
+function dispMesh(M,F,sex){
+  const ck='disp_'+sex; if(F[ck]) return F[ck];
   const X=new Float32Array(F.X), H=F.mm.H, nv=M.nv, A=MESH.adj||(MESH.adj=adjOf(nv,M.idx)), w=new Float32Array(nv);
   eggHead(M,X,H);
   for(let i=0;i<nv;i++){ const y=X[i*3+1]/H; w[i]=M.part[i]===4&&y>.8?sstep(.84,.9,y):0; } taubin(X,A,w,12);
+  for(let i=0;i<nv;i++){ const y=X[i*3+1]/H; w[i]=y>.78&&y<.885&&Math.abs(X[i*3])<.07*H?.7*sstep(.78,.81,y):0; } taubin(X,A,w,10); // 颈根处的筋络抹平
+  smoothChest(M,X,H,.015,.028,.02);
+  if(sex==='m') smoothChest(M,X,H,.06,.09,.05);
   for(let i=0;i<nv;i++){ const y=X[i*3+1]/H; w[i]=M.part[i]===4&&y>.4&&y<.8?.9:0; } taubin(X,A,w,30);
   taubin(X,A,null,2);
   poseArms(M,X,H);
-  return F.disp=loopSub(M,X,A);
+  return F[ck]=loopSub(M,X,A);
 }
 
 /* 肌群标签图：把 MuscleMap 正/背面图按肌群画成一张编号图（半分辨率），着色器按顶点的图上坐标取色 */
@@ -818,7 +869,7 @@ function mountBody(el,r){
 function build3D(el,r,M){
   const THREE=window.THREE, m=r.m, c=m.cm;
   const goal={h:(m.h||163)/100,shoulder:c.shoulder/100,waist:c.waist/100,hip:c.hip/100,thigh:c.thigh/100};
-  const F=fitBody(M,goal), s=F.s, H=F.mm.H, D=dispMesh(M,F), X=D.X, A=D.adj, nv=D.nv;
+  const F=fitBody(M,goal), s=F.s, H=F.mm.H, D=dispMesh(M,F,sx()), X=D.X, A=D.adj, nv=D.nv;
   const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
   renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
   if('outputEncoding' in renderer) renderer.outputEncoding=THREE.sRGBEncoding;
@@ -897,7 +948,7 @@ function build3D(el,r,M){
   const fill=new THREE.DirectionalLight(0xf2f6ff,.28); fill.position.set(2.2,.9,1.4); scene.add(fill);
   const rim=new THREE.DirectionalLight(0xffffff,.55); rim.position.set(1.2,2,-2.8); scene.add(rim);
   const Hs=H*s, cy=Hs*.5;
-  const st={rot:S.figView==='back'?Math.PI:-.3,vel:0,goal:null,auto:!matchMedia('(prefers-reduced-motion: reduce)').matches&&!T.muscle,drag:false,moved:0,lx:0,ly:0,raf:0,alive:true,last:performance.now()};
+  const st={rot:-.3,vel:0,goal:null,auto:!matchMedia('(prefers-reduced-motion: reduce)').matches&&!T.muscle,drag:false,moved:0,lx:0,ly:0,raf:0,alive:true,last:performance.now()};
   function size(){ const w=el.clientWidth,h=el.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); cam.aspect=w/h;
     const dist=(Hs*.56)/Math.tan(cam.fov*Math.PI/360)*Math.max(1,.5/cam.aspect); cam.position.set(0,cy+dist*.08,dist); cam.lookAt(0,cy,0); cam.updateProjectionMatrix(); }
   const v=new THREE.Vector3();
@@ -977,7 +1028,7 @@ document.addEventListener('error',ev=>{ const im=ev.target; if(!(im instanceof H
 
 /* ---------------- pages ---------------- */
 const P={
-  home:{root:1,title:()=>{const d=new Date(); return `${d.getMonth()+1}月${d.getDate()}日 · 周${DOW[d.getDay()]}`;},aside:()=>isSample()?'样例数据':'',render(){
+  home:{root:1,title:'',aside:()=>isSample()?'样例数据':'',render(){
     const r=analyze(), m=r.m, c=m.cm, t=r.t;
     const plan=weekPlan(r), today=todayISO(), tk=SCHED[new Date().getDay()];
     const FM=figMetrics(r), need=k=>FM[k].d!=null&&FM[k].d<-TOL[k]&&k!=='waist'?['+'+f1(-FM[k].d),'warm']:FM[k].d!=null&&k==='waist'&&FM[k].d>TOL[k]?['−'+f1(FM[k].d),'warm']:null;
@@ -988,8 +1039,7 @@ const P={
     else { const nd=weekDates().find(d=>d>new Date()&&SCHED[d.getDay()]); todayBlock=`<div><p class="eyebrow">今天休息</p><p class="h2">${nd?'下次 · 周'+DOW[nd.getDay()]+' '+plan[SCHED[nd.getDay()]].name:'下周一继续'}</p></div><button class="btn ghost block" type="button" data-tab="train">看训练计划</button>`; }
     return `
     <section class="hero" id="hero">
-      <div class="herobar"><span class="xs muted">目标 · ${esc(t.name)}</span>
-        <div class="seg sm" role="group" aria-label="视角">${[['front','正面'],['back','背面']].map(([v,l])=>`<button type="button" data-act="figView" data-arg="${v}" aria-pressed="${(S.figView||'front')===v}">${l}</button>`).join('')}</div></div>
+      <div class="herobar"><span class="xs muted">目标 · ${esc(t.name)}</span></div>
       <div id="body3d" class="body3d"><p class="b3load xs muted">正在按你的尺寸生成模型…</p></div>
       <div class="figkey"><span><i style="background:var(--under)"></i>比目标小</span><span><i style="background:var(--warm)"></i>比目标大</span><span><i style="background:var(--accent)"></i>达标</span></div>
       <div class="mpanel" id="mpanel" aria-live="polite">${musclePanel(T.muscle)}</div>
@@ -1103,7 +1153,9 @@ const P={
       ${isApp()?'':`<button class="li" type="button" data-go="install"><span></span><span><span class="t">安装到手机</span><span class="s">添加到主屏幕，像 App 一样全屏打开，离线也能用</span></span><span class="r">${I.chev}</span></button>`}
       <button class="li" type="button" data-go="about"><span></span><span><span class="t">关于</span><span class="s">怎么算的、隐私、素材来源</span></span><span class="r">${I.chev}</span></button>
     </div>
-    <div class="stack" style="gap:6px"><p class="eyebrow">数据来源</p><div><div class="seg" role="group" aria-label="数据来源">${[['photo','我的测量'],['a','样例 A'],['b','样例 B']].map(([k,l])=>`<button type="button" data-act="mode" data-arg="${k}" aria-pressed="${S.mode===k}">${l}</button>`).join('')}</div></div></div>`;
+    <div class="stack" style="gap:6px"><p class="eyebrow">性别</p><div><div class="seg" role="group" aria-label="性别">${[['f','女'],['m','男']].map(([k,l])=>`<button type="button" data-act="setSex" data-arg="${k}" aria-pressed="${sx()===k}">${l}</button>`).join('')}</div></div>
+      <p class="xs muted">${S.sex?'切换后，目标模板、样例和训练计划会换成对应的版本。':'还没选过，默认按女性。去「测量身材」时会先让你选。'}</p></div>
+    <div class="stack" style="gap:6px"><p class="eyebrow">数据来源</p><div><div class="seg" role="group" aria-label="数据来源">${[['photo','我的测量'],...samplesOf(sx()).map(k=>[k,SAMPLES[k].label])].map(([k,l])=>`<button type="button" data-act="mode" data-arg="${k}" aria-pressed="${S.mode===k}">${l}</button>`).join('')}</div></div></div>`;
   }},
   target:{title:'目标身材',render(){
     const r=analyze(), m=r.m, t=r.t, cap=capOf(m.h||163,S.af.frame), FM=figMetrics(r);
@@ -1135,8 +1187,8 @@ const P={
     <section class="stack" style="gap:6px">
       <p class="eyebrow">预设模板</p>
       <div role="radiogroup" aria-label="目标身材" style="border-top:1px solid var(--line)">
-        ${S.tgt&&S.tgt.cm?opt('mine',esc(S.tgt.name),MINE_NOTE[S.tgt.kind]||'',DIMS.map(([k,n])=>n+' '+fmtD(k,S.tgt.cm[k])).join(' · '),mini({...cmRatios(S.tgt.cm)})):''}
-        ${TARGETS.map(x=>opt(x.id,x.name+(passed(x)?' <span class="badge acc">已超过</span>':''),x.note,`肩腰 ${f2(x.swr)} · 臀腰 ${f2(x.hwr)}`,mini(x))).join('')}
+        ${S.tgt&&S.tgt.cm&&(S.tgt.sex||'f')===sx()?opt('mine',esc(S.tgt.name),MINE_NOTE[S.tgt.kind]||'',DIMS.map(([k,n])=>n+' '+fmtD(k,S.tgt.cm[k])).join(' · '),mini({...cmRatios(S.tgt.cm)})):''}
+        ${targetsOf(sx()).map(x=>opt(x.id,x.name+(passed(x)?' <span class="badge acc">已超过</span>':''),x.note,`肩腰 ${f2(x.swr)} · 臀腰 ${f2(x.hwr)}`,mini(x))).join('')}
       </div>
     </section>`;
   }},
@@ -1225,17 +1277,17 @@ function scanMeas(){
 }
 /* 手动输入：软尺量的围度。围度 → 宽度按常见体型的厚宽比反推（周长对宽度是线性的），再走同一套 derive */
 const MAN_FIELDS=[
-  {k:'shoulder',name:'肩宽',hint:'两侧肩峰（肩膀最外侧的骨点）之间的直线距离',min:25,max:60,ph:'36'},
-  {k:'waist',name:'腰围',hint:'肚脐上方最细处绕一圈，自然呼气时量',min:45,max:150,ph:'68'},
-  {k:'hip',name:'臀围',hint:'臀部最翘、最宽处水平绕一圈',min:60,max:170,ph:'92'},
-  {k:'thigh',name:'大腿围',hint:'大腿根下方最粗处绕一圈，不填按臀围估算',min:30,max:95,ph:'52',opt:1}
+  {k:'shoulder',name:'肩宽',hint:'两侧肩峰（肩膀最外侧的骨点）之间的直线距离',min:25,max:65,ph:{f:'36',m:'44'}},
+  {k:'waist',name:'腰围',hint:{f:'肚脐上方最细处绕一圈，自然呼气时量',m:'肚脐高度水平绕一圈，自然呼气时量'},min:45,max:150,ph:{f:'68',m:'80'}},
+  {k:'hip',name:'臀围',hint:'臀部最翘、最宽处水平绕一圈',min:60,max:170,ph:{f:'92',m:'94'}},
+  {k:'thigh',name:'大腿围',hint:'大腿根下方最粗处绕一圈，不填按臀围估算',min:30,max:95,ph:{f:'52',m:'55'},opt:1}
 ];
 function manualMeas(){
   const v=T.man||{}, num=k=>{ const x=parseFloat(v[k]); return isFinite(x)?x:0; };
   const bad=MAN_FIELDS.find(f=>{ const x=num(f.k); return f.opt&&!x?false:!(x>=f.min&&x<=f.max); });
   if(bad||!(S.h>=120&&S.h<=210)) return null;
-  const est=[], thighC=num('thigh')||(est.push('thigh'),num('hip')*.56);
-  const raw={shoulderW:num('shoulder'),waistW:num('waist')/ellipse(1,DEPTH_K.waist),hipW:num('hip')/ellipse(1,DEPTH_K.hip),thighW:thighC/ellipse(1,DEPTH_K.thigh)};
+  const est=[], thighC=num('thigh')||(est.push('thigh'),num('hip')*(sx()==='m'?.58:.56));
+  const raw={shoulderW:num('shoulder'),waistW:num('waist')/ellipse(1,DK().waist),hipW:num('hip')/ellipse(1,DK().hip),thighW:thighC/ellipse(1,DK().thigh)};
   const m=derive(raw,S.h,null); m.est=est; m.raw=raw; m.src='manual'; return m;
 }
 const draftMeas=()=>T.mtab==='scan'?scanMeas():manualMeas();
@@ -1284,8 +1336,8 @@ const refOdd=f=>Object.keys(REF_OK).filter(k=>f[k]<REF_OK[k][0]||f[k]>REF_OK[k][
 function refToCm(f,m){
   const c=m.cm, h=m.h||163, cap=capOf(h,S.af.frame), E=x=>ellipse(1,x), q={};
   for(const k in REF_OK) q[k]=Math.min(REF_OK[k][1],Math.max(REF_OK[k][0],f[k]));
-  const ww=f.full?f.wH*h:Math.min(c.waist,cap.waist)/E(DEPTH_K.waist);
-  const cm={shoulder:q.swr*ww,waist:ww*E(DEPTH_K.waist),hip:q.hwr*ww*E(DEPTH_K.hip),thigh:q.thr*q.hwr*ww*E(DEPTH_K.thigh)}, clamped=[];
+  const ww=f.full?f.wH*h:Math.min(c.waist,cap.waist)/E(DK().waist);
+  const cm={shoulder:q.swr*ww,waist:ww*E(DK().waist),hip:q.hwr*ww*E(DK().hip),thigh:q.thr*q.hwr*ww*E(DK().thigh)}, clamped=[];
   for(const k of ['shoulder','hip','thigh']){
     if(cm[k]>cap[k]){ cm[k]=cap[k]; clamped.push(k); }
     else if(cm[k]<c[k]-2*STEP[k]){ cm[k]=c[k]-2*STEP[k]; clamped.push(k); } // 不把「大幅减掉肌肉」当目标
@@ -1305,7 +1357,7 @@ function refTags(f){
 function refHTML(){
   const f=refCalc(); if(!f) return '<p class="small muted">放好照片上的点之后，这里会出现提取到的特征，以及你和它的差距。</p>';
   const m=cur(), R=refToCm(f,m), cap=capOf(m.h||163,S.af.frame);
-  const near=TARGETS.map(x=>({x,d:Math.hypot(x.swr-f.swr,x.hwr-f.hwr)})).sort((a,b)=>a.d-b.d)[0].x;
+  const near=targetsOf(sx()).map(x=>({x,d:Math.hypot(x.swr-f.swr,x.hwr-f.hwr)})).sort((a,b)=>a.d-b.d)[0].x;
   const cell=(k,v)=>`<div><span class="k">${k}</span><span class="num">${v}</span></div>`;
   const cn=R.clamped.map(k=>DIMS.find(d=>d[0]===k)[1]).join('、');
   const odd=refOdd(f).map(k=>({swr:'肩腰比',hwr:'臀腰比',thr:'腿臀比'})[k]);
@@ -1343,7 +1395,7 @@ P.measure={title:'测量身材',render(){
   if(tabv==='manual'){
     body=`<div class="mfields">
       <div class="mf"><span class="t">身高</span>${hField}</div>
-      ${MAN_FIELDS.map(f=>`<div class="mf"><span class="t">${f.name}${f.opt?'<em>可选</em>':''}</span><label class="field"><input data-man="${f.k}" type="number" inputmode="decimal" step="0.1" min="${f.min}" max="${f.max}" placeholder="${f.ph}" value="${esc(T.man[f.k]||'')}" aria-label="${f.name}（厘米）"><span>cm</span></label><span class="xs muted">${f.hint}</span></div>`).join('')}
+      ${MAN_FIELDS.map(f=>`<div class="mf"><span class="t">${f.name}${f.opt?'<em>可选</em>':''}</span><label class="field"><input data-man="${f.k}" type="number" inputmode="decimal" step="0.1" min="${f.min}" max="${f.max}" placeholder="${f.ph[sx()]}" value="${esc(T.man[f.k]||'')}" aria-label="${f.name}（厘米）"><span>cm</span></label><span class="xs muted">${typeof f.hint==='string'?f.hint:f.hint[sx()]}</span></div>`).join('')}
     </div>`;
   } else {
     const ph=T.ph.front;
@@ -1355,8 +1407,11 @@ P.measure={title:'测量身材',render(){
       <p class="status" id="pstatus"></p>
       <div id="pbtns" class="row2" ${hasF?'':'hidden'}><button class="btn ghost" type="button" data-act="auto" style="flex:1">重新识别</button><button class="btn ghost" type="button" data-act="deletePhoto" style="flex:1">换一张</button></div>`;
   }
+  const sexSeg=`<div class="mf"><span class="t">性别</span><div class="seg mtabs" role="group" aria-label="性别">${[['f','女'],['m','男']].map(([k,l])=>`<button type="button" data-act="setSex" data-arg="${k}" aria-pressed="${S.sex===k}">${l}</button>`).join('')}</div>
+    <span class="xs muted">男女的理想比例、目标模板和训练侧重不一样，先选好再填数据。</span></div>`;
+  if(!S.sex) return `<div class="stack" style="gap:8px"><p class="h2">先选择性别</p></div>${sexSeg}`;
   const m=draftMeas();
-  return `<div class="seg mtabs" role="tablist" aria-label="测量方式">${[['manual','手动输入'],['scan','拍照扫描']].map(([k,l])=>`<button type="button" role="tab" data-act="mtab" data-arg="${k}" aria-selected="${tabv===k}" aria-pressed="${tabv===k}">${l}</button>`).join('')}</div>
+  return `${sexSeg}<div class="seg mtabs" role="tablist" aria-label="测量方式">${[['manual','手动输入'],['scan','拍照扫描']].map(([k,l])=>`<button type="button" role="tab" data-act="mtab" data-arg="${k}" aria-selected="${tabv===k}" aria-pressed="${tabv===k}">${l}</button>`).join('')}</div>
     ${body}
     <section class="stack" style="gap:14px" id="sumSec"><p class="eyebrow">测量结果</p><div id="readout">${readoutHTML(m)}</div>
       <button class="btn block acc" type="button" data-act="saveMeas" ${m?'':'disabled style="opacity:.4"'}>保存为我的身材数据</button></section>`;
@@ -1534,7 +1589,7 @@ async function autoDetect(){
 }
 const MEAS_ACT={
   mtab(a){ if(T.mtab===a) return; T.mtab=a; if(a==='manual') T.man=null; refresh(); },
-  saveMeas(){ const m=draftMeas(); if(!m){ toast(T.mtab==='scan'?'先填身高、放好照片上的点':'先填好身高、肩宽、腰围、臀围'); return; } S.meas=m; S.mode='photo'; save(); if(m.src==='scan') savePhoto('front'); toast('已保存'); T.hFocus=null; T.man=null; stack=[{p:'home'}]; render('back'); },
+  saveMeas(){ const m=draftMeas(); if(!m){ toast(T.mtab==='scan'?'先填身高、放好照片上的点':'先填好身高、肩宽、腰围、臀围'); return; } m.sex=sx(); S.meas=m; S.mode='photo'; save(); if(m.src==='scan') savePhoto('front'); toast('已保存'); T.hFocus=null; T.man=null; stack=[{p:'home'}]; render('back'); },
   auto:autoDetect, deletePhoto
 };
 /* ---------------- AI coach ---------------- */
@@ -1847,14 +1902,20 @@ const ACT={
   ...COACH_ACT, ...MEAS_ACT,
   setTarget(a){S.target=a;save();refresh();toast('目标已改为 '+target().name);},
   afFrame(a){ S.af.frame=a; save(); refresh(); },
+  // 切换性别：模板、样例、进阶目标的默认侧重一起切；已有的测量数据保留
+  setSex(a){ if(!['f','m'].includes(a)||S.sex===a) return;
+    S.sex=a; if(!targetsOf(a).some(t=>t.id===S.target)&&!(S.target==='mine'&&S.tgt&&(S.tgt.sex||'f')===a)) S.target=DEF_TARGET[a];
+    if(SAMPLES[S.mode]&&SAMPLES[S.mode].sex!==a){ S.mode=samplesOf(a)[0]; S.rounded=SAMPLES[S.mode].rounded; S.apt=SAMPLES[S.mode].apt; }
+    S.af.foci=a==='m'?['shoulder','waist']:['shoulder','hip','waist']; T.man=null; T.hFocus=null; T.muscle=null;
+    save(); refresh(); toast(a==='m'?'已切换为男性：模板和训练计划已更新':'已切换为女性：模板和训练计划已更新'); },
   afFocus(a){ const f=new Set(S.af.foci); f.has(a)?f.delete(a):f.add(a); S.af.foci=[...f]; save(); refresh(); },
-  useAuto(){ const m=cur(); S.tgt={kind:'auto',name:'进阶 · 下一阶段',cm:cm1(autoCm(m,S.af)),frame:S.af.frame,foci:S.af.foci.slice(),at:todayISO()}; S.target='mine'; T.hFocus=null; save(); refresh(); toast('目标已改为下一阶段'); },
+  useAuto(){ const m=cur(); S.tgt={kind:'auto',sex:sx(),name:'进阶 · 下一阶段',cm:cm1(autoCm(m,S.af)),frame:S.af.frame,foci:S.af.foci.slice(),at:todayISO()}; S.target='mine'; T.hFocus=null; save(); refresh(); toast('目标已改为下一阶段'); },
   saveCustom(){ const cm={};
     for(const [k,n] of DIMS){ const i=document.querySelector(`[data-tg="${k}"]`), v=parseFloat(i&&i.value); if(!(v>=15&&v<=200)){ toast(n+'填一个合理的数'); return; } cm[k]=v; }
-    S.tgt={kind:'custom',name:'自定义目标',cm,at:todayISO()}; S.target='mine'; T.hFocus=null; save(); refresh(); toast('已保存自定义目标'); },
+    S.tgt={kind:'custom',sex:sx(),name:'自定义目标',cm,at:todayISO()}; S.target='mine'; T.hFocus=null; save(); refresh(); toast('已保存自定义目标'); },
   refFull(){ T.refFull=T.refFull===false; const b=document.querySelector('[data-act="refFull"]'); if(b) b.setAttribute('aria-pressed',String(T.refFull)); refUpdate(); },
   useRef(){ const f=refCalc(); if(!f) return; const R=refToCm(f,cur());
-    S.tgt={kind:'ref',name:'参考照片',cm:cm1(R.cm),ref:f,clamped:R.clamped,at:todayISO()}; S.target='mine'; T.hFocus=null; save(); savePhoto('ref'); stack=[{p:'home'}]; render('back'); toast('目标已改为参考照片'); },
+    S.tgt={kind:'ref',sex:sx(),name:'参考照片',cm:cm1(R.cm),ref:f,clamped:R.clamped,at:todayISO()}; S.target='mine'; T.hFocus=null; save(); savePhoto('ref'); stack=[{p:'home'}]; render('back'); toast('目标已改为参考照片'); },
   toggle(a){S[a]=!S[a];save();refresh();},
   mode(a){ if(a==='photo'&&!S.meas){ go('measure'); return; } S.mode=a; if(a!=='photo'){S.rounded=SAMPLES[a].rounded;S.apt=SAMPLES[a].apt;} save(); refresh(); },
   focus(k){ T.hFocus=T.hFocus===k?null:k; applyFigFocus(); if(B3.r) B3.r.focus(T.hFocus); },
