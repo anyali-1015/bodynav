@@ -100,6 +100,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .li:disabled{cursor:default}
 .li .t{display:block;font-weight:500}
 .li .s{display:block;font-size:13px;color:var(--muted);margin-top:1px}
+.li.adv .s{line-height:1.5}
+.li.adv .idx{font-size:12px;color:var(--faint);align-self:start;padding-top:3px}
 .li .r{display:flex;align-items:center;gap:6px;color:var(--faint);font-size:13px}
 .li .r svg{width:16px;height:16px}
 .idx{width:26px;font:500 13px var(--mono);color:var(--faint);text-align:left}
@@ -347,15 +349,16 @@ const I={
 /* ---------------- data ---------------- */
 /* 预设模板（演示设定值）。sex 区分男女；emph 是这个风格自带的侧重，在比例规则之外额外加强（规则 R9） */
 const TARGETS=[
-  {id:'square',sex:'f',name:'直角肩薄背',swr:1.45,hwr:1.30,note:'肩线清晰，背部有宽度'},
-  {id:'peach',sex:'f',name:'蜜桃线条',swr:1.34,hwr:1.45,note:'臀部饱满，腰臀差明显'},
-  {id:'balanced',sex:'f',name:'均衡薄肌',swr:1.40,hwr:1.38,note:'上下比例匀称'},
-  {id:'athletic',sex:'f',name:'运动 X 型',swr:1.50,hwr:1.45,note:'肩和臀都有明显宽度'},
-  {id:'ballet',sex:'f',name:'纤长芭蕾',swr:1.30,hwr:1.30,note:'整体线条纤细'},
-  {id:'m_lean',sex:'m',name:'薄肌少年感',swr:1.48,hwr:1.08,note:'线条干净利落，不追求块头'},
-  {id:'m_bal',sex:'m',name:'均衡匀称',swr:1.55,hwr:1.10,note:'上下协调，穿衣好看'},
-  {id:'m_v',sex:'m',name:'双开门倒三角',swr:1.70,hwr:1.08,note:'宽肩宽背、腰线收紧',emph:{pecs:'boost',lats:'focus'}},
-  {id:'m_ath',sex:'m',name:'运动型',swr:1.58,hwr:1.15,note:'肩背和腿臀都有力量感',emph:{quads:'boost',hams:'boost',gmax:'boost'}}
+  // 比例按「练得好」的身材设定（普通人大致在：女 肩腰 1.45 / 臀腰 1.35，男 肩腰 1.45 / 臀腰 1.22），不是平均水平
+  {id:'square',sex:'f',name:'直角肩薄背',swr:1.62,hwr:1.40,note:'肩线清晰，背部有宽度'},
+  {id:'peach',sex:'f',name:'蜜桃线条',swr:1.52,hwr:1.55,note:'臀部饱满，腰臀差明显'},
+  {id:'balanced',sex:'f',name:'均衡薄肌',swr:1.58,hwr:1.48,note:'上下比例匀称'},
+  {id:'athletic',sex:'f',name:'运动 X 型',swr:1.68,hwr:1.55,note:'肩和臀都有明显宽度'},
+  {id:'ballet',sex:'f',name:'纤长芭蕾',swr:1.50,hwr:1.40,note:'整体线条纤细'},
+  {id:'m_lean',sex:'m',name:'薄肌少年感',swr:1.62,hwr:1.20,note:'线条干净利落，不追求块头'},
+  {id:'m_bal',sex:'m',name:'均衡匀称',swr:1.68,hwr:1.22,note:'上下协调，穿衣好看'},
+  {id:'m_v',sex:'m',name:'双开门倒三角',swr:1.82,hwr:1.18,note:'宽肩宽背、腰线收紧',emph:{pecs:'boost',lats:'focus'}},
+  {id:'m_ath',sex:'m',name:'运动型',swr:1.74,hwr:1.26,note:'肩背和腿臀都有力量感',emph:{quads:'boost',hams:'boost',gmax:'boost'}}
 ];
 const sx=()=>S.sex==='m'?'m':'f';
 const DEF_TARGET={f:'square',m:'m_bal'};
@@ -475,6 +478,28 @@ const STEP={shoulder:1,hip:2.5,thigh:1.5,waist:3};       // 一个阶段（约 1
 const TOL={shoulder:.5,waist:1,hip:1,thigh:1};           // 差距在这以内算达标（显示和规则共用）
 const DIMS=[['shoulder','肩宽'],['waist','腰围'],['hip','臀围'],['thigh','腿围']];
 const DIM_MU={shoulder:'三角肌中束、背阔肌',hip:'臀大肌、臀中肌',thigh:'股四头肌、腘绳肌',waist:'整体体脂'};
+/* ---------------- 体型建议（规则 A1–A5）----------------
+   不管目标有没有达成都给建议：每一项和「按身高的理想值」比（围度 ÷ 身高），找出最值得练的地方。
+   全部在理想范围内时，挑离边界最近的一项作为「雕刻」方向——始终有事可做。 */
+const ADV_N={f:{shoulder:.245,waist:.40,hip:.57,thigh:[.52,.60]},m:{shoulder:.27,waist:.44,hip:.53,thigh:[.54,.62]}};
+function bodyAdvice(m){
+  const c=m.cm, h=m.h||(sx()==='m'?175:163), N=ADV_N[sx()], out=[], tr=c.thigh/c.hip, M=sx()==='m';
+  const gS=N.shoulder*h-c.shoulder, gW=c.waist-N.waist*h, gH=N.hip*h-c.hip;
+  if(gS>=.5) out.push({id:'A1',k:'shoulder',sc:gS/STEP.shoulder,title:'肩线再打开一点',detail:`肩宽 ${f1(c.shoulder)} cm，按你的身高 ${Math.round(N.shoulder*h)} cm 左右更挺拔：练三角肌中束和背阔肌。`,mus:[['delt','boost'],['lats','boost']]});
+  if(gH>=1.5) out.push({id:'A2',k:'hip',sc:gH/STEP.hip,title:M?'臀腿力量再加强':'臀部再饱满一点',detail:`臀围 ${Math.round(c.hip)} cm，按身高约 ${Math.round(N.hip*h)} cm 更${M?'有力量感':'饱满'}：加强臀大肌、臀中肌。`,mus:[['gmax','boost'],['gmed','boost']]});
+  if(gW>=2) out.push({id:'A3',k:'waist',sc:gW/STEP.waist,title:'腰线再收一点',detail:`腰围 ${Math.round(c.waist)} cm，按身高 ${Math.round(N.waist*h)} cm 以内更利落。腰围靠整体体脂下降，核心训练让腰腹更紧实。`,mus:[['core','boost']]});
+  if(tr>N.thigh[1]+.02) out.push({id:'A4',k:'thigh',sc:(tr-N.thigh[1])*20,title:'腿部线条更修长',detail:`腿围约是臀围的 ${Math.round(tr*100)}%，偏粗：下肢以臀和大腿后侧为主，减少大重量蹲类。`,mus:[['quads','less'],['hams','boost']]});
+  else if(tr<N.thigh[0]-.02) out.push({id:'A5',k:'thigh',sc:(N.thigh[0]-tr)*20,title:'腿部力量再加强',detail:`腿围约是臀围的 ${Math.round(tr*100)}%，偏细：加强股四头肌和腘绳肌。`,mus:[['quads','boost'],['hams','boost']]});
+  out.sort((a,b)=>b.sc-a.sc);
+  if(!out.length){ // 都在理想区间：挑余量最小的一项雕刻
+    const mg=[['shoulder',c.shoulder/(N.shoulder*h)-1],['hip',c.hip/(N.hip*h)-1],['waist',N.waist*h/c.waist-1]].sort((a,b)=>a[1]-b[1])[0][0];
+    const R={shoulder:{title:'雕刻肩背线条',detail:'各项比例都在理想区间。肩背是相对最可以再精进的地方：侧平举、面拉保持高质量。',mus:[['delt','boost'],['rear','boost']]},
+      hip:{title:M?'雕刻臀腿线条':'雕刻臀部线条',detail:'各项比例都在理想区间。臀部是相对最可以再精进的地方：臀推、侧向走多做慢速离心。',mus:[['gmax','boost'],['gmed','boost']]},
+      waist:{title:'雕刻腰腹线条',detail:'各项比例都在理想区间。腰腹是相对最可以再精进的地方：保持体脂，核心训练让线条更清楚。',mus:[['core','boost']]}}[mg];
+    out.push({id:'A0',k:mg,sc:0,...R});
+  }
+  return out;
+}
 const capOf=(h,fr)=>{ const k=(FRAMES[fr]||FRAMES.m).k, N=NORMS[sx()]; return {shoulder:N.shoulder*h*k,hip:N.hip*h*k,thigh:N.thigh*h*k,waist:N.waist*h*(.75+.25*k)}; };
 // 下一阶段：选中的部位往前走一步（不超过骨架上限），腰围高于理想值才往下收
 function autoCm(m,o){
@@ -516,6 +541,8 @@ function analyze(){
     if(t.id==='ballet'&&dH<=0) L.quads='less';
   }
   if(t.emph) for(const id in t.emph) up(id,t.emph[id]);   // R9 预设自带的侧重
+  const adv=bodyAdvice(m);                                  // A 系列：体型建议，取前两条进计划
+  for(const a of adv.slice(0,2)) for(const [id,lv] of a.mus){ if(lv==='less'){ if(!L[id]) L[id]='less'; } else up(id,lv); }
   if(S.rounded){up('rear','focus'); L.pecs=L.pecs==='boost'?'keep':'less';} // 圆肩时胸先放松，倒三角模板的加强胸也降为保持
   if(S.apt){up('gmax','boost');up('hams','boost');up('core','boost');}
   for(const id in MUSCLES) if(!L[id]) L[id]='keep';
@@ -529,14 +556,17 @@ function analyze(){
     // 标题取「相对一个阶段步长」最大的那项差距
     const top=[['shoulder','肩宽',0.5],['hip','臀围',1.5],['thigh','腿围',1.5],['waist','腰围',2]].filter(([k,,th])=>g[k]>=th).sort((a,b)=>g[b[0]]/STEP[b[0]]-g[a[0]]/STEP[a[0]]||g[b[0]]-g[a[0]])[0];
     reached=!top;
-    head=top?`${top[1]} <span class="num">${top[0]==='waist'?'−':'+'}${f1(g[top[0]])}</span> cm 到目标`:'这个目标已经达成';
+    head=top?`${top[1]} <span class="num">${top[0]==='waist'?'−':'+'}${f1(g[top[0]])}</span> cm 到目标`:'';
   } else {
     reached=Math.max(dS,dH)<0.04;
-    if(reached) head=Math.min(dS,dH)<=-0.04?'比例已经超过目标':'已经很接近目标';
+    if(reached) head='';
     else if(dS>=dH) head=`肩宽 <span class="num">+${f1(gS)}</span> cm 到目标`;
     else head=`臀宽 <span class="num">+${f1(gH)}</span> cm 到目标`;
   }
-  return {m,t,dS,dH,gS,gH,g,L,sets,focus,head,reached,notes};
+  const pl=plausible(c,m.h||163).adj;
+  if(pl.length) notes.push(`${pl.map(k=>DIMS.find(d=>d[0]===k)[1]).join('、')}和其他尺寸的组合不太符合常见人体比例，可能是测量或照片识别有误，3D 模型按常见比例显示。建议核对测量。`);
+  if(reached){ head=`下一步：${adv[0].title}`; notes.unshift(t.cm?'这个目标已经达成。':Math.min(dS,dH)<=-0.04?`比例已超过「${t.name}」目标。`:`已经很接近「${t.name}」目标。`); }
+  return {m,t,dS,dH,gS,gH,g,L,sets,focus,head,reached,notes,adv};
 }
 function weekPlan(r){
   const D={A:{name:'上肢',items:[]},B:{name:'下肢',items:[]},C:{name:'重点强化',items:[]}};
@@ -690,18 +720,43 @@ function measureX(M,X){
   return {H,shoulder:b-a,waist,hip,thigh:perim(section(M,X,.44*H,PT.legL)),y:{shoulder:.81,waist:wy,hip:hy,thigh:.44}};
 }
 const MKEYS=['shoulder','waist','hip','thigh'];
+/* 建模用的尺寸：明显不合人体常理的组合（多半是测量或照片识别误差）按常见范围收回来，避免模型畸形。
+   只影响 3D 外形；标签、比例、训练计划都还用实测值。返回被调整过的项，用来提示用户核对。 */
+const PLAUS={f:{s:[.2,.29],w:[.33,.62],hw:[1.12,1.7],th:[.5,.7]},m:{s:[.22,.31],w:[.36,.62],hw:[.98,1.35],th:[.5,.68]}};
+function plausible(c,h){
+  const P=PLAUS[sx()], o={shoulder:c.shoulder,waist:c.waist,hip:c.hip,thigh:c.thigh}, cl=(v,a,b)=>Math.min(b,Math.max(a,v)), adj=[];
+  const set=(k,v)=>{ if(Math.abs(v-o[k])>.5) adj.push(k); o[k]=v; };
+  set('shoulder',cl(o.shoulder,P.s[0]*h,P.s[1]*h)); set('waist',cl(o.waist,P.w[0]*h,P.w[1]*h));
+  set('hip',cl(o.hip,o.waist*P.hw[0],o.waist*P.hw[1])); set('thigh',cl(o.thigh,o.hip*P.th[0],o.hip*P.th[1]));
+  return {cm:o,adj};
+}
 // goal: 实际尺寸（米）{h,shoulder,waist,hip,thigh}；返回形变强度、网格坐标、缩放
 function fitBody(M,goal){
   const id=MKEYS.map(k=>goal[k].toFixed(4)).join()+goal.h; if(MESH.fit[id]) return MESH.fit[id];
   const w=[.5,.5,.5,.5];
   const sl=MKEYS.map((k,i)=>{ const a=w.slice(),b=w.slice(); a[i]=0; b[i]=1; return measureX(M,morphed(M,b))[k]-measureX(M,morphed(M,a))[k]; });
+  // 每个形变只在设计范围附近用：大幅外推（尤其腿围往负方向）会在大腿根挤出凹坑
+  const LIM=[[-.4,1.4],[-.4,1.4],[-.4,1.3],[-.15,1.2]];
   let X,mm,s;
-  for(let it=0;it<4;it++){
+  for(let it=0;it<5;it++){
     X=morphed(M,w); mm=measureX(M,X); s=goal.h/mm.H;
-    if(it===3) break;
-    MKEYS.forEach((k,i)=>{ w[i]=Math.max(-.35,Math.min(1.35,w[i]+(goal[k]/s-mm[k])/sl[i])); });
+    if(it===4) break;
+    MKEYS.forEach((k,i)=>{ w[i]=Math.max(LIM[i][0],Math.min(LIM[i][1],w[i]+(goal[k]/s-mm[k])/sl[i])); });
   }
+  // 腿围剩下的差距：整条腿绕自身轴线平滑缩放（大腿全量、小腿一半、到髋部接缝处淡出），不会出现凹陷
+  const r=goal.thigh/s/mm.thigh;
+  if(Math.abs(r-1)>.01){ scaleLegs(M,X,mm.H,Math.max(.8,Math.min(1.2,r))); mm=measureX(M,X); }
   return MESH.fit[id]={w,X,mm,s};
+}
+function scaleLegs(M,X,H,r){
+  for(const pt of [2,3]){
+    // 腿的轴线：脚踝、膝盖、大腿三个高度的截面中心，按高度线性插值
+    const ax=[.06,.27,.44].map(y=>{ let x=0,z=0,n=0; for(let i=0;i<M.nv;i++){ if(M.part[i]!==pt||Math.abs(X[i*3+1]/H-y)>.01) continue; x+=X[i*3]; z+=X[i*3+2]; n++; } return [y,x/n,z/n]; });
+    const axis=y=>{ const a=y<ax[1][0]?ax[0]:ax[1], b=y<ax[1][0]?ax[1]:ax[2], t=Math.max(0,Math.min(1.5,(y-a[0])/(b[0]-a[0]))); return [a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]; };
+    for(let i=0;i<M.nv;i++){ if(M.part[i]!==pt) continue; const y=X[i*3+1]/H;
+      const f=(.5+.5*sstep(.15,.4,y))*(1-sstep(.47,.535,y)), k=1+(r-1)*f, [cx,cz]=axis(Math.min(y,.47));
+      X[i*3]=cx+(X[i*3]-cx)*k; X[i*3+2]=cz+(X[i*3+2]-cz)*k; }
+  }
 }
 
 /* 显示用网格：只改外观，不影响测量——头部抹成光滑的人台头、手和全身轻度平滑、手臂向身体收拢，再 Loop 细分一次 */
@@ -735,36 +790,39 @@ function poseArms(M,X,H){
     X[i*3]=px+dx*c-dy*sn; X[i*3+1]=py+ny*cb-dz*sb; X[i*3+2]=pz+ny*sb+dz*cb;
   }
 }
-// 人台头：上半是蛋形；下半两侧收成下颌，前面留出下巴，后脑勺顺着弧线收进脖子。
-// 先把脖子上段略加粗（避免细脖子顶着大头），投影后再把头颈接口单独松弛成圆角，看起来是一体的而不是两块拼接。
+// 人台头（服装店假人那种抽象雕塑头），按古典人体比例：头高 ≈ 身高 / 7.5，头宽 ≈ 0.62 头高，头深 ≈ 0.78 头高。
+// 头顶留在原处，下巴落在「头顶 − 头高」；脖子投影成一根干净的椭圆柱，前面露出约 7–8 cm。
+// 下颌两侧收窄、下巴保留在前面，后脑勺顺着弧线收进后颈；下巴和后颈处再单独松弛成圆角，让头和脖子是一体的。
 function eggHead(M,X,H){
-  let cx=0,n=0,y0=1e9,y1=-1e9,z0=1e9,z1=-1e9,ncx=0,ncz=0,nn=0;
-  for(let i=0;i<M.nv;i++){ if(M.part[i]!==4) continue; const y=X[i*3+1]/H;
-    if(y>=.885){ cx+=X[i*3]; n++; y0=Math.min(y0,X[i*3+1]); y1=Math.max(y1,X[i*3+1]); z0=Math.min(z0,X[i*3+2]); z1=Math.max(z1,X[i*3+2]); }
-    else if(y>.855&&y<.875){ ncx+=X[i*3]; ncz+=X[i*3+2]; nn++; } }
-  if(!n||!nn) return; cx/=n; ncx/=nn; ncz/=nn;
-  const A=MESH.adj;
-  // 原始脖子明显前倾：颈根以上往后推（剪切），头跟着整体后移，脖子更挺直
-  const lean=.32;
-  for(let i=0;i<M.nv;i++){ const y=X[i*3+1]/H; if(y<.8) continue; const p=M.part[i]; if(p!==4&&!(p===0&&Math.abs(X[i*3])<.08*H)) continue;
+  const A=MESH.adj, P=M.part; let top=-1e9; for(let i=0;i<M.nv;i++) if(P[i]===4&&X[i*3+1]>top) top=X[i*3+1];
+  // 原始脖子前倾：颈根以上往后推（剪切），脖子更挺直
+  const lean=.25;
+  for(let i=0;i<M.nv;i++){ const y=X[i*3+1]/H; if(y<.8) continue; const p=P[i]; if(p!==4&&!(p===0&&Math.abs(X[i*3])<.08*H)) continue;
     const wx=p===4?1:1-sstep(.04,.08,Math.abs(X[i*3])/H); X[i*3+2]-=lean*(Math.min(y,.89)-.8)*H*sstep(.8,.84,y)*wx; }
-  // 脖子加粗一点，上端再略微放开去接下颌
-  ncz-=lean*(.865-.8)*H;
-  for(let i=0;i<M.nv;i++){ if(M.part[i]!==4) continue; const y=X[i*3+1]/H; if(y<.8||y>.9) continue;
-    const f=1+.12*sstep(.8,.83,y)+.2*sstep(.84,.878,y)*(1-sstep(.878,.9,y)); X[i*3]=ncx+(X[i*3]-ncx)*f; X[i*3+2]=ncz+(X[i*3+2]-ncz)*f; }
-  z0=1e9; z1=-1e9; for(let i=0;i<M.nv;i++){ if(M.part[i]!==4||X[i*3+1]/H<.885) continue; z0=Math.min(z0,X[i*3+2]); z1=Math.max(z1,X[i*3+2]); }
-  // 头的比例：高 ≈ 1.2 × 深，宽 ≈ 0.8 × 深（原来高、深几乎相等，侧面看像个球）
-  const ry=(y1-y0)/2*.92, rz=ry*.82, rx=ry*.68, cy=y0+ry*1.12, cz=(z0+z1)/2+rz*.05;
-  const wv=new Float32Array(M.nv); for(let i=0;i<M.nv;i++) if(M.part[i]===4) wv[i]=sstep(.85,.89,X[i*3+1]/H);
-  const project=()=>{ for(let i=0;i<M.nv;i++){ if(!wv[i]) continue;
-    const dx=X[i*3]-cx, dy=X[i*3+1]-cy, dz=X[i*3+2]-cz, u=Math.max(-1,Math.min(1,dy/ry)), lo=u<0?u*u:0;
-    const sx=rx*(1-.2*lo), sz=rz*(dz>=0?1-.06*lo:1-.36*lo), sy=ry*(u<0?1.1:1);
+  const Hh=.133*H, ry=Hh/2, cy=top-ry, chin=(top-Hh)/H;
+  // 脖子轴心：取颈中段的中心
+  let ncx=0,ncz=0,nn=0; for(let i=0;i<M.nv;i++){ if(P[i]!==4) continue; const y=X[i*3+1]/H; if(y>.85&&y<.865){ ncx+=X[i*3]; ncz+=X[i*3+2]; nn++; } }
+  if(!nn) return; ncx/=nn; ncz/=nn;
+  // 1 脖子：椭圆柱（宽 ≈ 0.6 头宽）
+  const na=.19*Hh, nb=.23*Hh, wn=new Float32Array(M.nv);
+  for(let i=0;i<M.nv;i++){ if(P[i]!==4) continue; const y=X[i*3+1]/H; wn[i]=sstep(.835,.852,y)*(1-sstep(chin,chin+.02,y)); }
+  const neck=()=>{ for(let i=0;i<M.nv;i++){ if(!wn[i]) continue; const dx=X[i*3]-ncx, dz=X[i*3+2]-ncz, k=1/Math.sqrt((dx/na)**2+(dz/nb)**2||1);
+    X[i*3]+=dx*(k-1)*wn[i]; X[i*3+2]+=dz*(k-1)*wn[i]; } };
+  // 2 头：雕塑感的蛋形
+  const rx=.31*Hh, rz=.39*Hh, cz=ncz+.14*rz, wv=new Float32Array(M.nv);
+  for(let i=0;i<M.nv;i++) if(P[i]===4) wv[i]=sstep(chin-.012,chin+.012,X[i*3+1]/H);
+  const head=()=>{ for(let i=0;i<M.nv;i++){ if(!wv[i]) continue;
+    const dx=X[i*3]-ncx, dy=X[i*3+1]-cy, dz=X[i*3+2]-cz, u=Math.max(-1,Math.min(1,dy/ry)), lo=u<0?u*u:0, hi=u>0?u*u:0;
+    const sx=rx*(1-.26*lo-.06*hi), sz=rz*(dz>=0?1-.05*lo:1-.42*lo), sy=ry;
     const k=1/Math.sqrt((dx/sx)**2+(dy/sy)**2+(dz/sz)**2||1);
     X[i*3]+=dx*(k-1)*wv[i]; X[i*3+1]+=dy*(k-1)*wv[i]; X[i*3+2]+=dz*(k-1)*wv[i]; } };
-  // 眼窝、嘴里的点投影后会折叠：投影和松弛交替几轮，让网格在蛋形上铺平
-  for(let r=0;r<6;r++){ project(); for(let i=0;i<4;i++) relax(X,A,wv,.6,3); } project();
-  const wf=new Float32Array(M.nv); for(let i=0;i<M.nv;i++) if(M.part[i]===4){ const y=X[i*3+1]/H; wf[i]=sstep(.835,.86,y)*(1-sstep(.89,.915,y)); }
-  for(let i=0;i<12;i++) relax(X,A,wf,.5,3);
+  // 眼窝、嘴里的点投影后会折叠：投影和松弛交替几轮，让网格铺平
+  const wa=new Float32Array(M.nv); for(let i=0;i<M.nv;i++) wa[i]=Math.max(wv[i],wn[i]);
+  for(let r=0;r<12;r++){ neck(); head(); for(let i=0;i<5;i++) relax(X,A,wa,.6,3); } neck(); head();
+  for(let r=0;r<3;r++){ for(let i=0;i<3;i++) relax(X,A,wv,.4,3); head(); } // 嘴、眼窝残留的折痕再抹一遍
+  // 3 下巴 / 后颈接口松弛成圆角
+  const wf=new Float32Array(M.nv); for(let i=0;i<M.nv;i++) if(P[i]===4){ const y=X[i*3+1]/H; wf[i]=sstep(chin-.03,chin-.01,y)*(1-sstep(chin+.02,chin+.04,y)); }
+  for(let i=0;i<16;i++) relax(X,A,wf,.5,3);
 }
 // 胸部：以每侧最靠前的点（乳头）为中心，用外圈一环的表面拟合一个二次曲面 z=f(x,y)，把内圈的点按权重贴到这个曲面上。
 // 只改 z（前后方向），不会让网格折叠。r1/r2 是内圈半径和外圈半径（× 身高）：小半径抹掉乳头，大半径把整个胸部压平（男性人台）。
@@ -868,7 +926,7 @@ function mountBody(el,r){
 }
 function build3D(el,r,M){
   const THREE=window.THREE, m=r.m, c=m.cm;
-  const goal={h:(m.h||163)/100,shoulder:c.shoulder/100,waist:c.waist/100,hip:c.hip/100,thigh:c.thigh/100};
+  const pc=plausible(c,m.h||163).cm, goal={h:(m.h||163)/100,shoulder:pc.shoulder/100,waist:pc.waist/100,hip:pc.hip/100,thigh:pc.thigh/100};
   const F=fitBody(M,goal), s=F.s, H=F.mm.H, D=dispMesh(M,F,sx()), X=D.X, A=D.adj, nv=D.nv;
   const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
   renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
@@ -1048,8 +1106,11 @@ const P={
       <p class="h1">${r.head}</p>
       <div class="row2"><span class="small muted">目标：${esc(t.name)}</span><button class="link" type="button" data-go="target">更换${I.chev}</button></div>
       ${r.notes.map(n=>`<p class="xs muted">${n}</p>`).join('')}
-      ${r.reached?`<button class="nextup" type="button" data-go="target"><span><b>想继续精进？</b><span class="small muted">按你的身高和骨架生成下一阶段目标，或上传一张参考照片</span></span>${I.chev}</button>`:''}
     </div>
+    <section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">体型建议 · 已加进本周计划</p>
+      <div class="list">${r.adv.slice(0,3).map((a,i)=>`<button class="li adv" type="button" data-tab="train"><span class="idx mono">${String(i+1).padStart(2,'0')}</span><span style="min-width:0"><span class="t">${a.title}${i<2?'<span class="badge acc">计划中</span>':''}</span><span class="s">${a.detail}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div>
+      ${r.reached?`<button class="link" type="button" data-go="target" style="margin-top:10px">换一个更高的目标：按身高骨架生成下一阶段，或用参考照片${I.chev}</button>`:''}
+    </section>
     <div class="stack" style="gap:12px">
       <div class="metrics">
         ${met('shoulder','肩宽',f1(c.shoulder),...(need('shoulder')||['达标','acc']))}
@@ -1299,8 +1360,12 @@ function manFill(){
 function readoutHTML(m){
   if(!m) return `<p class="small muted">${T.mtab==='scan'?'填好身高、放好正面照的点之后，这里会出现结果。':'填好身高、肩宽、腰围、臀围之后，这里会出现结果。'}</p>`;
   const e=k=>m.est.includes(k)?'<span class="est">估</span>':'';
+  const adj=plausible(m.cm,S.h||163).adj, why=T.mtab==='scan'
+    ?'照片识别常见原因：手臂贴着身体或手放在胯边，会被算进臀宽；腿的点没放在大腿最粗处。请放大核对这几个点。'
+    :'请再核对一下：腰围在肚脐高度、臀围在最宽处、腿围在大腿根下方最粗处。';
+  const warn=adj.length?`<p class="status err">${adj.map(k=>DIMS.find(d=>d[0]===k)[1]).join('、')}和其他尺寸的组合不太符合常见人体比例（比如腿围通常是臀围的五到七成）。${why}</p>`:'';
   const cell=(k,v,u='cm',x='')=>`<div><span class="k">${k}${x}</span><span class="num">${v}<small class="mono xs muted"> ${u}</small></span></div>`;
-  return `<div class="readout">${cell('肩宽',f1(m.cm.shoulder))}${cell('腰围',Math.round(m.cm.waist),'cm',e('waist'))}${cell('臀围',Math.round(m.cm.hip),'cm',e('hip'))}${cell('大腿围',Math.round(m.cm.thigh),'cm',e('thigh'))}${cell('腰臀比',f2(m.whr),'')}${m.legR?cell('腿长比',Math.round(m.legR*100),'%'):''}${cell('肩腰比',f2(m.swr),'')}${cell('臀腰比',f2(m.hwr),'')}</div>
+  return `${warn}<div class="readout">${cell('肩宽',f1(m.cm.shoulder))}${cell('腰围',Math.round(m.cm.waist),'cm',e('waist'))}${cell('臀围',Math.round(m.cm.hip),'cm',e('hip'))}${cell('大腿围',Math.round(m.cm.thigh),'cm',e('thigh'))}${cell('腰臀比',f2(m.whr),'')}${m.legR?cell('腿长比',Math.round(m.legR*100),'%'):''}${cell('肩腰比',f2(m.swr),'')}${cell('臀腰比',f2(m.hwr),'')}</div>
     ${m.est.length?`<p class="xs muted">${m.src==='scan'?'标「估」的由照片宽度按常见体型估算，想更准可以切到「手动输入」用软尺量的数改一下。':'大腿围没填，按臀围估算。'}</p>`:''}`;
 }
 /* ---------------- 目标：逐项差距 ---------------- */
@@ -1589,7 +1654,7 @@ async function autoDetect(){
 }
 const MEAS_ACT={
   mtab(a){ if(T.mtab===a) return; T.mtab=a; if(a==='manual') T.man=null; refresh(); },
-  saveMeas(){ const m=draftMeas(); if(!m){ toast(T.mtab==='scan'?'先填身高、放好照片上的点':'先填好身高、肩宽、腰围、臀围'); return; } m.sex=sx(); S.meas=m; S.mode='photo'; save(); if(m.src==='scan') savePhoto('front'); toast('已保存'); T.hFocus=null; T.man=null; stack=[{p:'home'}]; render('back'); },
+  saveMeas(){ const m=draftMeas(); if(!m){ toast(T.mtab==='scan'?'先填身高、放好照片上的点':'先填好身高、肩宽、腰围、臀围'); return; } m.sex=sx(); S.meas=m; if(S.mode!=='photo'&&!S.postureSet){ S.rounded=false; S.apt=false; } S.mode='photo'; /* 样例的体态不带进自己的数据 */ save(); if(m.src==='scan') savePhoto('front'); toast('已保存'); T.hFocus=null; T.man=null; stack=[{p:'home'}]; render('back'); },
   auto:autoDetect, deletePhoto
 };
 /* ---------------- AI coach ---------------- */
@@ -1916,7 +1981,7 @@ const ACT={
   refFull(){ T.refFull=T.refFull===false; const b=document.querySelector('[data-act="refFull"]'); if(b) b.setAttribute('aria-pressed',String(T.refFull)); refUpdate(); },
   useRef(){ const f=refCalc(); if(!f) return; const R=refToCm(f,cur());
     S.tgt={kind:'ref',sex:sx(),name:'参考照片',cm:cm1(R.cm),ref:f,clamped:R.clamped,at:todayISO()}; S.target='mine'; T.hFocus=null; save(); savePhoto('ref'); stack=[{p:'home'}]; render('back'); toast('目标已改为参考照片'); },
-  toggle(a){S[a]=!S[a];save();refresh();},
+  toggle(a){S[a]=!S[a]; if(a==='rounded'||a==='apt') S.postureSet=true; save();refresh();},
   mode(a){ if(a==='photo'&&!S.meas){ go('measure'); return; } S.mode=a; if(a!=='photo'){S.rounded=SAMPLES[a].rounded;S.apt=SAMPLES[a].apt;} save(); refresh(); },
   focus(k){ T.hFocus=T.hFocus===k?null:k; applyFigFocus(); if(B3.r) B3.r.focus(T.hFocus); },
   figView(v){ S.figView=v; save(); document.querySelectorAll('[data-act="figView"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.arg===v)));
