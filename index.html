@@ -896,7 +896,7 @@ function poseArms(M,X,H){
     X[i*3]=px+dx*c-dy*sn; X[i*3+1]=py+ny*cb-dz*sb; X[i*3+2]=pz+ny*sb+dz*cb;
   }
 }
-// 人台头（服装店假人那种抽象雕塑头），按古典人体比例：头高 ≈ 身高 / 7.5，头宽 ≈ 0.62 头高，头深 ≈ 0.78 头高。
+// 人台头（服装店假人那种抽象雕塑头，不是蛋形），按古典人体比例：头高 ≈ 身高 / 7.5，头宽 ≈ 0.62 头高，头深 ≈ 0.78 头高。
 // 头顶留在原处，下巴落在「头顶 − 头高」；脖子投影成一根干净的椭圆柱，前面露出约 7–8 cm。
 // 下颌两侧收窄、下巴保留在前面，后脑勺顺着弧线收进后颈；下巴和后颈处再单独松弛成圆角，让头和脖子是一体的。
 function eggHead(M,X,H){
@@ -914,18 +914,28 @@ function eggHead(M,X,H){
   for(let i=0;i<M.nv;i++){ if(P[i]!==4) continue; const y=X[i*3+1]/H; wn[i]=sstep(.835,.852,y)*(1-sstep(chin,chin+.02,y)); }
   const neck=()=>{ for(let i=0;i<M.nv;i++){ if(!wn[i]) continue; const dx=X[i*3]-ncx, dz=X[i*3+2]-ncz, k=1/Math.sqrt((dx/na)**2+(dz/nb)**2||1);
     X[i*3]+=dx*(k-1)*wn[i]; X[i*3+2]+=dz*(k-1)*wn[i]; } };
-  // 2 头：雕塑感的蛋形
+  // 2 头：人台头的基本形——圆颅顶、截面略方（不是蛋），上半张脸宽度保持到颧骨、下颌角处收、下巴收窄但向前；脸的正面较平，后脑勺在下半部收进后颈
   const rx=.31*Hh, rz=.39*Hh, cz=ncz+.14*rz, wv=new Float32Array(M.nv);
   for(let i=0;i<M.nv;i++) if(P[i]===4) wv[i]=sstep(chin-.012,chin+.012,X[i*3+1]/H);
+  const jaw=u=>u>=0?1-.07*u*u:u>-.58?1-.13*(u/-.58)**2:.87-.47*sstep(-.58,-1.02,u);   // 宽度：颧骨 → 下颌角 → 下巴
   const head=()=>{ for(let i=0;i<M.nv;i++){ if(!wv[i]) continue;
-    const dx=X[i*3]-ncx, dy=X[i*3+1]-cy, dz=X[i*3+2]-cz, u=Math.max(-1,Math.min(1,dy/ry)), lo=u<0?u*u:0, hi=u>0?u*u:0;
-    const sx=rx*(1-.26*lo-.06*hi), sz=rz*(dz>=0?1-.05*lo:1-.42*lo), sy=ry;
-    const k=1/Math.sqrt((dx/sx)**2+(dy/sy)**2+(dz/sz)**2||1);
+    const dx=X[i*3]-ncx, dy=X[i*3+1]-cy, dz=X[i*3+2]-cz, u=Math.max(-1.05,Math.min(1,dy/ry)), lo=u<0?u*u:0;
+    const sx=rx*jaw(u), sz=dz>=0?rz*(1-.04*lo):rz*(1-.5*sstep(-.1,-.9,u)), sy=ry, p=dz>=0&&u<.4?2.6:2.25; // 正面截面更平（p 大），颅顶接近圆
+    const py=u>0?2.7:2.1, q=(Math.abs(dx/sx)**p+Math.abs(dz/sz)**p)**(1/p), k=1/((q**py+Math.abs(dy/sy)**py)**(1/py)||1); // 颅顶用更「方」的竖向截面，头顶是圆钝的而不是尖的
     X[i*3]+=dx*(k-1)*wv[i]; X[i*3+1]+=dy*(k-1)*wv[i]; X[i*3+2]+=dz*(k-1)*wv[i]; } };
   // 眼窝、嘴里的点投影后会折叠：投影和松弛交替几轮，让网格铺平
   const wa=new Float32Array(M.nv); for(let i=0;i<M.nv;i++) wa[i]=Math.max(wv[i],wn[i]);
   for(let r=0;r<12;r++){ neck(); head(); for(let i=0;i<5;i++) relax(X,A,wa,.6,3); } neck(); head();
-  for(let r=0;r<3;r++){ for(let i=0;i<3;i++) relax(X,A,wv,.4,3); head(); } // 嘴、眼窝残留的折痕再抹一遍
+  for(let r=0;r<10;r++){ for(let i=0;i<6;i++) relax(X,A,wv,.6,3); head(); } // 嘴、眼窝投影后折叠的三角形多抹几轮，展平（否则脸上会有暗斑）
+  // 五官只做雕塑式的暗示（像服装店人台）：眉骨、鼻梁、颧骨、下巴；不做眼窝和嘴，避免面具感，沿前后方向轻推，不做写实细节
+  const G=(v,c,w)=>Math.exp(-(((v-c)/w)**2));
+  for(let i=0;i<M.nv;i++){ if(!wv[i]) continue; const dx=X[i*3]-ncx, dy=X[i*3+1]-cy, dz=X[i*3+2]-cz; if(dz<=0) continue;
+    const u=dy/ry, x=dx/rx, f=sstep(.35,.8,dz/rz)*wv[i];               // 只作用在脸的正面
+    const nose=.06*G(x,0,.12)*sstep(-.6,-.34,u)*(1-sstep(-.06,.06,u))*(.55+.45*sstep(.08,-.32,u)); // 鼻底缓缓收回，避免底下的阴影像一张嘴 // 鼻梁到鼻尖逐渐高起
+    const brow=.035*G(u,.1,.09)*(1-sstep(.55,.85,Math.abs(x)));
+    const cheek=.015*G(u,-.22,.16)*G(Math.abs(x),.6,.18), chinB=.03*G(u,-.86,.12)*G(x,0,.4);
+    X[i*3+2]+=(nose+brow+cheek+chinB)*rz*f; }
+  { const wl=new Float32Array(M.nv); for(let i=0;i<M.nv;i++) wl[i]=wv[i]*.5; relax(X,A,wl,.3,3); } // 轻轻抹一下，让五官过渡柔和
   // 3 下巴 / 后颈接口松弛成圆角
   const wf=new Float32Array(M.nv); for(let i=0;i<M.nv;i++) if(P[i]===4){ const y=X[i*3+1]/H; wf[i]=sstep(chin-.03,chin-.01,y)*(1-sstep(chin+.02,chin+.04,y)); }
   for(let i=0;i<16;i++) relax(X,A,wf,.5,3);
@@ -1105,7 +1115,7 @@ function build3D(el,r,M){
     for(let i=0;i<3;i++) relax(col,A,null,.5,3);   // 肌群边缘柔化成渐变
     // 只给没达标的部位上色：以测量环为中心按上下距离渐隐（高斯），最浓处约 45%，达标的部位不上色
     const off=MKEYS.filter(k=>rings[k]&&(FM[k].cls==='under'||FM[k].cls==='over'));
-    if(off.length){ const tc=off.map(k=>lin(cssColor(FM[k].color))), SIG={shoulder:.042,waist:.04,hip:.036,thigh:.045}, MASK={shoulder:PT.torso|PT.arms,waist:PT.torso,hip:PT.torso|PT.legL|PT.legR,thigh:PT.legL|PT.legR};
+    if(off.length){ const tc=off.map(k=>lin(cssColor(FM[k].color))), SIG={shoulder:.042,waist:.04,hip:.036,thigh:.045}, MASK={shoulder:PT.torso|PT.arms|16,waist:PT.torso,hip:PT.torso|PT.legL|PT.legR,thigh:PT.legL|PT.legR};
       for(let j=0;j<nv;j++){ let bw=0,bi=-1; const y=X[j*3+1];
         off.forEach((k,i)=>{ if(!((MASK[k]>>D.part[j])&1)) return; const dy=(y-rings[k].y)/(SIG[k]*H), w=Math.exp(-dy*dy)*(T.hFocus&&T.hFocus!==k?.18:.45); if(w>bw){ bw=w; bi=i; } });
         if(bi>=0&&bw>.01){ const c=tc[bi]; col[j*3]+=(c.r-col[j*3])*bw; col[j*3+1]+=(c.g-col[j*3+1])*bw; col[j*3+2]+=(c.b-col[j*3+2])*bw; } } }
