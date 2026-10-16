@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>薄肌比例导航</title>
-<meta name="description" content="手动输入尺寸或拍一张正面照，算出身材比例和目标的差距，生成每周训练计划。">
+<meta name="description" content="把体型目标变成每周的训练计划：练哪块肌肉、做哪几个动作，打开就知道今天练什么。">
 <!-- 主屏 App（PWA）：iPhone 用 Safari 打开 → 分享 → 添加到主屏幕 -->
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f6f7f5" media="(prefers-color-scheme: light)">
@@ -256,6 +256,31 @@ ol.how li::before{content:counter(s,decimal-leading-zero);font:500 12px/1.9 var(
 .callout{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;padding:12px 0;border-top:1px solid var(--line)}
 .callout .k{font:500 11px/1.9 var(--mono);letter-spacing:.06em;color:var(--muted)}
 .callout.avoid .k{color:var(--warm)}
+/* P0：训练页、周视图、引导 */
+p.callout.warn,.callout.warn{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;padding:12px 14px;border:0;border-radius:12px;background:var(--warm-soft);color:var(--ink)}
+.callout.warn .k{color:var(--warm)}
+.li2{display:flex;align-items:center;border-bottom:1px solid var(--line)}
+.li2 .li{border-bottom:0;flex:1;min-width:0}
+.swapbtn{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 12px;font-size:12.5px;cursor:pointer;margin-left:4px}
+.thumb.ph{display:grid;place-items:center;filter:none;color:var(--faint)}
+.thumb.ph svg{width:22px;height:22px}
+.chip2.ro{cursor:default;color:var(--muted)}
+ul.bul{margin:0;padding-left:18px;display:grid;gap:6px;font-size:14.5px}
+.wk7{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.wk7>div{display:flex;flex-direction:column;align-items:center;gap:4px;font:500 11px var(--mono);color:var(--faint)}
+.wk7 i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);font-style:normal;color:var(--muted)}
+.wk7 i svg{width:14px;height:14px}
+.wk7 .s-done i{background:var(--accent);border-color:var(--accent);color:var(--invert)}
+.wk7 .s-today span{color:var(--ink)}
+.wk7 .s-today i{border-color:var(--ink)}
+.wk7 .s-skip i{border-style:dashed}
+.wkrow{cursor:default}
+.wkrow .idx{font:500 12px var(--mono);color:var(--muted);min-width:34px}
+.wkrow.s-future .t,.wkrow.s-rest .t{color:var(--faint)}
+.tblwrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl th,.tbl td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl th{font:500 11px var(--mono);color:var(--muted);letter-spacing:.04em}
 .note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--warm-soft)}
 .note p{flex:1;min-width:0;font-size:14.5px}
 .note small{display:block;font:500 11px var(--mono);color:var(--muted);margin-top:2px}
@@ -347,30 +372,39 @@ const I={
 };
 
 /* ---------------- data ---------------- */
-/* 预设模板（演示设定值）。sex 区分男女；emph 是这个风格自带的侧重，在比例规则之外额外加强（规则 R9） */
-const TARGETS=[
-  // 比例按「练得好」的身材设定（普通人大致在：女 肩腰 1.45 / 臀腰 1.35，男 肩腰 1.45 / 臀腰 1.22），不是平均水平
-  {id:'square',sex:'f',name:'直角肩薄背',swr:1.62,hwr:1.40,note:'肩线清晰，背部有宽度'},
-  {id:'peach',sex:'f',name:'蜜桃线条',swr:1.52,hwr:1.55,note:'臀部饱满，腰臀差明显'},
-  {id:'balanced',sex:'f',name:'均衡薄肌',swr:1.58,hwr:1.48,note:'上下比例匀称'},
-  {id:'athletic',sex:'f',name:'运动 X 型',swr:1.68,hwr:1.55,note:'肩和臀都有明显宽度'},
-  {id:'ballet',sex:'f',name:'纤长芭蕾',swr:1.50,hwr:1.40,note:'整体线条纤细'},
-  {id:'m_lean',sex:'m',name:'薄肌少年感',swr:1.62,hwr:1.20,note:'线条干净利落，不追求块头'},
-  {id:'m_bal',sex:'m',name:'均衡匀称',swr:1.68,hwr:1.22,note:'上下协调，穿衣好看'},
-  {id:'m_v',sex:'m',name:'双开门倒三角',swr:1.82,hwr:1.18,note:'宽肩宽背、腰线收紧',emph:{pecs:'boost',lats:'focus'}},
-  {id:'m_ath',sex:'m',name:'运动型',swr:1.74,hwr:1.26,note:'肩背和腿臀都有力量感',emph:{quads:'boost',hams:'boost',gmax:'boost'}}
-];
-const sx=()=>S.sex==='m'?'m':'f';
-const DEF_TARGET={f:'square',m:'m_bal'};
-const targetsOf=x=>TARGETS.filter(t=>t.sex===x);
-/* 演示数据：正面宽度 / 侧面厚度，单位 cm */
-const SAMPLES={
-  a:{sex:'f',label:'样例 A',h:163,raw:{shoulderW:34.5,waistW:27.5,hipW:35.6,thighW:16.4,waistD:19.6,hipD:23.8,thighD:16.2},legR:.47,rounded:true,apt:false},
-  b:{sex:'f',label:'样例 B',h:168,raw:{shoulderW:39.4,waistW:28.6,hipW:33.4,thighW:15.6,waistD:20.4,hipD:21.2,thighD:15.0},legR:.49,rounded:false,apt:true},
-  c:{sex:'m',label:'样例 C',h:176,raw:{shoulderW:41.5,waistW:29.5,hipW:33.2,thighW:17.8,waistD:21.5,hipD:23.0,thighD:17.5},legR:.48,rounded:true,apt:false},
-  d:{sex:'m',label:'样例 D',h:172,raw:{shoulderW:43.5,waistW:32.5,hipW:34.0,thighW:18.5,waistD:25.0,hipD:24.0,thighD:18.0},legR:.47,rounded:false,apt:true}
+/* 体型目标 → 主练肌群（PRD「目标 → 肌群映射」）。模板只决定练哪些肌群，不算尺寸、不出差距数字 */
+const GOALS={
+  f:[{id:'shoulder',name:'直角肩',mus:['delt','rear'],note:'练的是肩部外缘的轮廓，不改变骨架宽度'},
+     {id:'back',name:'薄背 / 背部线条',mus:['lats','rear']},
+     {id:'glute',name:'蜜桃臀',mus:['gmax','gmed']},
+     {id:'legs',name:'腿部线条',mus:['quads','hams','gmax']},
+     {id:'waist',name:'腰线',mus:['core'],note:'腰围主要取决于整体体脂，训练不能局部减脂；已经偏瘦的话不建议以收腰为目标'}],
+  m:[{id:'shoulder',name:'宽肩',mus:['delt','rear'],note:'练的是肩部外缘的轮廓，不改变骨架宽度'},
+     {id:'back',name:'倒三角背',mus:['lats','rear']},
+     {id:'chest',name:'胸肌',mus:['pecs']},
+     {id:'legs',name:'腿臀力量',mus:['quads','hams','gmax']},
+     {id:'waist',name:'腰腹线条',mus:['core'],note:'腹部线条能不能显出来主要取决于体脂，训练不能局部减脂'}]
 };
-const samplesOf=x=>Object.keys(SAMPLES).filter(k=>SAMPLES[k].sex===x);
+const sx=()=>S.sex==='m'?'m':'f';
+const goalsOf=()=>GOALS[sx()].filter(g=>(S.goals||[]).includes(g.id));
+/* 训练经验 → 训练量（每个动作的组数：主练 / 其他） */
+const EXP={n:{name:'1–3 个月',main:3,base:2},m:{name:'3–6 个月',main:3,base:3},x:{name:'6–12 个月',main:4,base:3}};
+const EQ={db:'哑铃 / 杠铃',cable:'绳索',machine:'固定器械',band:'弹力带',body:'自重'};
+const EQ_PICK=['db','cable','machine','band'];
+/* 每周次数 → 分化（PRD）。rot = 训练轮转顺序；days = 推荐的星期（只用于提示） */
+const SPLITS={
+  2:{name:'全身 A / B',rot:['A','B']},
+  3:{name:'全身 A / B / A 交替',rot:['A','B']},
+  4:{name:'上肢 / 下肢 / 上肢 / 下肢',rot:['U','L','U2','L2']}
+};
+const SESSION_NAME={A:'全身 A',B:'全身 B',U:'上肢',L:'下肢',U2:'上肢',L2:'下肢'};
+const ALL_MU=['delt','rear','lats','pecs','core','gmax','gmed','quads','hams'];
+const UP_MU=['delt','rear','lats','pecs'], LO_MU=['gmax','gmed','quads','hams','core'];
+/* 肌群图谱的人体：有测量数据就按自己的身体，没有就用常见体型（只用来显示，不出数字） */
+const BASE_BODY={
+  f:{h:163,raw:{shoulderW:38,waistW:26.5,hipW:35,thighW:17,waistD:19.5,hipD:23.5,thighD:16.5},legR:.47},
+  m:{h:175,raw:{shoulderW:44,waistW:29.5,hipW:34,thighW:18,waistD:22,hipD:23,thighD:17.5},legR:.48}
+};
 /* img = free-exercise-db 图片 id；p/s = 主要/辅助发力肌群（MuscleMap 区块） */
 const EX={
   lat_raise:{name:'哑铃侧平举',reps:'12–15 次',img:'Side_Lateral_Raise',p:['deltoids'],s:['trapezius'],steps:['站直，手肘微屈，哑铃在身体两侧','手肘带动手臂向两侧抬到与肩同高','顶端停 1 秒，2–3 秒慢慢放下'],cue:'想象把哑铃往远处推，而不是往上举',avoid:'耸肩、甩起来'},
@@ -404,54 +438,99 @@ const EX={
   russian_twist:{name:'俄罗斯转体',reps:'10 次/侧',img:'Russian_Twist',p:['obliques'],s:['abs'],steps:['坐姿，上身后倾约 45°，脚可着地','双手合在胸前，向一侧转','回到中间再转向另一侧'],cue:'转的是胸口，不只是手',avoid:'弓背、速度太快'},
   superman:{name:'超人式',reps:'10–12 次',img:'Superman',p:['lowerBack'],s:['gluteal'],steps:['俯卧，手臂向前伸直','同时抬起手臂和腿','停 2 秒后慢慢放下'],cue:'往远处伸，而不是往高处抬',avoid:'仰头'},
   back_ext:{name:'山羊挺身',reps:'10–12 次',img:'Hyperextensions_Back_Extensions',p:['lowerBack'],s:['gluteal','hamstring'],steps:['髋部卡在垫子边缘，双手抱胸','背部平直地向下俯身','臀部发力，起到身体成直线'],cue:'起到平直就停',avoid:'顶端过度后仰'},
+  db_press:{name:'哑铃卧推',reps:'8–12 次',img:null,p:['chest'],s:['triceps','deltoids'],steps:['仰卧平凳，双脚踩实，哑铃在胸部两侧','向上推起到手臂伸直，哑铃在胸口上方','慢慢放回到胸部两侧'],cue:'肩胛骨收紧贴住凳子',avoid:'手肘完全向两侧打开'},
+  machine_press:{name:'器械推胸',reps:'10–12 次',img:null,p:['chest'],s:['triceps','deltoids'],steps:['调整座椅，让把手在胸部中段高度','向前推到手臂接近伸直','慢慢回到胸前有拉伸感'],cue:'背贴靠垫，肩膀下沉',avoid:'耸肩'},
   plie_squat:{name:'相扑深蹲',reps:'10–12 次',img:'Plie_Dumbbell_Squat',p:['adductors','quadriceps'],s:['gluteal'],steps:['双脚宽站，脚尖外转约 45°','双手持哑铃垂在中间','垂直下蹲，再用脚掌发力站起'],cue:'膝盖和脚尖同一方向',avoid:'膝盖内扣'}
 };
+/* 动作补充信息：器械（eq）、难度（lv 1 入门 / 2 进阶 / 3 较难）、是否复合动作（cmp，排在前面）、第二条常见错误、受伤风险点 */
+const EX_META={
+  lat_raise:['db',1,0,'重量太大，用身体甩起来','肩前侧有夹痛时，手臂略往前（肩胛面）抬，高度降到肩下'],
+  cable_lat:['cable',1,0,'手臂抬得远高过肩膀','肩峰处夹痛就降低抬起高度'],
+  band_lat:['band',1,0,'放下太快、不控制','弹力带踩稳，避免回弹打到身体'],
+  pulldown:['machine',1,1,'把横杆拉到脖子后面','颈后下拉会给肩关节很大压力，只拉到胸前'],
+  db_row:['db',2,1,'背部拱起','撑凳的手和膝盖稳住身体，腰背不能弓'],
+  face_pull:['cable',1,0,'重量太大，变成用手臂拉','用轻重量慢做，肩前侧不适就缩小幅度'],
+  reverse_fly:['db',2,0,'用惯性甩起来','俯身时背部保持平直；腰不适可以胸贴斜凳做'],
+  band_pull:['band',1,0,'手肘弯得太多','弹力带老化可能断裂，用前检查'],
+  pushup:['body',2,1,'手肘向两侧完全打开','手腕不适可以撑在高台上（上斜俯卧撑）'],
+  db_press:['db',2,1,'下放太快、在底部弹起','肩前侧不适就缩小下放幅度；重量大时请人保护'],
+  machine_press:['machine',1,1,'推到底锁死手肘','座椅太低会让肩膀压力变大'],
+  dead_bug:['body',1,0,'动作太快','腰离开地面说明幅度太大，缩小伸展的距离'],
+  plank:['body',1,0,'耸肩，肩膀压到手腕前面','腰酸说明塌腰了，先缩短时间保证姿势'],
+  hip_thrust:['db',2,1,'膝盖内扣','杠铃或哑铃压在髋部要垫软垫，凳子靠墙防滑'],
+  glute_bridge:['body',1,1,'用大腿后侧发力到抽筋','腘绳肌抽筋就把脚往臀部方向收近一点'],
+  band_walk:['band',1,0,'站得太直','膝盖往里塌会给膝关节压力，始终往外推'],
+  side_leg:['body',1,0,'腿抬得太高','腰侧不适就减小幅度'],
+  rdl:['db',3,1,'膝盖弯太多，变成了深蹲','最容易伤腰的动作：从轻重量开始，背部始终平直；有腰痛史先咨询医生或教练'],
+  leg_curl:['machine',1,0,'放下太快','调整机器，让膝关节对准转轴'],
+  goblet:['db',2,1,'脚跟离地','膝盖疼痛先减小下蹲深度'],
+  split_squat:['db',2,1,'重心落在后腿','前膝不适就把前脚往前放一点'],
+  plie_squat:['db',2,1,'上身过度前倾','髋或膝内侧不适就收窄站距'],
+  hipflex_stretch:['body',1,0,'憋气','跪地的膝盖下垫软垫'],
+  chest_stretch:['body',1,0,'手肘抬得高过肩膀太多','肩前侧出现刺痛立即停'],
+  db_curl:['db',1,0,'放下时不控制','手肘内侧疼就减重'],
+  hammer_curl:['db',1,0,'手腕弯曲','手肘疼就减重'],
+  pushdown:['cable',1,0,'手肘向外张开','手肘疼就减重或换成绳索把手'],
+  bench_dip:['body',2,1,'屁股离凳子太远','肩前侧压力大，有肩伤先不做'],
+  calf_raise:['body',1,0,'只做半程','台阶边要站稳，可以扶墙'],
+  seated_calf:['machine',1,0,'重量压在脚踝上','把垫子压在大腿靠近膝盖处'],
+  side_plank:['body',2,0,'肩膀耸起','肩膀不适可以先做跪姿侧桥'],
+  russian_twist:['body',2,0,'只转手臂不转胸','有腰痛史慎做，可以脚着地慢速转'],
+  superman:['body',1,0,'憋气','腰部不适就只抬手或只抬腿'],
+  back_ext:['machine',2,0,'速度太快','顶端不要过度后仰；有腰痛史先咨询医生或教练']
+};
+for(const k in EX_META){ const [eq,lv,cmp,avoid2,risk]=EX_META[k]; Object.assign(EX[k],{eq,lv,cmp:!!cmp,avoid2,risk}); }
+const LV_NAME=['','入门','进阶','较难'];
 const SLUG_CN={deltoids:'三角肌',trapezius:'斜方肌',upperBack:'背阔肌',rhomboids:'菱形肌',biceps:'肱二头肌',triceps:'肱三头肌',chest:'胸大肌',abs:'腹直肌',obliques:'腹斜肌',gluteal:'臀肌',hamstring:'腘绳肌',quadriceps:'股四头肌',adductors:'内收肌',calves:'小腿',lowerBack:'下背'};
 const MUSCLES={
   delt:{name:'三角肌中束',area:'肩部外侧',ex:['lat_raise','cable_lat','band_lat']},
   lats:{name:'背阔肌',area:'上背两侧',ex:['pulldown','db_row']},
-  rear:{name:'后束 · 中下斜方',area:'肩后侧',ex:['face_pull','reverse_fly','band_pull']},
-  pecs:{name:'胸大肌',area:'胸部',ex:['pushup']},
-  core:{name:'核心',area:'腹部',ex:['dead_bug','plank']},
+  rear:{name:'三角肌后束 · 中下斜方',area:'肩后侧与上背',ex:['face_pull','reverse_fly','band_pull']},
+  pecs:{name:'胸大肌',area:'胸部',ex:['pushup','db_press','machine_press']},
+  core:{name:'核心 · 腹横肌 / 腹斜肌',area:'腰腹',ex:['dead_bug','plank','side_plank','russian_twist']},
   gmax:{name:'臀大肌',area:'臀部',ex:['hip_thrust','glute_bridge']},
   gmed:{name:'臀中肌',area:'臀部外侧',ex:['band_walk','side_leg']},
   hams:{name:'腘绳肌',area:'大腿后侧',ex:['rdl','leg_curl']},
-  quads:{name:'股四头肌',area:'大腿前侧',ex:['goblet','split_squat']}
+  quads:{name:'股四头肌',area:'大腿前侧',ex:['goblet','split_squat','plie_squat']}
 };
 // 3D 人体上可点的肌群：区块 → 名称、作用、对应动作；mu 指向训练计划里的肌群
 const RINFO={
-  pecs:{name:'胸大肌',area:'胸部',fn:'把手臂往前推、往里合。圆肩的人胸常偏紧，先拉伸再练。',mu:'pecs',ex:['pushup','chest_stretch']},
-  delts:{name:'三角肌',area:'肩部',fn:'把手臂向前、侧、后抬起。中束是肩宽最直接的来源。',mu:'delt',ex:['lat_raise','cable_lat','band_lat','reverse_fly']},
-  biceps:{name:'肱二头肌',area:'上臂前侧',fn:'屈肘。下拉、划船时也在帮忙。',ex:['db_curl','hammer_curl']},
-  triceps:{name:'肱三头肌',area:'上臂后侧',fn:'伸肘，占上臂围度的一大半，决定手臂后侧线条。',ex:['pushdown','bench_dip','pushup']},
-  abs:{name:'腹直肌',area:'腹部',fn:'让躯干前屈，更重要的是稳住骨盆、不塌腰。',mu:'core',ex:['dead_bug','plank']},
-  obliques:{name:'腹斜肌',area:'腰两侧',fn:'负责转体和侧屈，帮躯干抗扭转。',ex:['side_plank','russian_twist','dead_bug']},
-  traps:{name:'斜方肌',area:'颈肩与上背',fn:'中下束把肩胛往后下方拉，改善圆肩；上束容易代偿，练时别耸肩。',mu:'rear',ex:['face_pull','reverse_fly','band_pull']},
-  lats:{name:'背阔肌',area:'背部两侧',fn:'把手臂往下、往后拉。背变宽，腰就显细。',mu:'lats',ex:['pulldown','db_row']},
-  lowback:{name:'竖脊肌',area:'下背',fn:'保持脊柱挺直，硬拉、臀推时一直在出力。',ex:['superman','back_ext','rdl']},
-  gmax:{name:'臀大肌',area:'臀部',fn:'伸髋。臀部的厚度和形状主要来自它。',mu:'gmax',ex:['hip_thrust','glute_bridge']},
-  gmed:{name:'臀中肌',area:'臀部外上侧',fn:'把腿向外打开，走路时稳住骨盆；练它让臀部上侧更饱满。',mu:'gmed',ex:['band_walk','side_leg']},
-  quads:{name:'股四头肌',area:'大腿前侧',fn:'伸膝，蹲起时的主力。',mu:'quads',ex:['goblet','split_squat']},
-  hams:{name:'腘绳肌',area:'大腿后侧',fn:'屈膝、伸髋，和臀一起发力。',mu:'hams',ex:['rdl','leg_curl']},
-  adductors:{name:'内收肌',area:'大腿内侧',fn:'把腿往里收，深蹲时帮你稳住膝盖。',ex:['plie_squat','goblet']},
-  calves:{name:'小腿三头肌',area:'小腿后侧',fn:'踮脚。站姿练腓肠肌，坐姿练深层的比目鱼肌。',ex:['calf_raise','seated_calf']}
+  pecs:{name:'胸大肌',area:'胸部',fn:'把手臂往前推、往里合。圆肩的人胸常偏紧，先拉伸再练。',shape:'让胸部上缘更饱满，上半身显得更挺拔。',mu:'pecs',ex:['pushup','chest_stretch']},
+  delts:{name:'三角肌',area:'肩部',fn:'把手臂向前、侧、后抬起。中束是肩宽最直接的来源。',shape:'肩部外侧的轮廓：「直角肩」「宽肩」主要来自三角肌中束，不改变骨架宽度。',mu:'delt',ex:['lat_raise','cable_lat','band_lat','reverse_fly']},
+  biceps:{name:'肱二头肌',area:'上臂前侧',fn:'屈肘。下拉、划船时也在帮忙。',shape:'上臂前侧的线条。',ex:['db_curl','hammer_curl']},
+  triceps:{name:'肱三头肌',area:'上臂后侧',fn:'伸肘，占上臂围度的一大半，决定手臂后侧线条。',shape:'上臂后侧的紧实度，也就是「拜拜肉」的位置。',ex:['pushdown','bench_dip','pushup']},
+  abs:{name:'腹直肌',area:'腹部',fn:'让躯干前屈，更重要的是稳住骨盆、不塌腰。',shape:'腹部的紧实和体态；腹肌线条能不能显出来，主要取决于体脂。',mu:'core',ex:['dead_bug','plank']},
+  obliques:{name:'腹斜肌',area:'腰两侧',fn:'负责转体和侧屈，帮躯干抗扭转。',shape:'腰两侧更紧实；腰围主要由整体体脂决定，训练不能局部减脂。',ex:['side_plank','russian_twist','dead_bug'],mu:'core'},
+  traps:{name:'斜方肌',area:'颈肩与上背',fn:'中下束把肩胛往后下方拉，改善圆肩；上束容易代偿，练时别耸肩。',shape:'中下斜方和肩后侧改善圆肩，让肩背更挺；上斜方练多了会显得脖子短。',mu:'rear',ex:['face_pull','reverse_fly','band_pull']},
+  lats:{name:'背阔肌',area:'背部两侧',fn:'把手臂往下、往后拉。背变宽，腰就显细。',shape:'背的宽度。背宽了，腰在视觉上更细，形成倒三角或 X 型。',mu:'lats',ex:['pulldown','db_row']},
+  lowback:{name:'竖脊肌',area:'下背',fn:'保持脊柱挺直，硬拉、臀推时一直在出力。',shape:'支撑挺直的站姿和坐姿。',ex:['superman','back_ext','rdl']},
+  gmax:{name:'臀大肌',area:'臀部',fn:'伸髋。臀部的厚度和形状主要来自它。',shape:'臀部的厚度和上翘程度，蜜桃臀主要靠它。',mu:'gmax',ex:['hip_thrust','glute_bridge']},
+  gmed:{name:'臀中肌',area:'臀部外上侧',fn:'把腿向外打开，走路时稳住骨盆；练它让臀部上侧更饱满。',shape:'臀部外上方的饱满度，让侧面和后面的臀线更圆。',mu:'gmed',ex:['band_walk','side_leg']},
+  quads:{name:'股四头肌',area:'大腿前侧',fn:'伸膝，蹲起时的主力。',shape:'大腿前侧的线条和膝盖上方的形状。',mu:'quads',ex:['goblet','split_squat']},
+  hams:{name:'腘绳肌',area:'大腿后侧',fn:'屈膝、伸髋，和臀一起发力。',shape:'大腿后侧的线条，让臀腿交界更清晰。',mu:'hams',ex:['rdl','leg_curl']},
+  adductors:{name:'内收肌',area:'大腿内侧',fn:'把腿往里收，深蹲时帮你稳住膝盖。',shape:'大腿内侧更紧实。',ex:['plie_squat','goblet']},
+  calves:{name:'小腿三头肌',area:'小腿后侧',fn:'踮脚。站姿练腓肠肌，坐姿练深层的比目鱼肌。',shape:'小腿的线条。',ex:['calf_raise','seated_calf']}
 };
-const W={focus:3,boost:2,keep:1,less:.5};
-const LVNAME={focus:'重点',boost:'加强',keep:'保持',less:'少量'};
-const UPPER=['delt','lats','rear','pecs'], LOWER=['gmax','gmed','hams','quads'];
 const DOW=['日','一','二','三','四','五','六'];
-const SCHED={1:'A',3:'B',5:'C'}; // 周一 / 周三 / 周五
-const DAYNAME={A:'上肢',B:'下肢',C:'重点强化'};
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const todayISO=()=>iso(new Date());
+const pickCm=c=>({shoulder:c.shoulder,waist:c.waist,hip:c.hip,thigh:c.thigh});
 
-/* ---------------- state ---------------- */
-const KEY='bodynav.v4';
-const S={mode:'a',sex:null,target:'square',tgt:null,af:{frame:'m',foci:['shoulder','hip','waist']},rounded:true,apt:false,meas:null,done:{},swap:{},notes:{},voice:true,countVoice:true,h:null};
-const T={ph:{front:null,side:null,ref:null},step:'front',mtab:S.meas&&S.meas.src==='scan'?'scan':'manual',man:null,coachKey:'A',draft:null,hFocus:null,selDay:null,muscle:null};
+/* ---------------- state ----------------
+   v5（P0 重构：目标驱动的训练计划）。从 v4 迁移有用的：性别、备注、语音设置、自己的测量；样例数据和厘米目标不再使用。
+   log：每天一条 {d, st:'done'|'skip', k:训练, mus:[肌群]}；rot：已完成的训练次数，决定下一次练哪个（漏练、跳过都不前进 → 自动顺延） */
+const KEY='bodynav.v5';
+const S={onb:false,sex:null,goals:[],freq:3,exp:'n',eq:['db','cable','machine','band'],rounded:false,apt:false,
+  log:[],rot:0,done:{},swap:{},daySwap:null,notes:{},meas:null,measLog:[],voice:true,countVoice:true,h:null};
 try{
   const r=localStorage.getItem(KEY);
   if(r) Object.assign(S,JSON.parse(r));
-  else{ const o=JSON.parse(localStorage.getItem('bodynav.v3')||'null'); if(o){ ['target','rounded','apt','done','swap','voice','countVoice'].forEach(k=>{ if(k in o) S[k]=o[k]; }); } }
+  else{ const o=JSON.parse(localStorage.getItem('bodynav.v4')||'null');
+    if(o){ for(const k of ['sex','notes','voice','countVoice','h']) if(k in o) S[k]=o[k];
+      if(o.postureSet){ S.rounded=!!o.rounded; S.apt=!!o.apt; }
+      if(o.meas&&o.mode==='photo'&&o.meas.cm){ S.meas=o.meas; S.measLog=[{d:todayISO(),cm:pickCm(o.meas.cm),h:o.meas.h}]; } } }
 }catch(e){}
+const T={ph:{front:null,side:null},step:'front',mtab:S.meas&&S.meas.src==='scan'?'scan':'manual',man:null,draft:null,muscle:null,force:false,obd:null};
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
 
 /* ---------------- body math ---------------- */
@@ -468,211 +547,75 @@ function derive(raw,h,legR){
     waist:ellipse(raw.waistW,waistD),hip:ellipse(raw.hipW,hipD),thigh:ellipse(raw.thighW,thighD)};
   return {swr:raw.shoulderW/raw.waistW,hwr:raw.hipW/raw.waistW,whr:cm.waist/cm.hip,cm,h,legR,est};
 }
-/* ---------------- 目标 ----------------
-   预设模板只定义比例（腰围不变，按比例放大肩宽/臀宽）。
-   「我的目标」（进阶生成 / 自定义 / 参考照片）直接给出四个围度（cm），规则按每项的 cm 差距判断。
-   骨架上限 = 身高 × 系数 × 骨架系数，是自然训练大致能到的范围，用来给进阶目标和参考照片封顶。 */
-const FRAMES={s:{name:'偏小',k:.96},m:{name:'适中',k:1},l:{name:'偏大',k:1.04}};
-const NORMS={f:{shoulder:.25,hip:.60,thigh:.34,waist:.40},m:{shoulder:.275,hip:.56,thigh:.34,waist:.43}}; // × 身高；腰围是理想下限，其余是上限
-const STEP={shoulder:1,hip:2.5,thigh:1.5,waist:3};       // 一个阶段（约 12 周）的合理变化，cm
-const TOL={shoulder:.5,waist:1,hip:1,thigh:1};           // 差距在这以内算达标（显示和规则共用）
 const DIMS=[['shoulder','肩宽'],['waist','腰围'],['hip','臀围'],['thigh','腿围']];
-const DIM_MU={shoulder:'三角肌中束、背阔肌',hip:'臀大肌、臀中肌',thigh:'股四头肌、腘绳肌',waist:'整体体脂'};
-/* ---------------- 体型建议（规则 A1–A5）----------------
-   不管目标有没有达成都给建议：每一项和「按身高的理想值」比（围度 ÷ 身高），找出最值得练的地方。
-   全部在理想范围内时，挑离边界最近的一项作为「雕刻」方向——始终有事可做。 */
-const ADV_N={f:{shoulder:.245,waist:.40,hip:.57,thigh:[.52,.60]},m:{shoulder:.27,waist:.44,hip:.53,thigh:[.54,.62]}};
-function bodyAdvice(m){
-  const c=m.cm, h=m.h||(sx()==='m'?175:163), N=ADV_N[sx()], out=[], tr=c.thigh/c.hip, M=sx()==='m';
-  const gS=N.shoulder*h-c.shoulder, gW=c.waist-N.waist*h, gH=N.hip*h-c.hip;
-  if(gS>=.5) out.push({id:'A1',k:'shoulder',sc:gS/STEP.shoulder,title:'肩线再打开一点',detail:`肩宽 ${f1(c.shoulder)} cm，按你的身高 ${Math.round(N.shoulder*h)} cm 左右更挺拔：练三角肌中束和背阔肌。`,mus:[['delt','boost'],['lats','boost']]});
-  if(gH>=1.5) out.push({id:'A2',k:'hip',sc:gH/STEP.hip,title:M?'臀腿力量再加强':'臀部再饱满一点',detail:`臀围 ${Math.round(c.hip)} cm，按身高约 ${Math.round(N.hip*h)} cm 更${M?'有力量感':'饱满'}：加强臀大肌、臀中肌。`,mus:[['gmax','boost'],['gmed','boost']]});
-  if(gW>=2) out.push({id:'A3',k:'waist',sc:gW/STEP.waist,title:'腰线再收一点',detail:`腰围 ${Math.round(c.waist)} cm，按身高 ${Math.round(N.waist*h)} cm 以内更利落。腰围靠整体体脂下降，核心训练让腰腹更紧实。`,mus:[['core','boost']]});
-  if(tr>N.thigh[1]+.02) out.push({id:'A4',k:'thigh',sc:(tr-N.thigh[1])*20,title:'腿部线条更修长',detail:`腿围约是臀围的 ${Math.round(tr*100)}%，偏粗：下肢以臀和大腿后侧为主，减少大重量蹲类。`,mus:[['quads','less'],['hams','boost']]});
-  else if(tr<N.thigh[0]-.02) out.push({id:'A5',k:'thigh',sc:(N.thigh[0]-tr)*20,title:'腿部力量再加强',detail:`腿围约是臀围的 ${Math.round(tr*100)}%，偏细：加强股四头肌和腘绳肌。`,mus:[['quads','boost'],['hams','boost']]});
-  out.sort((a,b)=>b.sc-a.sc);
-  if(!out.length){ // 都在理想区间：挑余量最小的一项雕刻
-    const mg=[['shoulder',c.shoulder/(N.shoulder*h)-1],['hip',c.hip/(N.hip*h)-1],['waist',N.waist*h/c.waist-1]].sort((a,b)=>a[1]-b[1])[0][0];
-    const R={shoulder:{title:'雕刻肩背线条',detail:'各项比例都在理想区间。肩背是相对最可以再精进的地方：侧平举、面拉保持高质量。',mus:[['delt','boost'],['rear','boost']]},
-      hip:{title:M?'雕刻臀腿线条':'雕刻臀部线条',detail:'各项比例都在理想区间。臀部是相对最可以再精进的地方：臀推、侧向走多做慢速离心。',mus:[['gmax','boost'],['gmed','boost']]},
-      waist:{title:'雕刻腰腹线条',detail:'各项比例都在理想区间。腰腹是相对最可以再精进的地方：保持体脂，核心训练让线条更清楚。',mus:[['core','boost']]}}[mg];
-    out.push({id:'A0',k:mg,sc:0,...R});
-  }
-  return out;
-}
-const capOf=(h,fr)=>{ const k=(FRAMES[fr]||FRAMES.m).k, N=NORMS[sx()]; return {shoulder:N.shoulder*h*k,hip:N.hip*h*k,thigh:N.thigh*h*k,waist:N.waist*h*(.75+.25*k)}; };
-// 下一阶段：选中的部位往前走一步（不超过骨架上限），腰围高于理想值才往下收
-function autoCm(m,o){
-  const c=m.cm, cap=capOf(m.h||163,o.frame), f=new Set(o.foci), t={};
-  for(const k of ['shoulder','hip','thigh']) t[k]=f.has(k)?Math.max(c[k],Math.min(cap[k],c[k]+STEP[k])):c[k];
-  t.waist=f.has('waist')&&c.waist>cap.waist?Math.max(cap.waist,c.waist-STEP.waist):c.waist;
-  return t;
-}
-const cm1=cm=>Object.fromEntries(Object.entries(cm).map(([k,v])=>[k,Math.round(v*10)/10]));
-const cmRatios=cm=>{ const ww=cm.waist/ellipse(1,DK().waist); return {swr:cm.shoulder/ww,hwr:cm.hip/ellipse(1,DK().hip)/ww}; };
-const MINE_NOTE={auto:'按你的身高和骨架生成的下一阶段',custom:'你手动设定的四项尺寸',ref:'从参考照片提取的比例，换算到你的身高'};
-const target=()=>{
-  if(S.target==='mine'&&S.tgt&&S.tgt.cm&&(S.tgt.sex||'f')===sx()) return {id:'mine',kind:S.tgt.kind,name:S.tgt.name,note:MINE_NOTE[S.tgt.kind]||'',cm:S.tgt.cm,...cmRatios(S.tgt.cm)};
-  return targetsOf(sx()).find(t=>t.id===S.target)||TARGETS.find(t=>t.id===DEF_TARGET[sx()]);
-};
-function cur(){
-  if(S.mode==='photo'&&S.meas) return S.meas;
-  const k=SAMPLES[S.mode]&&SAMPLES[S.mode].sex===sx()?S.mode:samplesOf(sx())[0], s=SAMPLES[k]; return derive(s.raw,s.h,s.legR);
-}
 const isApp=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
-const isSample=()=>!(S.mode==='photo'&&S.meas);
-
-/* ---------------- plan logic ---------------- */
-function analyze(){
-  const m=cur(), t=target(), c=m.cm;
-  const dS=t.swr-m.swr, dH=t.hwr-m.hwr, L={}, notes=[];
-  const up=(id,lv)=>{ if(!L[id]||W[lv]>W[L[id]]) L[id]=lv; };
-  let g=null;
-  if(t.cm){
-    // 我的目标：按每项 cm 差距（腰围是「要减多少」）
-    g=cm1({shoulder:t.cm.shoulder-c.shoulder,hip:t.cm.hip-c.hip,thigh:t.cm.thigh-c.thigh,waist:c.waist-t.cm.waist}); // 取到 0.1 cm，避免换算误差卡在阈值边上
-    if(g.shoulder>=2.5){up('delt','focus');up('lats','boost');} else if(g.shoulder>=0.5){up('delt','boost');up('lats','boost');}
-    if(g.hip>=4){up('gmed','focus');up('gmax','focus');} else if(g.hip>=1.5){up('gmed','boost');up('gmax','boost');}
-    if(g.thigh>=1.5){up('quads','boost');up('hams','boost');} else if(g.thigh<=-2) L.quads='less';
-    if(g.waist>=2) notes.push(`腰围要收 ${f1(g.waist)} cm：靠整体体脂下降（饮食 + 总训练量），练腹不能局部瘦腰。`);
-  } else {
-    if(dS>=0.10){up('delt','focus');up('lats','boost');} else if(dS>=0.04){up('delt','boost');up('lats','boost');}
-    if(dH>=0.10){up('gmed','focus');up('gmax','focus');} else if(dH>=0.04){up('gmed','boost');up('gmax','boost');}
-    if(t.id==='ballet'&&dH<=0) L.quads='less';
-  }
-  if(t.emph) for(const id in t.emph) up(id,t.emph[id]);   // R9 预设自带的侧重
-  const adv=bodyAdvice(m);                                  // A 系列：体型建议，取前两条进计划
-  for(const a of adv.slice(0,2)) for(const [id,lv] of a.mus){ if(lv==='less'){ if(!L[id]) L[id]='less'; } else up(id,lv); }
-  if(S.rounded){up('rear','focus'); L.pecs=L.pecs==='boost'?'keep':'less';} // 圆肩时胸先放松，倒三角模板的加强胸也降为保持
-  if(S.apt){up('gmax','boost');up('hams','boost');up('core','boost');}
-  for(const id in MUSCLES) if(!L[id]) L[id]='keep';
-  const wsum=Object.values(L).reduce((a,lv)=>a+W[lv],0);
-  const sets={}; for(const id in L) sets[id]=Math.max(1,Math.round(36*W[L[id]]/wsum));
-  const focus=Object.keys(L).filter(id=>L[id]==='focus');
-  // 用 cm 表达差距：腰宽不变，肩/臀需要多出的宽度
-  const gS=t.swr*m.cm.waistW-m.cm.shoulder, gH=t.hwr*m.cm.waistW-m.cm.hipW;
-  let head, reached;
-  if(g){
-    // 标题取「相对一个阶段步长」最大的那项差距
-    const top=[['shoulder','肩宽',0.5],['hip','臀围',1.5],['thigh','腿围',1.5],['waist','腰围',2]].filter(([k,,th])=>g[k]>=th).sort((a,b)=>g[b[0]]/STEP[b[0]]-g[a[0]]/STEP[a[0]]||g[b[0]]-g[a[0]])[0];
-    reached=!top;
-    head=top?`${top[1]} <span class="num">${top[0]==='waist'?'−':'+'}${f1(g[top[0]])}</span> cm 到目标`:'';
-  } else {
-    reached=Math.max(dS,dH)<0.04;
-    if(reached) head='';
-    else if(dS>=dH) head=`肩宽 <span class="num">+${f1(gS)}</span> cm 到目标`;
-    else head=`臀宽 <span class="num">+${f1(gH)}</span> cm 到目标`;
-  }
-  const pl=plausible(c,m.h||163).adj;
-  if(pl.length) notes.push(`${pl.map(k=>DIMS.find(d=>d[0]===k)[1]).join('、')}和其他尺寸的组合不太符合常见人体比例，可能是测量或照片识别有误，3D 模型按常见比例显示。建议核对测量。`);
-  if(reached){ head=`下一步：${adv[0].title}`; notes.unshift(t.cm?'这个目标已经达成。':Math.min(dS,dH)<=-0.04?`比例已超过「${t.name}」目标。`:`已经很接近「${t.name}」目标。`); }
-  return {m,t,dS,dH,gS,gH,g,L,sets,focus,head,reached,notes,adv};
-}
-function weekPlan(r){
-  const D={A:{name:'上肢',items:[]},B:{name:'下肢',items:[]},C:{name:'重点强化',items:[]}};
-  const order=Object.keys(r.L).sort((a,b)=>W[r.L[b]]-W[r.L[a]]);
-  for(const id of order){
-    const lv=r.L[id], s=r.sets[id], g=UPPER.includes(id)?'A':LOWER.includes(id)?'B':'C';
-    if(g!=='C' && (lv==='focus'||lv==='boost') && s>=4){
-      const a=Math.ceil(s/2); D[g].items.push({mu:id,lv,sets:a}); D.C.items.push({mu:id,lv,sets:s-a,alt:1});
-    } else D[g].items.push({mu:id,lv,sets:s});
-  }
-  if(S.rounded) D.A.items.push({mu:null,ex:'chest_stretch',lv:'keep',sets:1,stretch:1});
-  if(S.apt) D.B.items.push({mu:null,ex:'hipflex_stretch',lv:'keep',sets:1,stretch:1});
-  for(const k in D){ D[k].sets=D[k].items.reduce((a,it)=>a+(it.stretch?0:it.sets),0); D[k].min=Math.max(15,Math.round((D[k].sets*2.6+(D[k].items.some(i=>i.stretch)?3:0))/5)*5); }
-  return D;
-}
-const exOf=(k,it)=>it.ex || S.swap[k+':'+it.mu] || MUSCLES[it.mu].ex[it.alt&&MUSCLES[it.mu].ex[1]?1:0];
-function weekDates(){
-  const now=new Date(); const mon=new Date(now); mon.setDate(now.getDate()-((now.getDay()+6)%7)); mon.setHours(0,0,0,0);
-  return [0,1,2,3,4,5,6].map(i=>{const d=new Date(mon); d.setDate(mon.getDate()+i); return d;});
-}
-const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-const todayISO=()=>iso(new Date());
-function dayProgress(date,key,plan){ const its=plan[key].items; const n=its.filter(it=>S.done[date+':'+exOf(key,it)]).length; return {n,total:its.length}; }
 const notesOf=e=>S.notes[e]||[];
+const addDays=(d,n)=>{ const x=new Date(d+'T00:00'); x.setDate(x.getDate()+n); return iso(x); };
+const dayDiff=(a,b)=>Math.round((new Date(b+'T00:00')-new Date(a+'T00:00'))/864e5);
+const mondayOf=d=>{ const x=new Date(d+'T00:00'); x.setDate(x.getDate()-(x.getDay()+6)%7); return iso(x); };
 
-/* ---------------- 2D fallback figure ---------------- */
-function smooth(p){
-  const F=v=>v.toFixed(1),n=p.length; let d=`M${F(p[0][0])},${F(p[0][1])}`;
-  for(let i=0;i<n;i++){const a=p[(i-1+n)%n],b=p[i],c=p[(i+1)%n],e=p[(i+2)%n];
-    d+=`C${F(b[0]+(c[0]-a[0])/6)},${F(b[1]+(c[1]-a[1])/6)} ${F(c[0]-(e[0]-b[0])/6)},${F(c[1]-(e[1]-b[1])/6)} ${F(c[0])},${F(c[1])}`;}
-  return d+'Z';
+/* ---------------- 训练计划（PRD「训练计划生成规则」）----------------
+   体型目标 → 主练肌群；每周次数 → 分化；训练经验 → 组数；可用器械 → 选哪个动作。
+   同样的输入永远得到同样的计划。 */
+const mainMus=()=>[...new Set(goalsOf().flatMap(g=>g.mus))];
+const eqOK=e=>EX[e].eq==='body'||(S.eq||[]).includes(EX[e].eq);
+function pickEx(mu,v){
+  const all=MUSCLES[mu].ex, ok=all.filter(eqOK), L=ok.length?ok:all, fixed=S.swap[mu+':'+(v%2)];
+  return fixed&&L.includes(fixed)?fixed:L[v%L.length];
 }
-function bodyPath(cx,hw,swr,hwr){
-  const hS=hw*swr,hH=hw*hwr,ua=hw+(hS-hw)*.55;
-  const R=[[9,62],[hS*.6,76],[hS,92],[hS*.94,114],[ua,135],[hw,185],[hH,232],[hH*.93,268],[hH*.68,330],[hH*.5,372],[hH*.44,410],[hH*.2,414],[hH*.17,372],[hH*.16,320],[4,280]];
-  return smooth(R.map(([x,y])=>[cx+x,y]).concat(R.map(([x,y])=>[cx-x,y]).reverse()));
+// 一次训练：全身 = 全部主练肌群 + 一半非主练肌群（A/B 轮流，每个肌群每周都练到）；上下肢 = 对应半身。
+// 2 次/周、4 次/周时主练肌群每次 2 个动作；单次最多 8 个动作；先复合后孤立、主练在前；体态拉伸放最后。
+function sessionItems(key){
+  const main=mainMus(), X=EXP[S.exp]||EXP.n, f=S.freq, v=key==='B'||key.endsWith('2')?1:0;
+  const mus=f===4?(key.startsWith('U')?UP_MU:LO_MU):[...main,...ALL_MU.filter(m=>!main.includes(m)).filter((_,i)=>i%2===(key==='A'?0:1))];
+  const items=[], seen=new Set();
+  for(const mu of mus){ const isMain=main.includes(mu), n=isMain&&(f===2||f===4)?2:1;
+    for(let j=0;j<n;j++){ let e=pickEx(mu,v+j);
+      if(seen.has(e)){ const all=MUSCLES[mu].ex, ok=all.filter(eqOK); e=(ok.length?ok:all).find(x=>!seen.has(x)); if(!e) continue; } // 换过的动作和另一个位置撞了：用同组下一个没用过的
+      seen.add(e); items.push({mu,e,v:v+j,main:isMain,sets:isMain?X.main:X.base}); } }
+  while(items.length>8){ let i=-1; for(let k=items.length-1;k>=0;k--) if(!items[k].main&&!EX[items[k].e].cmp){ i=k; break; }
+    if(i<0) for(let k=items.length-1;k>=0;k--) if(!items[k].main){ i=k; break; } if(i<0) break; items.splice(i,1); }
+  items.sort((a,b)=>(EX[b.e].cmp-EX[a.e].cmp)||(b.main-a.main));
+  if(S.rounded&&(f!==4||key.startsWith('U'))) items.push({mu:null,e:'chest_stretch',stretch:1,sets:1});
+  if(S.apt&&(f!==4||key.startsWith('L'))) items.push({mu:null,e:'hipflex_stretch',stretch:1,sets:1});
+  return items;
 }
-function figure2d(m,t){
-  const w=30,cx=120;
-  return `<svg viewBox="40 10 160 410" role="img" aria-label="实线为现在的身材，虚线为目标身材">
-    <circle cx="${cx}" cy="40" r="18" style="fill:var(--body);stroke:var(--ink)" stroke-width="1.2"/>
-    <path d="${bodyPath(cx,w,m.swr,m.hwr)}" style="fill:var(--body);stroke:var(--ink)" stroke-width="1.2"/>
-    <path d="${bodyPath(cx,w,t.swr,t.hwr)}" style="fill:none;stroke:var(--accent)" stroke-width="1.6" stroke-dasharray="5 4"/>
-  </svg>`;
+const rotOf=()=>(SPLITS[S.freq]||SPLITS[3]).rot;
+const nextKey=()=>rotOf()[(S.rot||0)%rotOf().length];
+// 某天的训练：当天临时换过的动作（daySwap）只在那一天生效，不改周计划
+function sessionFor(key,date){
+  const sw=S.daySwap&&S.daySwap.d===date?S.daySwap.m:{};
+  const items=sessionItems(key).map(it=>sw[it.e]?{...it,orig:it.e,e:sw[it.e]}:it);
+  const sets=items.reduce((a,it)=>a+(it.stretch?0:it.sets),0);
+  return {key,name:SESSION_NAME[key],items,sets,min:Math.max(15,Math.round((sets*2.6+(items.some(i=>i.stretch)?3:0))/5)*5),
+    mus:[...new Set(items.filter(i=>i.mu).map(i=>i.mu))]};
 }
-const mini=t=>`<svg class="mini" viewBox="60 15 120 410" aria-hidden="true"><circle cx="120" cy="40" r="18" style="fill:none;stroke:currentColor" stroke-width="5" stroke-dasharray="10 8"/><path d="${bodyPath(120,34,t.swr,t.hwr)}" style="fill:none;stroke:currentColor" stroke-width="6" stroke-dasharray="14 10"/></svg>`;
+// 每周练几次某个肌群（肌群图谱里显示）
+function weeklyFreq(mu){ const r=rotOf(); let n=0; for(let i=0;i<S.freq;i++) if(sessionItems(r[i%r.length]).some(it=>it.mu===mu)) n++; return n; }
+// 今天：完成了 / 跳过了 / 建议休息（同一主练肌群间隔 < 48 小时，或本周次数已练完）/ 该练了
+function todayState(){
+  const t=todayISO(), log=S.log||[], doneToday=log.find(l=>l.d===t&&l.st==='done'), skipToday=log.find(l=>l.d===t&&l.st==='skip');
+  const key=nextKey(), ses=sessionFor(key,t), wk=mondayOf(t), weekDone=log.filter(l=>l.st==='done'&&l.d>=wk&&l.d<=t).length;
+  const last=[...log].reverse().find(l=>l.st==='done'&&l.d<t);
+  let rest=null;
+  if(!doneToday&&last&&dayDiff(last.d,t)<2){ const ov=ses.mus.filter(m=>(last.mus||[]).includes(m)&&mainMus().includes(m));
+    if(ov.length) rest=`昨天练过${ov.map(m=>MUSCLES[m].name).join('、')}，同一肌群隔 48 小时再练恢复更好。`; }
+  if(!doneToday&&!rest&&weekDone>=S.freq) rest=`本周 ${S.freq} 次已经练完，下周继续。`;
+  return {t,key,ses,doneToday,skipToday,weekDone,rest};
+}
+function logDone(key,mus){ const t=todayISO(); S.log=(S.log||[]).filter(l=>l.d!==t); S.log.push({d:t,k:key,st:'done',mus}); S.log=S.log.slice(-400); S.rot=(S.rot||0)+1; save(); }
+function logSkip(){ const t=todayISO(); if((S.log||[]).some(l=>l.d===t)) return; S.log.push({d:t,st:'skip'}); save(); }
+// 周视图：一周 7 天的状态（完成 / 跳过 / 休息 / 今天 / 未到）
+function weekDays(off){ const t=todayISO(), m0=addDays(mondayOf(t),7*off);
+  return [...Array(7)].map((_,i)=>{ const d=addDays(m0,i), L=(S.log||[]).filter(x=>x.d===d), dn=L.find(x=>x.st==='done'), sk=L.find(x=>x.st==='skip');
+    return {d,dow:DOW[new Date(d+'T00:00').getDay()],st:dn?'done':sk?'skip':d>t?'future':d===t?'today':'rest',k:dn&&dn.k,mus:dn?dn.mus||[]:[]}; }); }
+// 肌群图谱的人体：有自己的测量就按自己的身体，没有就用常见体型（不显示任何数字）
+function bodyM(){ if(S.meas&&S.meas.cm) return S.meas; const b=BASE_BODY[sx()]; return derive(b.raw,b.h,b.legR); }
 
-/* ---------------- fitting-card figure ----------------
-   量体卡式人体图：MuscleMap 女性正/背面轮廓，相关肌群按状态着色，软尺线 + 刻度 + 引线标签。
-   线的位置是这张示意图上的固定位置（SVG 坐标），数值来自测量。 */
-const FIG_INERT=new Set(['head','hair','neck','hands','feet','knees','ankles']);
-const FIG_LINES={
-  shoulder:{name:'肩宽',groups:['deltoids','trapezius'],front:[318,172,469],back:[312,174,465]},
-  waist:{name:'腰围',groups:['obliques','abs','lowerBack'],front:[562,239,401],back:[560,240,399]},
-  hip:{name:'臀围',groups:['gluteal'],front:[700,204,436],back:[700,196,443]},
-  thigh:{name:'腿围',groups:['quadriceps','adductors','hamstring'],front:[800,197,295],back:[820,200,308]}
-};
-const FIG_OX={front:0,back:823};
-// 目标：腰不变，按目标比例放大肩宽/臀宽；臀围按同比例放大厚度
-function figMetrics(r){
-  const m=r.m, c=m.cm, t=r.t, tH=t.hwr*c.waistW;
-  const tgt=t.cm?{...t.cm}:{shoulder:t.swr*c.waistW,waist:null,hip:ellipse(tH,c.hipD*(tH/c.hipW)),thigh:null};
-  const cur={shoulder:c.shoulder,waist:c.waist,hip:c.hip,thigh:c.thigh};
-  const out={};
-  for(const k in FIG_LINES){
-    const d=tgt[k]==null?null:Math.round((cur[k]-tgt[k])*10)/10;
-    let st;
-    if(d==null) st={cls:'na',color:'var(--muted)',label:''};
-    else if(Math.abs(d)<=TOL[k]) st={cls:'ok',color:'var(--accent)',label:'✓'};
-    else st=d>0?{cls:'over',color:'var(--warm)',label:'+'+d.toFixed(1)}:{cls:'under',color:'var(--under)',label:d.toFixed(1)};
-    out[k]={cur:cur[k],tgt:tgt[k],d,...st};
-  }
-  return out;
-}
-function figureSVG(r,view){
-  const M=figMetrics(r), ox=FIG_OX[view], d=MM[view];
-  const owner={}; for(const k in FIG_LINES) FIG_LINES[k].groups.forEach(g=>owner[g]=k);
-  let body='';
-  for(const slug of Object.keys(d)){
-    const path=d[slug].join(' ');
-    if(FIG_INERT.has(slug)){ body+=`<path class="inert" d="${path}"/>`; continue; }
-    const k=owner[slug];
-    body+=k&&M[k].cls!=='na'?`<path class="m hl" data-metric="${k}" style="--st:${M[k].color}" d="${path}"/>`:`<path class="m" d="${path}"/>`;
-  }
-  const lx=ox+668;
-  let meas='';
-  for(const k in FIG_LINES){
-    const L=FIG_LINES[k], [y,x1,x2]=L[view], a=x1+ox, b=x2+ox, s=M[k];
-    let ticks=''; for(let x=a+12;x<b-6;x+=12) ticks+=`<line class="tick" x1="${x}" y1="${y-((((x-a)/12)%5===0)?9:5)}" x2="${x}" y2="${y}"/>`;
-    meas+=`<g class="meas" data-metric="${k}" data-act="focus" data-arg="${k}" style="--st:${s.color}">
-      <line class="tape" x1="${a}" y1="${y}" x2="${b}" y2="${y}"/>${ticks}
-      <line class="tick" x1="${a}" y1="${y-12}" x2="${a}" y2="${y+12}"/><line class="tick" x1="${b}" y1="${y-12}" x2="${b}" y2="${y+12}"/>
-      <path class="lead" d="M${b+8},${y} H${lx-14}"/><circle cx="${lx-8}" cy="${y}" r="5"/>
-      <text x="${lx+4}" y="${y-6}">${L.name}</text>
-      <text class="val" x="${lx+4}" y="${y+38}">${k==='shoulder'?f1(s.cur):Math.round(s.cur)}</text>
-      <text class="dl" x="${lx+(k==='shoulder'?112:80)}" y="${y+38}">${s.label}</text>
-      <rect x="${a}" y="${y-30}" width="${lx+190-a}" height="70" fill="transparent"/></g>`;
-  }
-  return `<svg id="fig" viewBox="${ox-10} 0 860 1450" role="img" aria-label="${view==='front'?'正面':'背面'}人体比例图" class="${T.hFocus?'dim':''}">${body}${meas}</svg>`;
-}
-function applyFigFocus(){
-  const svg=$('fig'); if(!svg) return;
-  svg.classList.toggle('dim',!!T.hFocus);
-  svg.querySelectorAll('[data-metric]').forEach(n=>n.classList.toggle('focus',n.dataset.metric===T.hFocus));
-  document.querySelectorAll('.metric').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.arg===T.hFocus)));
-}
+/* ---------------- 没有 WebGL 时：正 / 背面肌群图，计划里的主练肌群高亮 ---------------- */
+const MU_SLUG={delt:['deltoids'],rear:['trapezius','rhomboids'],lats:['upperBack'],pecs:['chest'],core:['abs','obliques'],gmax:['gluteal'],gmed:['gluteal'],quads:['quadriceps'],hams:['hamstring']};
+function atlasFallback(el){ el.classList.add('flat'); const p=mainMus().flatMap(m=>MU_SLUG[m]||[]);
+  el.innerHTML=`<div class="muscles" style="grid-template-columns:1fr 1fr">${muscleSVG('front',p,[])}${muscleSVG('back',p,[])}</div>`; }
 
 /* ---------------- 3D 人体：网格与拟合 ----------------
    body.mesh.wasm = MakeHuman 女性基础网格（MPFB2，CC0）+ 4 个测量形变（肩宽/腰围/臀围/腿围）+ 每个顶点在 MuscleMap 正/背面图上的坐标。
@@ -900,38 +843,37 @@ const B3={r:null};
 const cssv=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const cssColor=c=>{ const m=/var\((--[\w-]+)\)/.exec(c); return m?cssv(m[1]):c; };
 function regionLevel(key){
-  const R=RINFO[key], r=analyze();
-  if(R.mu) return {lv:r.L[R.mu],txt:LVNAME[r.L[R.mu]]+' · 每周 '+r.sets[R.mu]+' 组'};
-  return {lv:'',txt:'计划外 · 想练可以加'};
+  const mu=RINFO[key].mu; if(!mu) return {lv:'',txt:'计划外 · 想练可以从动作库加'};
+  const n=weeklyFreq(mu); if(mainMus().includes(mu)) return {lv:'main',txt:`主练 · 每周 ${n} 次`};
+  return n?{lv:'base',txt:`基础训练 · 每周 ${n} 次`}:{lv:'',txt:'计划外 · 想练可以从动作库加'};
 }
 function musclePanel(key){
-  if(!key||!RINFO[key]) return `<p class="mp-hint">点一块肌肉，看它是什么、怎么练 · 左右拖动旋转</p>`;
+  if(!key||!RINFO[key]) return `<p class="mp-hint">点一块肌肉，看它是什么、对体型有什么影响、怎么练 · 左右拖动旋转</p>`;
   const R=RINFO[key], L=regionLevel(key);
   return `<div class="mp-head"><div><p class="eyebrow">${R.area}</p><p class="h2">${R.name}</p></div>
-      <span class="badge ${L.lv==='focus'||L.lv==='boost'?'acc':''}">${L.txt}</span>
+      <span class="badge ${L.lv==='main'?'acc':''}">${L.txt}</span>
       <button class="mp-x" type="button" data-act="muscle" data-arg="" aria-label="关闭">${I.x||'×'}</button></div>
-    <p class="small muted">${R.fn}</p>
-    <div class="list">${R.ex.map(e=>`<button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span style="min-width:0"><span class="t">${EX[e].name}${notesOf(e).length?'<span class="badge">备注</span>':''}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div>`;
+    <div class="stack" style="gap:6px"><p class="small"><b>作用</b>　${R.fn}</p><p class="small"><b>对体型</b>　${R.shape||''}</p></div>
+    <div class="list">${R.ex.map(e=>exRow(e,`data-go="ex" data-arg="${e}"`,EX[e].reps)).join('')}</div>`;
 }
 function unmount3D(){ if(B3.r){ try{ B3.r.dispose(); }catch(e){} B3.r=null; } }
-function body3dFallback(el,r){ el.classList.add('flat'); el.innerHTML=figureSVG(r,S.figView||'front'); applyFigFocus(); }
-function mountBody(el,r){
+function mountBody(el,m){
   unmount3D();
   const THREE=window.THREE; let ok=!!THREE;
   if(ok){ try{ const c=document.createElement('canvas'); ok=!!(c.getContext('webgl')||c.getContext('experimental-webgl')); }catch(e){ ok=false; } }
-  if(!ok){ body3dFallback(el,r); return; }
+  if(!ok){ atlasFallback(el); return; }
   el.classList.add('loading');
-  meshLoad().then(M=>{ if(!el.isConnected) return; el.classList.remove('loading'); build3D(el,r,M); })
-    .catch(()=>{ if(el.isConnected){ el.classList.remove('loading'); body3dFallback(el,r); } });
+  meshLoad().then(M=>{ if(!el.isConnected) return; el.classList.remove('loading'); build3D(el,m,M); })
+    .catch(()=>{ if(el.isConnected){ el.classList.remove('loading'); atlasFallback(el); } });
 }
-function build3D(el,r,M){
-  const THREE=window.THREE, m=r.m, c=m.cm;
+function build3D(el,m,M){
+  const THREE=window.THREE, c=m.cm;
   const pc=plausible(c,m.h||163).cm, goal={h:(m.h||163)/100,shoulder:pc.shoulder/100,waist:pc.waist/100,hip:pc.hip/100,thigh:pc.thigh/100};
   const F=fitBody(M,goal), s=F.s, H=F.mm.H, D=dispMesh(M,F,sx()), X=D.X, A=D.adj, nv=D.nv;
   const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
   renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
   if('outputEncoding' in renderer) renderer.outputEncoding=THREE.sRGBEncoding;
-  const cv=renderer.domElement; cv.setAttribute('aria-label','你的 3D 身体模型，可拖动旋转，点肌肉查看练法'); cv.setAttribute('role','img');
+  const cv=renderer.domElement; cv.setAttribute('aria-label','3D 肌群图谱，可拖动旋转，点肌肉查看作用和练法'); cv.setAttribute('role','img');
   el.prepend(cv);
   const scene=new THREE.Scene(), cam=new THREE.PerspectiveCamera(22,1,.05,20);
   const root=new THREE.Group(); root.scale.setScalar(s); scene.add(root);
@@ -972,35 +914,16 @@ function build3D(el,r,M){
   const cen={}; for(let j=0;j<nv;j++){ const k=REGIONS[rid[j]]; if(!k) continue; const o=cen[k]||(cen[k]=[0,0,0,0]); o[0]+=X[j*3]; o[1]+=X[j*3+1]; o[2]+=X[j*3+2]; o[3]++; }
   const lin=h=>new THREE.Color(h).convertSRGBToLinear();
   function paint(){
-    const bg=lin(cssv('--bg')), base=lin(cssv('--body')), acc=lin(cssv('--accent')), sel=T.muscle, lv=analyze().L, dark=bg.r+bg.g+bg.b<.3;
+    const bg=lin(cssv('--bg')), base=lin(cssv('--body')), acc=lin(cssv('--accent')), sel=T.muscle, mm=mainMus(), dark=bg.r+bg.g+bg.b<.3;
     const skin=dark?base.clone().lerp(lin('#ffffff'),.06):base.clone().lerp(lin('#ffffff'),.35);
     rimC.value.copy(bg); shadow.material.opacity=dark?.8:.5;
-    const pal=REGIONS.map((k,i)=>{ if(!i) return skin; const mu=RINFO[k]&&RINFO[k].mu, hot=mu&&(lv[mu]==='focus'||lv[mu]==='boost');
+    const pal=REGIONS.map((k,i)=>{ if(!i) return skin; const mu=RINFO[k]&&RINFO[k].mu, hot=mu&&mm.includes(mu);
       return k===sel?skin.clone().lerp(acc,.8):hot?skin.clone().lerp(acc,sel?.25:.5):skin; });
     for(let j=0;j<nv;j++){ const p=pal[rid[j]]||skin; col[j*3]=p.r; col[j*3+1]=p.g; col[j*3+2]=p.b; }
     for(let i=0;i<3;i++) relax(col,A,null,.5,3);   // 肌群边缘柔化成渐变
     for(let j=0;j<nv;j++){ col[j*3]*=ao[j]; col[j*3+1]*=ao[j]; col[j*3+2]*=ao[j]; }
     geo.attributes.color.needsUpdate=true; kick();
   }
-  // 软尺：截面凸包，略向外放一点
-  const FM=figMetrics(r), rings={};
-  const partsOf={shoulder:PT.torso|PT.arms,waist:PT.torso,hip:PT.torso|PT.legL|PT.legR,thigh:PT.legL};
-  for(const k of MKEYS){
-    const y=F.mm.y[k]*H, h=section(D,X,y,partsOf[k]); if(h.length<3) continue;
-    let cx=0,cz=0; h.forEach(p=>{cx+=p[0];cz+=p[1];}); cx/=h.length; cz/=h.length;
-    const g=new THREE.Group(), color=lin(cssColor(FM[k].color));
-    const mk=(sx,sz,dash)=>{ const pts=h.map(p=>new THREE.Vector3(cx+(p[0]-cx)*sx,y,cz+(p[1]-cz)*sz)); 
-      if(dash){ const geo2=new THREE.BufferGeometry().setFromPoints(pts.concat([pts[0]])); const ln=new THREE.Line(geo2,new THREE.LineDashedMaterial({color:lin(cssv('--accent')),dashSize:.012,gapSize:.01,transparent:true,opacity:.9})); ln.computeLineDistances(); return ln; }
-      const curve=new THREE.CatmullRomCurve3(pts,true,'centripetal'); return new THREE.Mesh(new THREE.TubeGeometry(curve,Math.max(64,pts.length*3),.0026/s,6,true),new THREE.MeshBasicMaterial({color,transparent:true})); };
-    const ring=mk(1.012,1.012,false); g.add(ring);
-    const legs=[ring]; if(k==='thigh'){ const r2=ring.clone(); r2.material=ring.material; r2.scale.x=-1; g.add(r2); legs.push(r2); }
-    const t=FM[k]; if(t.tgt&&Math.abs(t.d)>1){ const q=k==='shoulder'?t.tgt/t.cur:t.tgt/t.cur; g.add(mk(1.012*q,k==='shoulder'?1.012:1.012*q,true)); }
-    root.add(g); rings[k]={g,h,y,cx,cz,meshes:legs};
-  }
-  // 标签
-  const tags={}; const tagBox=document.createElement('div'); tagBox.className='tags3'; el.appendChild(tagBox);
-  for(const k in rings){ const t=FM[k], b=document.createElement('button'); b.type='button'; b.className='tag3'; b.dataset.act='focus'; b.dataset.arg=k; b.style.setProperty('--st',t.color);
-    b.innerHTML=`<i></i><span>${FIG_LINES[k].name}</span><b class="mono">${k==='shoulder'?f1(t.cur):Math.round(t.cur)}</b>${t.label?`<em class="mono">${t.label}</em>`:''}`; tagBox.appendChild(b); tags[k]=b; }
   scene.add(new THREE.HemisphereLight(0xffffff,0x8a8f8c,.62));
   const key=new THREE.DirectionalLight(0xfffaf4,.82); key.position.set(-1.4,2.4,2.6); scene.add(key);
   const fill=new THREE.DirectionalLight(0xf2f6ff,.28); fill.position.set(2.2,.9,1.4); scene.add(fill);
@@ -1010,14 +933,6 @@ function build3D(el,r,M){
   function size(){ const w=el.clientWidth,h=el.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); cam.aspect=w/h;
     const dist=(Hs*.56)/Math.tan(cam.fov*Math.PI/360)*Math.max(1,.5/cam.aspect); cam.position.set(0,cy+dist*.08,dist); cam.lookAt(0,cy,0); cam.updateProjectionMatrix(); }
   const v=new THREE.Vector3();
-  function placeTags(){
-    const W=el.clientWidth, Hh=el.clientHeight;
-    for(const k in tags){ const R=rings[k]; let bx=-1e9,by=0;
-      for(let i=0;i<R.h.length;i+=Math.max(1,R.h.length>>5)){ const p=R.h[i]; v.set(p[0],R.y,p[1]).applyMatrix4(root.matrixWorld).project(cam); if(v.x>bx){ bx=v.x; by=v.y; } }
-      const x=(bx*.5+.5)*W, y=(-by*.5+.5)*Hh, tg=tags[k];
-      tg.style.top=y+'px'; tg.style.setProperty('--lead',Math.max(8,W-tg.offsetWidth-6-x)+'px'); }
-  }
-  function focus(k){ for(const key in rings){ const on=!k||key===k; rings[key].g.traverse(o=>{ if(o.material){ o.material.opacity=on?1:.15; } }); tags[key]&&tags[key].classList.toggle('dim',!on); } kick(); }
   const wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
   function frame(now){
     st.raf=0; if(!st.alive) return;
@@ -1025,7 +940,7 @@ function build3D(el,r,M){
     if(!st.drag){ if(st.goal!=null){ const d=wrap(st.goal-st.rot); st.rot+=d*Math.min(1,dt*7); if(Math.abs(d)<.002){ st.rot=st.goal; st.goal=null; } }
       else if(Math.abs(st.vel)>.0005){ st.rot+=st.vel; st.vel*=.92; } else if(st.auto) st.rot+=dt*.28; }
     root.rotation.y=st.rot; root.updateMatrixWorld();
-    renderer.render(scene,cam); placeTags();
+    renderer.render(scene,cam);
     if(st.drag||st.auto||st.goal!=null||Math.abs(st.vel)>.0005) st.raf=requestAnimationFrame(frame);
   }
   function kick(){ if(!st.raf&&st.alive){ st.last=performance.now(); st.raf=requestAnimationFrame(frame); } }
@@ -1047,12 +962,11 @@ function build3D(el,r,M){
   const ro=new ResizeObserver(()=>{ size(); kick(); }); ro.observe(el);
   const onVis=()=>{ if(document.hidden) st.auto=false; }; document.addEventListener('visibilitychange',onVis);
   size(); paint();
-  B3.r={st,focus,paint,turnTo,
+  B3.r={st,paint,turnTo,
     face(k){ const o=cen[k]; if(!o) return; const x=o[0]/o[3], z=o[2]/o[3]; turnTo(Math.atan2(-x,z)); },
     dispose(){ st.alive=false; cancelAnimationFrame(st.raf); ro.disconnect(); document.removeEventListener('visibilitychange',onVis);
       window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); window.removeEventListener('pointercancel',up);
-      scene.traverse(o=>{ if(o.geometry) o.geometry.dispose(); if(o.material) o.material.dispose(); }); renderer.dispose(); cv.remove(); tagBox.remove(); }};
-  if(T.hFocus) focus(T.hFocus);
+      scene.traverse(o=>{ if(o.geometry) o.geometry.dispose(); if(o.material) o.material.dispose(); }); renderer.dispose(); cv.remove(); }};
 }
 
 /* ---------------- muscle map ----------------
@@ -1065,193 +979,149 @@ function muscleSVG(view,p,s){
   return `<svg viewBox="${vb.join(' ')}" role="img" aria-label="${view==='front'?'正面':'背面'}发力肌群">${out}</svg>`;
 }
 
-/* ---------------- small views ---------------- */
-function ratioRow(name,c,tg){
-  const lo=1.0,hi=1.6,pc=v=>Math.max(0,Math.min(100,(v-lo)/(hi-lo)*100)); const d=tg-c, ok=Math.abs(d)<0.04;
-  return `<div class="ratio"><span class="small muted">${name}</span>
-    <div class="track"><span class="fill" style="width:${pc(c)}%"></span><span class="dot" style="left:${pc(c)}%"></span><span class="tgt" style="left:${pc(tg)}%"></span></div>
-    <span class="mono small">${f2(c)}<span class="muted"> / ${f2(tg)}</span></span></div>`;
+/* ---------------- 小组件 ---------------- */
+const imgSrc=(e,n)=>EX[e].img?`ex/${EX[e].img}_${n}.jpg`:'';
+const thumb=e=>EX[e].img?`<img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy">`:`<span class="thumb ph">${I.train}</span>`;
+function exRow(e,attrs,sub,right='',tag=''){ return `<button class="li" type="button" ${attrs}>${thumb(e)}<span style="min-width:0"><span class="t">${EX[e].name}${tag}${notesOf(e).length?'<span class="badge">备注</span>':''}</span><span class="s">${sub}</span></span><span class="r">${right}${I.chev}</span></button>`; }
+// 动作库分组：计划里的肌群 + 其余部位；同组的动作互为替代
+const LIB_EXTRA=[['肱二头肌',['db_curl','hammer_curl']],['肱三头肌',['pushdown','bench_dip']],['下背',['superman','back_ext']],['小腿',['calf_raise','seated_calf']],['拉伸',['chest_stretch','hipflex_stretch']]];
+function groupOf(e){ for(const mu in MUSCLES) if(MUSCLES[mu].ex.includes(e)) return {mu,name:MUSCLES[mu].name,ex:MUSCLES[mu].ex}; for(const [n,l] of LIB_EXTRA) if(l.includes(e)) return {mu:null,name:n,ex:l}; return null; }
+const altsOf=e=>{ const g=groupOf(e); return g&&g.name!=='拉伸'?g.ex.filter(x=>x!==e):[]; };
+const MU_RKEY={delt:'delts',rear:'traps',lats:'lats',pecs:'pecs',core:'abs',gmax:'gmax',gmed:'gmed',quads:'quads',hams:'hams'};
+function weekStrip(){ return `<div class="wk7" aria-label="本周">${weekDays(0).map(d=>`<div class="s-${d.st}"><span>${d.dow}</span><i>${d.st==='done'?I.check:d.st==='skip'?'–':''}</i></div>`).join('')}</div>`; }
+const DAY_ST={done:'',skip:'跳过',rest:'休息',today:'今天',future:'未到'};
+function weekList(off){ const t=todayISO();
+  return `<div class="list">${weekDays(off).map(d=>`<div class="li wkrow s-${d.st}"><span class="idx">周${d.dow}</span><span style="min-width:0"><span class="t">${d.st==='done'?SESSION_NAME[d.k]||'训练':DAY_ST[d.st]}${d.d===t?'<span class="badge">今天</span>':''}</span>${d.mus.length?`<span class="s">${d.mus.map(m=>MUSCLES[m].name).join('、')}</span>`:''}</span><span class="r">${d.st==='done'?`<span class="acc">${I.check}</span>`:''}</span></div>`).join('')}</div>`; }
+const mainNames=ses=>ses.mus.filter(m=>mainMus().includes(m)).map(m=>MUSCLES[m].name);
+const goalNames=ses=>goalsOf().filter(g=>g.mus.some(m=>ses.mus.includes(m))).map(g=>g.name);
+
+/* 训练设置表单：首次引导和「训练设置」共用。草稿在 T.obd，保存时才写进 S */
+function planForm(btn){
+  const d=T.obd||(T.obd={sex:S.sex||'f',goals:[...(S.goals||[])],freq:S.freq||3,exp:S.exp||'n',eq:[...(S.eq||EQ_PICK)]});
+  const G=GOALS[d.sex], seg=(k,opts)=>`<div class="seg mtabs" role="group">${opts.map(([v,l])=>`<button type="button" data-act="obd" data-arg="${k}:${v}" aria-pressed="${String(d[k])===String(v)}">${l}</button>`).join('')}</div>`;
+  const notes=G.filter(g=>d.goals.includes(g.id)&&g.note).map(g=>`<p class="xs muted">${g.name}：${g.note}</p>`).join('');
+  return `<section class="stack" style="gap:8px"><p class="eyebrow">性别</p>${seg('sex',[['f','女'],['m','男']])}</section>
+    <section class="stack" style="gap:8px"><p class="eyebrow">想练成什么样 · 最多选 3 个</p>
+      <div class="chips">${G.map(g=>`<button class="chip2" type="button" data-act="obd" data-arg="goal:${g.id}" aria-pressed="${d.goals.includes(g.id)}">${g.name}</button>`).join('')}</div>${notes}</section>
+    <section class="stack" style="gap:8px"><p class="eyebrow">每周去健身房几次</p>${seg('freq',[[2,'2 次'],[3,'3 次'],[4,'4 次']])}<p class="xs muted">${SPLITS[d.freq].name}；主练的肌群每周练 2–3 次。</p></section>
+    <section class="stack" style="gap:8px"><p class="eyebrow">练了多久</p>${seg('exp',Object.entries(EXP).map(([k,x])=>[k,x.name]))}</section>
+    <section class="stack" style="gap:8px"><p class="eyebrow">健身房里能用的器械</p>
+      <div class="chips">${EQ_PICK.map(k=>`<button class="chip2" type="button" data-act="obd" data-arg="eq:${k}" aria-pressed="${d.eq.includes(k)}">${EQ[k]}</button>`).join('')}</div>
+      <p class="xs muted">没选的器械会换成同一肌群的其他动作；自重动作不需要器械。</p></section>
+    <p class="callout warn small">有伤病，或训练中出现疼痛，请先咨询医生或教练。</p>
+    <button class="btn block acc" type="button" data-act="obdSave" ${d.goals.length?'':'disabled style="opacity:.4"'}>${btn}</button>`;
 }
-function weekStrip(plan,sel,act){
-  const today=todayISO();
-  return `<div class="week" role="group" aria-label="本周">${weekDates().map(d=>{ const k=SCHED[d.getDay()], di=iso(d);
-    let cls=k?'train':'rest', inner=k?DAYNAME[k][0]:'·';
-    if(k){ const p=dayProgress(di,k,plan); if(p.total&&p.n===p.total){ cls='done'; inner=I.check; } }
-    return `<button type="button" class="${cls} ${di===sel?'sel':''}" ${act?`data-act="${act}" data-arg="${di}"`:'disabled'} aria-label="周${DOW[d.getDay()]}${k?' '+DAYNAME[k]:' 休息'}"><span>${DOW[d.getDay()]}</span><span class="dd">${inner}</span>${di===today?'<span class="today-mark"></span>':'<span style="height:4px"></span>'}</button>`; }).join('')}</div>`;
-}
-function nextTrainDay(){ const ds=weekDates(), t=todayISO(); const td=ds.find(d=>iso(d)===t&&SCHED[d.getDay()]); if(td) return iso(td); const n=ds.find(d=>iso(d)>t&&SCHED[d.getDay()]); return n?iso(n):t; }
-const imgSrc=(e,n)=>`ex/${EX[e].img}_${n}.jpg`;
-// 本地没有图片时（如 GitHub Pages）退回 jsDelivr 上的 free-exercise-db 原图
-document.addEventListener('error',ev=>{ const im=ev.target; if(!(im instanceof HTMLImageElement)||im.dataset.fb) return; const m=(im.getAttribute('src')||'').match(/^ex\/(.+)_(\d)\.jpg$/); if(!m) return; im.dataset.fb='1'; im.src=`https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises/${m[1]}/${m[2]}.jpg`; },true);
 
 /* ---------------- pages ---------------- */
 const P={
-  home:{root:1,title:'',aside:()=>isSample()?'样例数据':'',render(){
-    const r=analyze(), m=r.m, c=m.cm, t=r.t;
-    const plan=weekPlan(r), today=todayISO(), tk=SCHED[new Date().getDay()];
-    const FM=figMetrics(r), need=k=>FM[k].d!=null&&FM[k].d<-TOL[k]&&k!=='waist'?['+'+f1(-FM[k].d),'warm']:FM[k].d!=null&&k==='waist'&&FM[k].d>TOL[k]?['−'+f1(FM[k].d),'warm']:null;
-    const met=(k,label,val,sub,cls='')=>`<button class="metric" type="button" data-act="focus" data-arg="${k}" aria-pressed="${T.hFocus===k}"><span class="k">${label}${m.est.includes(k)?'<span class="est">估</span>':''}</span><span class="num">${val}<small>cm</small></span><span class="d ${cls}">${sub}</span></button>`;
-    let todayBlock;
-    if(tk){ const p=dayProgress(today,tk,plan); todayBlock=`<div class="between"><div><p class="eyebrow">今天</p><p class="h2">${plan[tk].name} · ${plan[tk].items.length} 个动作</p><p class="small muted">约 ${plan[tk].min} 分钟${p.n?` · 已完成 ${p.n}/${p.total}`:''}</p></div></div>
-      <button class="btn block" type="button" data-tab="train">开始今天的训练</button>`; }
-    else { const nd=weekDates().find(d=>d>new Date()&&SCHED[d.getDay()]); todayBlock=`<div><p class="eyebrow">今天休息</p><p class="h2">${nd?'下次 · 周'+DOW[nd.getDay()]+' '+plan[SCHED[nd.getDay()]].name:'下周一继续'}</p></div><button class="btn ghost block" type="button" data-tab="train">看训练计划</button>`; }
-    return `
-    <section class="hero" id="hero">
-      <div class="herobar"><span class="xs muted">目标 · ${esc(t.name)}</span></div>
-      <div id="body3d" class="body3d"><p class="b3load xs muted">正在按你的尺寸生成模型…</p></div>
-      <div class="figkey"><span><i style="background:var(--under)"></i>比目标小</span><span><i style="background:var(--warm)"></i>比目标大</span><span><i style="background:var(--accent)"></i>达标</span></div>
+  onb:{title:'BodyNav',render(){
+    return `<div class="stack" style="gap:6px"><p class="h1">把体型目标变成每周的训练计划</p>
+      <p class="small muted">告诉我想练成什么样、每周练几次，我来安排练哪些肌群、做哪几个动作。打开就知道今天练什么。</p></div>${planForm('生成我的训练计划')}`;
+  }},
+  settings:{title:'训练设置',render(){ return `<p class="small muted">保存后从下一次训练开始按新计划；已经完成的记录会保留。</p>${planForm('保存并更新计划')}`; },leave(){ T.obd=null; }},
+  today:{root:1,title:'训练',render(){
+    const st=todayState(), ses=st.ses, gs=goalsOf().map(g=>g.name).join('、'), mainHere=mainNames(ses), nk=st.doneToday?nextKey():st.key, nx=sessionFor(nk,addDays(st.t,1));
+    const wnote=(S.goals||[]).includes('waist')?'<p class="xs muted">腰线：核心训练让腰腹更紧实，腰围主要靠整体体脂下降，训练不能局部减脂。</p>':'';
+    const rows=ses.items.map((it,i)=>{ const e=it.e, done=!!S.done[st.t+':'+e];
+      const tag=it.stretch?'':it.main?'<span class="badge acc">主练</span>':'';
+      return `<div class="li2">${exRow(e,`data-go="ex" data-arg="${e}|today|${i}"`,`${it.stretch?'拉伸 · 练完做':it.sets+' 组 × '+EX[e].reps}${it.mu?' · '+MUSCLES[it.mu].name:''}${it.orig?' · 今天换过':''}`,done?`<span class="acc">${I.check}</span>`:'',tag)}${it.stretch||!altsOf(e).length?'':`<button class="swapbtn" type="button" data-act="swapToday" data-arg="${i}" aria-label="换一个${MUSCLES[it.mu].name}动作">换</button>`}</div>`; }).join('');
+    const preview=x=>`<div class="list">${x.items.map(it=>exRow(it.e,`data-go="ex" data-arg="${it.e}"`,`${it.stretch?'拉伸':it.sets+' 组 × '+EX[it.e].reps}${it.mu?' · '+MUSCLES[it.mu].name:''}`)).join('')}</div>`;
+    let top, body;
+    if(st.doneToday){
+      top=`<p class="eyebrow">今天 · 本周 ${st.weekDone}/${S.freq} 次</p><p class="h1">今天的训练完成了</p><p class="small muted">${SESSION_NAME[st.doneToday.k]} · 练了${(st.doneToday.mus||[]).map(m=>MUSCLES[m].name).join('、')}</p>`;
+      body=`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">下一次 · ${nx.name} · ${goalNames(nx).join(' · ')||'基础训练'}</p>${preview(nx)}</section>`;
+    } else if(st.skipToday){
+      top=`<p class="eyebrow">今天 · 本周 ${st.weekDone}/${S.freq} 次</p><p class="h1">今天不练</p><p class="small muted">计划已顺延：下次打开还是「${ses.name}」，不会累积欠练。</p>`;
+      body=`<button class="btn ghost block" type="button" data-act="unskip">改主意了，现在练</button>`;
+    } else if(st.rest&&!T.force){
+      top=`<p class="eyebrow">第 ${(S.rot||0)+1} 次训练 · 本周 ${st.weekDone}/${S.freq} 次</p><p class="h1">今天建议休息</p><p class="small muted">${st.rest}</p>`;
+      body=`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">下一次 · ${ses.name} · ${goalNames(ses).join(' · ')||'基础训练'}</p>${preview(ses)}</section>
+        <button class="btn ghost block" type="button" data-act="forceTrain">今天还是想练</button>`;
+    } else {
+      const gn=goalNames(ses);
+      top=`<p class="eyebrow">第 ${(S.rot||0)+1} 次训练 · 本周 ${st.weekDone}/${S.freq} 次</p><p class="h1">${gn.length?'今天练'+gn.join(' · '):'今天练'+ses.name}</p>
+        <p class="small muted">主练${mainHere.join('、')||'—'}</p><p class="small muted">${ses.name} · ${ses.items.length} 个动作 · 约 ${ses.min} 分钟</p>${wnote}`;
+      body=`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">动作明细 · 先复合动作、后孤立动作</p><div class="list">${rows}</div>
+          <p class="xs muted" style="margin-top:8px">器械被占？点「换」换成同肌群的其他动作，只对今天生效。</p></section>
+        <div class="stack" style="gap:8px"><button class="btn block" type="button" data-act="startCoach" data-arg="today">${I.coach}整体跟练 · 按顺序做完</button>
+          <p class="xs muted" style="text-align:center">摄像头自动计数、提醒体态，组间休息自动计时</p>
+          <div class="row2"><button class="btn ghost" type="button" data-act="completeToday" style="flex:1">完成今天的训练</button><button class="btn ghost" type="button" data-act="skipToday" style="flex:1">今天不练</button></div></div>`;
+    }
+    return `${weekStrip()}<div class="stack" style="gap:6px">${top}</div>${body}
+      <div class="between"><button class="link" type="button" data-go="week">周视图${I.chev}</button><button class="link" type="button" data-go="library">动作库${I.chev}</button></div>
+      <div class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">跟练语音</p>
+        ${sw('voice','语音提醒','动作纠正、你的备注、休息和下一个动作')}${sw('countVoice','语音报数','每完成一次报一个数')}
+        <button class="btn ghost block" type="button" data-act="voiceTest" style="margin-top:12px">试听语音</button>
+        <p class="xs muted" style="margin-top:8px">听不到的话：iPhone 先关掉侧边的静音键、调大媒体音量，再点一次「试听语音」。</p></div>`;
+  }},
+  week:{title:'周视图',render(){
+    const r=rotOf(), up=[...Array(Math.min(4,r.length))].map((_,i)=>sessionFor(r[((S.rot||0)+i)%r.length],todayISO()));
+    return `<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">本周</p>${weekList(0)}</section>
+      <section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">上周</p>${weekList(-1)}</section>
+      <section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">接下来 · ${SPLITS[S.freq].name}</p>
+        <div class="list">${up.map((x,i)=>`<div class="li wkrow"><span class="idx mono">${String((S.rot||0)+i+1).padStart(2,'0')}</span><span style="min-width:0"><span class="t">${x.name}${i===0?'<span class="badge acc">下一次</span>':''}</span><span class="s">主练${mainNames(x).join('、')||'—'} · ${x.items.length} 个动作</span></span><span class="r"></span></div>`).join('')}</div>
+        <p class="xs muted" style="margin-top:8px">漏练或跳过不会累积，按顺序往后顺延。</p></section>`;
+  }},
+  atlas:{root:1,title:'肌群',render(){
+    const plan=ALL_MU.map(mu=>({mu,n:weeklyFreq(mu),main:mainMus().includes(mu)})).filter(x=>x.n||x.main).sort((a,b)=>b.main-a.main||b.n-a.n);
+    return `<section class="hero" id="hero">
+      <div class="herobar"><span class="xs muted">绿色是你的主练肌群 · 拖动旋转，点肌肉看作用</span></div>
+      <div id="body3d" class="body3d"><p class="b3load xs muted">正在加载人体模型…</p></div>
       <div class="mpanel" id="mpanel" aria-live="polite">${musclePanel(T.muscle)}</div>
     </section>
-    <div class="stack" style="gap:4px;margin-top:-10px">
-      <p class="h1">${r.head}</p>
-      <div class="row2"><span class="small muted">目标：${esc(t.name)}</span><button class="link" type="button" data-go="target">更换${I.chev}</button></div>
-      ${r.notes.map(n=>`<p class="xs muted">${n}</p>`).join('')}
-    </div>
-    <section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">体型建议 · 已加进本周计划</p>
-      <div class="list">${r.adv.slice(0,3).map((a,i)=>`<button class="li adv" type="button" data-tab="train"><span class="idx mono">${String(i+1).padStart(2,'0')}</span><span style="min-width:0"><span class="t">${a.title}${i<2?'<span class="badge acc">计划中</span>':''}</span><span class="s">${a.detail}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div>
-      ${r.reached?`<button class="link" type="button" data-go="target" style="margin-top:10px">换一个更高的目标：按身高骨架生成下一阶段，或用参考照片${I.chev}</button>`:''}
-    </section>
-    <div class="stack" style="gap:12px">
-      <div class="metrics">
-        ${met('shoulder','肩宽',f1(c.shoulder),...(need('shoulder')||['达标','acc']))}
-        ${met('waist','腰围',Math.round(c.waist),...(need('waist')||['腰臀 '+f2(m.whr),'muted']))}
-        ${met('hip','臀围',Math.round(c.hip),...(need('hip')||['达标','acc']))}
-        ${met('thigh','腿围',Math.round(c.thigh),...(need('thigh')||[m.legR?'腿长 '+Math.round(m.legR*100)+'%':'','muted']))}
-      </div>
-      ${ratioRow('肩腰比',m.swr,t.swr)}${ratioRow('臀腰比',m.hwr,t.hwr)}
-      ${isSample()?`<p class="small muted">这是演示用的样例身材。<button class="link" type="button" data-go="measure">测量我的${I.chev}</button></p>`:`<p class="xs muted">${m.src==='manual'?(m.est.length?'尺寸为你手动输入，大腿围按臀围估算。':'尺寸为你手动输入。'):m.src==='scan'?'围度由正面照宽度按常见体型估算。':m.est.length?'没有侧面照，围度按常见体型估算。':'围度由正面宽度和侧面厚度按椭圆估算。'}<button class="link xs" type="button" data-go="measure">更新测量${I.chev}</button></p>`}
-    </div>
-    <section class="today">${todayBlock}</section>`;
-  },after(){ mountBody($('body3d'),analyze()); },leave(){ unmount3D(); }},
-  plan:{title:'本周计划',render(){
-    const r=analyze(), plan=weekPlan(r), today=todayISO();
-    const focusTxt=r.focus.length?r.focus.map(id=>MUSCLES[id].name).join('、'):'整体保持';
-    const rows=weekDates().map(d=>{const k=SCHED[d.getDay()], di=iso(d), isT=di===today;
-      const day=`<span class="idx">周${DOW[d.getDay()]}</span>`;
-      if(!k) return `<button class="li" type="button" disabled>${day}<span class="muted">休息${isT?'<span class="badge">今天</span>':''}</span><span></span></button>`;
-      const p=dayProgress(di,k,plan);
-      const names=[...new Set(plan[k].items.filter(i=>!i.stretch).slice(0,3).map(i=>MUSCLES[i.mu].name))].join('、');
-      return `<button class="li" type="button" data-act="openDay" data-arg="${di}">${day}<span style="min-width:0"><span class="t">${plan[k].name}${isT?'<span class="badge">今天</span>':''}${p.total&&p.n===p.total?'<span class="badge acc">已完成</span>':''}</span><span class="s">${names} · ${plan[k].min} 分钟</span></span><span class="r">${p.n?p.n+'/'+p.total:''}${I.chev}</span></button>`;}).join('');
-    return `<div class="stack" style="gap:6px"><p class="eyebrow">本周重点</p><p class="h1">${focusTxt}</p>
-      <p class="small muted">按「${esc(r.t.name)}」和你现在的差距安排，每周约 ${Object.values(r.sets).reduce((a,b)=>a+b,0)} 组，练三天。</p></div>
-      <div class="list">${rows}</div>`;
-  }},
-  train:{root:1,title:'训练',render(){
-    const r=analyze(), plan=weekPlan(r);
-    const sel=T.selDay||nextTrainDay(); const d=new Date(sel+'T00:00'); const tk=SCHED[d.getDay()];
-    const k=tk||T.coachKey||'A', day=plan[k], p=dayProgress(sel,k,plan), isToday=sel===todayISO();
-    const when=isToday?'今天':'周'+DOW[d.getDay()];
-    // 这一天主练哪些肌群：按等级（重点 > 加强 > 保持）和组数排，取前三个不重复的
-    const main=[...new Set(day.items.filter(it=>it.mu).sort((x,y)=>W[y.lv]-W[x.lv]||y.sets-x.sets).map(it=>MUSCLES[it.mu].name))].slice(0,3);
-    const why=r.reached?'':String(r.head).replace(/<[^>]+>/g,'');
-    const rows=day.items.map((it,i)=>{ const e=exOf(k,it), done=!!S.done[sel+':'+e], n=notesOf(e).length;
-      const tag=it.stretch?'':it.lv==='focus'?'<span class="badge">重点</span>':it.lv==='boost'?'<span class="badge acc">加强</span>':'';
-      return `<button class="li" type="button" data-go="ex" data-arg="${e}|${sel}|${k}|${i}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span style="min-width:0"><span class="t">${EX[e].name}${tag}${n?'<span class="badge">备注</span>':''}</span><span class="s">${it.stretch?'拉伸 · 练完做':it.sets+' 组 × '+EX[e].reps}${it.mu?' · '+MUSCLES[it.mu].name:''}</span></span><span class="r">${done?`<span class="acc">${I.check}</span>`:''}${I.chev}</span></button>`; }).join('');
-    return `${weekStrip(plan,sel,'selDay')}
-    <div class="stack" style="gap:6px">
-      <p class="eyebrow">${when} · ${tk?day.name+'日':'休息日'}</p>
-      ${tk?`<p class="h1">主练${main.join('、')}</p>
-        <p class="small muted">${day.items.length} 个动作 · 约 ${day.min} 分钟${p.n?` · 已完成 ${p.n}/${p.total}`:''}${why?` · 为了：${why}`:''}</p>`
-      :`<p class="h1">今天休息</p><p class="small muted">想练的话，选一组：</p><div class="seg" role="group" aria-label="选择训练">${['A','B','C'].map(x=>`<button type="button" data-act="coachKey" data-arg="${x}" aria-pressed="${k===x}">${DAYNAME[x]}</button>`).join('')}</div>
-        <p class="small muted">主练${main.join('、')} · ${day.items.length} 个动作 · 约 ${day.min} 分钟</p>`}
-    </div>
-    <section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">动作明细 · 点进去看要领，也可以单独跟练</p><div class="list">${rows}</div></section>
-    <div class="stack" style="gap:6px">
-      <button class="btn block" type="button" data-act="startCoach" data-arg="${k}">${I.coach}整体跟练 · 按顺序做完</button>
-      <p class="xs muted" style="text-align:center">摄像头自动计数、纠正体态，组间休息自动计时</p>
-    </div>
-    <div class="between"><button class="link" type="button" data-go="library">动作库 · 自选动作跟练${I.chev}</button><button class="link" type="button" data-go="plan">本周计划${I.chev}</button></div>
-    <div class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">跟练语音</p>
-      ${sw('voice','语音提醒','动作纠正、你的备注、休息和下一个动作')}${sw('countVoice','语音报数','每完成一次报一个数')}
-      <button class="btn ghost block" type="button" data-act="voiceTest" style="margin-top:12px">试听语音</button>
-      <p class="xs muted" style="margin-top:8px">听不到的话：iPhone 先关掉侧边的静音键、调大媒体音量，再点一次「试听语音」。</p></div>`;
-  }},
+    <section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">你的计划里的肌群</p>
+      <div class="list">${plan.map(x=>`<button class="li" type="button" data-act="muscle" data-arg="${MU_RKEY[x.mu]}"><span class="idx">${x.main?'<span class="badge acc">主练</span>':''}</span><span style="min-width:0"><span class="t">${MUSCLES[x.mu].name}</span><span class="s">${MUSCLES[x.mu].area} · 每周 ${x.n} 次</span></span><span class="r">${I.chev}</span></button>`).join('')}</div></section>`;
+  },after(){ mountBody($('body3d'),bodyM()); },leave(){ unmount3D(); }},
   library:{title:'动作库',render(){
-    return `<p class="small muted">点进任意动作，可以单独开摄像头跟练：自动计数、提醒体态、组间计时。</p>`+Object.keys(MUSCLES).map(mu=>`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">${MUSCLES[mu].name} · ${MUSCLES[mu].area}</p><div class="list">${MUSCLES[mu].ex.map(e=>`<button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span><span class="t">${EX[e].name}${notesOf(e).length?'<span class="badge">备注</span>':''}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div></section>`).join('')
-      +[['手臂',['db_curl','hammer_curl','pushdown','bench_dip']],['腰腹 · 下背',['side_plank','russian_twist','superman','back_ext']],['大腿内侧 · 小腿',['plie_squat','calf_raise','seated_calf']]].map(([n,l])=>`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">${n}</p><div class="list">${l.map(e=>`<button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span><span class="t">${EX[e].name}${notesOf(e).length?'<span class="badge">备注</span>':''}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div></section>`).join('')
-      +`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">拉伸</p><div class="list">${['chest_stretch','hipflex_stretch'].map(e=>`<button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span><span class="t">${EX[e].name}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div></section>`;
+    const sec=(n,l)=>`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">${n}</p><div class="list">${l.map(e=>exRow(e,`data-go="ex" data-arg="${e}"`,`${EX[e].reps} · ${EQ[EX[e].eq]} · ${LV_NAME[EX[e].lv]}`)).join('')}</div></section>`;
+    return `<p class="small muted">按肌群分组，同一组里的动作可以互相替换。点进任意动作，都可以单独开摄像头跟练。</p>`
+      +Object.keys(MUSCLES).map(mu=>sec(`${MUSCLES[mu].name} · ${MUSCLES[mu].area}`,MUSCLES[mu].ex)).join('')+LIB_EXTRA.map(([n,l])=>sec(n,l)).join('');
   }},
   ex:{title:a=>EX[a.split('|')[0]].name,render(a){
-    const [e,date,k,i]=a.split('|'); const ex=EX[e]; const ctx=!!date;
-    let it=null, done=false; if(ctx){ const plan=weekPlan(analyze()); it=plan[k].items[+i]; done=!!S.done[date+':'+e]; }
-    const alts=it&&it.mu?MUSCLES[it.mu].ex:[];
-    const ns=notesOf(e);
+    const [e,ctx,ii]=a.split('|'), ex=EX[e], i=+ii, t=todayISO(), it=ctx==='today'?sessionFor(nextKey(),t).items[i]:null, live=it&&it.e===e;
+    const ns=notesOf(e), g=groupOf(e), alts=altsOf(e);
     const hasBack=[...ex.p,...ex.s].some(x=>MM.back[x]), hasFront=[...ex.p,...ex.s].some(x=>MM.front[x]);
     const views=[hasFront&&'front',hasBack&&'back'].filter(Boolean);
-    return `<div class="media" id="media"><img src="${imgSrc(e,0)}" alt="${ex.name}起始姿势" id="m0"><img src="${imgSrc(e,1)}" alt="${ex.name}发力姿势" id="m1" style="opacity:0">
-        <div class="ph"><button type="button" data-act="frame" data-arg="0" aria-pressed="true">起始</button><button type="button" data-act="frame" data-arg="1" aria-pressed="false">发力</button></div><span class="credit">free-exercise-db</span></div>
+    const n=live&&!it.stretch?it.sets:exSets(e), tr=isTracked(e), ck=checksOf(e), done=!!S.done[t+':'+e];
+    const media=ex.img?`<div class="media" id="media"><img src="${imgSrc(e,0)}" alt="${ex.name}起始姿势" id="m0"><img src="${imgSrc(e,1)}" alt="${ex.name}发力姿势" id="m1" style="opacity:0">
+        <div class="ph"><button type="button" data-act="frame" data-arg="0" aria-pressed="true">起始</button><button type="button" data-act="frame" data-arg="1" aria-pressed="false">发力</button></div><span class="credit">free-exercise-db</span></div>`:'';
+    return `${media}
       <div class="stack" style="gap:4px">
         <p class="eyebrow">${ex.p.map(x=>SLUG_CN[x]).join(' · ')}</p>
         <p class="h1">${ex.name}</p>
-        <p class="mono small muted">${it&&!it.stretch?it.sets+' 组 × ':''}${ex.reps}</p>
+        <p class="mono small muted">${live&&!it.stretch?it.sets+' 组 × ':''}${ex.reps}</p>
+        <div class="chips" style="margin-top:6px"><span class="chip2 ro">${EQ[ex.eq]}</span><span class="chip2 ro">${LV_NAME[ex.lv]}</span><span class="chip2 ro">${ex.cmp?'复合动作':'孤立动作'}</span></div>
       </div>
-      ${(()=>{ const n=it&&!it.stretch?it.sets:exSets(e), tr=isTracked(e), ck=checksOf(e);
-        return `<div class="stack" style="gap:6px"><button class="btn block" type="button" data-act="startCoach" data-arg="ex:${e}:${n}">${I.coach}单独跟练这个动作 · ${n} 组</button>
-          <p class="xs muted">${tr?`摄像头自动计数${ck.length?'，提醒'+ck.join('、'):''}；`:'计时跟练；'}语音提醒开始、组间休息和下一组。</p></div>`; })()}
-      ${ns.length?`<section class="stack" aria-label="我的备注">${ns.map((n,j)=>`<div class="note"><p>${esc(n.txt)}<small>${n.t}</small></p><button type="button" data-act="delNote" data-arg="${e}|${j}" aria-label="删除这条备注">${I.trash}</button></div>`).join('')}</section>`:''}
+      <div class="stack" style="gap:6px"><button class="btn block" type="button" data-act="startCoach" data-arg="ex:${e}:${n}">${I.coach}单独跟练这个动作 · ${n} 组</button>
+        <p class="xs muted">${tr?`摄像头自动计数${ck.length?'，提醒'+ck.join('、'):''}；`:'计时跟练；'}语音提醒开始、组间休息和下一组。</p></div>
+      ${ns.length?`<section class="stack" aria-label="我的备注">${ns.map((x,j)=>`<div class="note"><p>${esc(x.txt)}<small>${x.t}</small></p><button type="button" data-act="delNote" data-arg="${e}|${j}" aria-label="删除这条备注">${I.trash}</button></div>`).join('')}</section>`:''}
       <section class="stack" style="gap:10px"><div class="muscles" style="grid-template-columns:repeat(${views.length},1fr)">${views.map(v=>muscleSVG(v,ex.p,ex.s)).join('')}</div>
-        <div class="mkey"><span><i style="background:var(--accent)"></i>主要发力 ${ex.p.map(x=>SLUG_CN[x]).join('、')}</span>${ex.s.length?`<span><i style="background:color-mix(in srgb,var(--accent) 38%,var(--body))"></i>辅助 ${ex.s.map(x=>SLUG_CN[x]).join('、')}</span>`:''}</div></section>
-      <section class="stack" style="gap:12px"><p class="eyebrow">动作规范</p><ol class="how">${ex.steps.map(s=>`<li><span>${s}</span></li>`).join('')}</ol></section>
-      <section><div class="callout"><span class="k">要点</span><span>${ex.cue}</span></div><div class="callout avoid" style="border-bottom:1px solid var(--line)"><span class="k">避免</span><span>${ex.avoid}</span></div></section>
+        <div class="mkey"><span><i style="background:var(--accent)"></i>主练 ${ex.p.map(x=>SLUG_CN[x]).join('、')}</span>${ex.s.length?`<span><i style="background:color-mix(in srgb,var(--accent) 38%,var(--body))"></i>辅助 ${ex.s.map(x=>SLUG_CN[x]).join('、')}</span>`:''}</div></section>
+      <section class="stack" style="gap:12px"><p class="eyebrow">动作要领</p><ol class="how">${ex.steps.concat([ex.cue]).map(x=>`<li><span>${x}</span></li>`).join('')}</ol></section>
+      <section class="stack" style="gap:8px"><p class="eyebrow">常见错误</p><ul class="bul">${[ex.avoid,ex.avoid2].filter(Boolean).map(x=>`<li>${x}</li>`).join('')}</ul></section>
+      ${ex.risk?`<section><div class="callout warn"><span class="k">受伤风险</span><span>${ex.risk}</span></div></section>`:''}
+      ${alts.length?`<section class="stack" style="gap:10px"><p class="eyebrow">替代动作 · ${g.name}</p>
+        ${live?`<div class="chips">${g.ex.map(x=>`<button class="chip2" type="button" data-act="swapTo" data-arg="${i}|${x}" aria-pressed="${x===e}">${EX[x].name}${eqOK(x)?'':` <span class="muted xs">需要${EQ[EX[x].eq]}</span>`}</button>`).join('')}</div>
+          <p class="xs muted">换过的动作只对今天生效。${it.orig?`<button class="link xs" type="button" data-act="keepSwap" data-arg="${i}">以后都用「${ex.name}」</button>`:''}</p>`
+        :`<div class="list">${alts.map(x=>exRow(x,`data-go="ex" data-arg="${x}"`,`${EQ[EX[x].eq]} · ${LV_NAME[EX[x].lv]}`)).join('')}</div>`}</section>`:''}
       <section class="stack" style="gap:10px"><p class="eyebrow">记一条给下次的自己</p>
         <div class="chips">${['容易耸肩','腰会塌','膝盖内扣','借力甩起来','重量可以加','重量太重'].map(c=>`<button class="chip2" type="button" data-act="noteChip" data-arg="${c}">${c}</button>`).join('')}</div>
         <div class="composer"><textarea id="noteIn" rows="1" placeholder="比如：下拉时肩膀先往下沉再拉" aria-label="备注内容"></textarea><button class="btn" type="button" data-act="addNote" data-arg="${e}" style="min-height:40px;padding:0 16px">记下</button></div>
         <p class="xs muted">跟练到这个动作时，教练会先读一遍你的备注。</p></section>
-      ${alts.length>1?`<section class="stack" style="gap:10px"><p class="eyebrow">同部位可替换</p><div class="chips">${alts.map(x=>`<button class="chip2" type="button" data-act="swapEx" data-arg="${k}|${it.mu}|${x}|${date}|${i}" aria-pressed="${x===e}">${EX[x].name}</button>`).join('')}</div></section>`:''}
-      ${ctx?`<button class="btn block ${done?'ghost':''}" type="button" data-act="toggleDone" data-arg="${date}|${e}">${done?I.check+' 已完成':'完成这个动作'}</button>`:''}`;
+      ${live?`<button class="btn block ${done?'ghost':''}" type="button" data-act="toggleDone" data-arg="${t}|${e}">${done?I.check+' 已完成':'完成这个动作'}</button>`:''}`;
   },after(){ startFrames(); },leave(){ stopFrames(); }},
   me:{root:1,title:'我的',render(){
-    const r=analyze(), t=target(), m=r.m;
-    return `<div class="stack" style="gap:6px">
-      <p class="eyebrow">${isSample()?'样例数据':'我的身材'}</p>
-      <p class="h1"><span class="num" style="font-size:36px">${f2(m.swr)}</span> <span class="small muted">肩腰比</span>　<span class="num" style="font-size:36px">${f2(m.hwr)}</span> <span class="small muted">臀腰比</span></p>
-      <p class="small muted">${m.h?`身高 ${m.h} cm · `:''}腰围 ${Math.round(m.cm.waist)} · 臀围 ${Math.round(m.cm.hip)} · 腿围 ${Math.round(m.cm.thigh)} cm</p>
-    </div>
+    const gs=goalsOf().map(g=>g.name).join('、')||'未设置', last=(S.measLog||[]).slice(-1)[0];
+    return `<div class="stack" style="gap:6px"><p class="eyebrow">我的训练</p><p class="h1">${esc(gs)}</p>
+      <p class="small muted">${sx()==='m'?'男':'女'} · 每周 ${S.freq} 次 · ${(EXP[S.exp]||EXP.n).name} · ${SPLITS[S.freq].name}</p></div>
     <div class="list">
-      <button class="li" type="button" data-go="measure"><span></span><span><span class="t">测量身材</span><span class="s">手动输入尺寸，或拍一张正面照扫描</span></span><span class="r">${I.chev}</span></button>
-      <button class="li" type="button" data-go="target"><span></span><span><span class="t">目标身材</span><span class="s">${esc(t.name)} · 肩腰 ${f2(t.swr)} · 臀腰 ${f2(t.hwr)}</span></span><span class="r">${I.chev}</span></button>
-      <button class="li" type="button" data-go="posture"><span></span><span><span class="t">体态</span><span class="s">${[S.rounded&&'圆肩',S.apt&&'骨盆前倾'].filter(Boolean).join('、')||'无'}</span></span><span class="r">${I.chev}</span></button>
+      <button class="li" type="button" data-go="settings"><span></span><span><span class="t">训练设置</span><span class="s">目标、每周次数、经验、器械</span></span><span class="r">${I.chev}</span></button>
+      <button class="li" type="button" data-go="week"><span></span><span><span class="t">周视图</span><span class="s">本周和上周练了哪些肌群</span></span><span class="r">${I.chev}</span></button>
+      <button class="li" type="button" data-go="measure"><span></span><span><span class="t">身体数据 · 可选</span><span class="s">${last?`上次记录 ${last.d}`:'只记录你自己的变化，肌群图会按你的身形显示'}</span></span><span class="r">${I.chev}</span></button>
+      <button class="li" type="button" data-go="posture"><span></span><span><span class="t">体态 · 可选</span><span class="s">${[S.rounded&&'圆肩',S.apt&&'骨盆前倾'].filter(Boolean).join('、')||'无'}</span></span><span class="r">${I.chev}</span></button>
       ${isApp()?'':`<button class="li" type="button" data-go="install"><span></span><span><span class="t">安装到手机</span><span class="s">添加到主屏幕，像 App 一样全屏打开，离线也能用</span></span><span class="r">${I.chev}</span></button>`}
-      <button class="li" type="button" data-go="about"><span></span><span><span class="t">关于</span><span class="s">怎么算的、隐私、素材来源</span></span><span class="r">${I.chev}</span></button>
-    </div>
-    <div class="stack" style="gap:6px"><p class="eyebrow">性别</p><div><div class="seg" role="group" aria-label="性别">${[['f','女'],['m','男']].map(([k,l])=>`<button type="button" data-act="setSex" data-arg="${k}" aria-pressed="${sx()===k}">${l}</button>`).join('')}</div></div>
-      <p class="xs muted">${S.sex?'切换后，目标模板、样例和训练计划会换成对应的版本。':'还没选过，默认按女性。去「测量身材」时会先让你选。'}</p></div>
-    <div class="stack" style="gap:6px"><p class="eyebrow">数据来源</p><div><div class="seg" role="group" aria-label="数据来源">${[['photo','我的测量'],...samplesOf(sx()).map(k=>[k,SAMPLES[k].label])].map(([k,l])=>`<button type="button" data-act="mode" data-arg="${k}" aria-pressed="${S.mode===k}">${l}</button>`).join('')}</div></div></div>`;
-  }},
-  target:{title:'目标身材',render(){
-    const r=analyze(), m=r.m, t=r.t, cap=capOf(m.h||163,S.af.frame), FM=figMetrics(r);
-    const tc={}; DIMS.forEach(([k])=>tc[k]=FM[k].tgt);
-    const pv=autoCm(m,S.af), moves=DIMS.some(([k])=>Math.abs(pv[k]-m.cm[k])>.2);
-    const passed=x=>x.swr-m.swr<0.04&&x.hwr-m.hwr<0.04;
-    const opt=(id,name,note,sub,mn)=>`<button class="opt" type="button" role="radio" aria-checked="${S.target===id}" data-act="setTarget" data-arg="${id}"><span class="acc">${mn}</span><span style="min-width:0"><b style="font-weight:600">${name}</b><br><span class="muted small">${note}</span><br><span class="mono xs muted">${sub}</span></span><span class="radio">${S.target===id?I.check:''}</span></button>`;
-    return `<section class="stack" style="gap:10px">
-      <div class="between"><div><p class="eyebrow">当前目标</p><p class="h2">${esc(t.name)}</p></div>${r.reached?'<span class="badge acc">已达成</span>':''}</div>
-      <p class="xs muted">${t.cm?t.note:'预设模板只比较比例：腰围不变，按比例换算肩宽和臀围。'}</p>
-      ${gapRows(m.cm,tc,cap)}
-    </section>
-    <section class="stack" style="gap:12px">
-      <p class="eyebrow">按身高和骨架生成 · 下一阶段</p>
-      <p class="small muted">以你现在的尺寸为起点，选中的部位各往前走一个阶段（约 12 周的合理变化），封顶在 ${m.h||163} cm 身高、${FRAMES[S.af.frame].name}骨架对应的上限。达成后再生成下一阶段。</p>
-      <div class="mf"><span class="t">骨架</span><div><div class="seg sm" role="group" aria-label="骨架">${Object.entries(FRAMES).map(([k,f])=>`<button type="button" data-act="afFrame" data-arg="${k}" aria-pressed="${S.af.frame===k}">${f.name}</button>`).join('')}</div></div>
-        <span class="xs muted">拇指和中指圈住手腕：刚好碰到选适中，有空隙选偏小，碰不到选偏大。</span></div>
-      <div class="mf"><span class="t">想加强的部位</span><div class="chips">${[['shoulder','肩背'],['hip','臀'],['thigh','腿'],['waist','腰线']].map(([k,l])=>`<button class="chip2" type="button" data-act="afFocus" data-arg="${k}" aria-pressed="${S.af.foci.includes(k)}">${l}</button>`).join('')}</div></div>
-      ${gapRows(m.cm,pv,cap)}
-      ${moves?`<button class="btn block" type="button" data-act="useAuto">用这个作为目标</button>`:`<p class="small muted">选中的部位都已经到了骨架上限、腰围也在理想范围内——接下来以维持和线条为主。想继续挑战，可以在下面手动设定。</p>`}
-    </section>
-    <section class="stack" style="gap:12px">
-      <p class="eyebrow">精细调整</p>
-      <p class="small muted">直接设定四项目标尺寸（默认填的是${t.cm?'当前目标':'你现在的尺寸'}），训练计划按每项的差距来分配。</p>
-      <div class="mfields">${DIMS.map(([k,n])=>`<div class="mf"><span class="t">${n}</span><label class="field"><input data-tg="${k}" type="number" inputmode="decimal" step="0.5" value="${fmtD(k,t.cm?t.cm[k]:m.cm[k])}" aria-label="目标${n}（厘米）"><span>cm</span></label><span class="xs muted">现在 ${fmtD(k,m.cm[k])} · ${k==='waist'?'理想约 '+fmtD(k,cap[k]):'上限约 '+fmtD(k,cap[k])}</span></div>`).join('')}</div>
-      <button class="btn ghost block" type="button" data-act="saveCustom">保存为自定义目标</button>
-    </section>
-    <div class="list"><button class="li" type="button" data-go="refphoto"><span></span><span><span class="t">用参考照片设定目标</span><span class="s">上传一张喜欢的身材照片，提取比例，算出你和它的差距</span></span><span class="r">${I.chev}</span></button></div>
-    <section class="stack" style="gap:6px">
-      <p class="eyebrow">预设模板</p>
-      <div role="radiogroup" aria-label="目标身材" style="border-top:1px solid var(--line)">
-        ${S.tgt&&S.tgt.cm&&(S.tgt.sex||'f')===sx()?opt('mine',esc(S.tgt.name),MINE_NOTE[S.tgt.kind]||'',DIMS.map(([k,n])=>n+' '+fmtD(k,S.tgt.cm[k])).join(' · '),mini({...cmRatios(S.tgt.cm)})):''}
-        ${targetsOf(sx()).map(x=>opt(x.id,x.name+(passed(x)?' <span class="badge acc">已超过</span>':''),x.note,`肩腰 ${f2(x.swr)} · 臀腰 ${f2(x.hwr)}`,mini(x))).join('')}
-      </div>
-    </section>`;
+      <button class="li" type="button" data-go="about"><span></span><span><span class="t">关于</span><span class="s">计划怎么来的、隐私、免责声明</span></span><span class="r">${I.chev}</span></button>
+    </div>`;
   }},
   install:{title:'安装到手机',render(){
     const ios=/iPhone|iPad|iPod/.test(navigator.userAgent), wx=/MicroMessenger/i.test(navigator.userAgent);
@@ -1262,17 +1132,17 @@ const P={
         <ol class="how">${step(1,'用 Safari 打开这个网址',esc(location.origin+location.pathname))}${step(2,'点底部工具栏的「分享」按钮','方框加向上箭头的图标；iOS 26 起可能在「···」菜单里')}${step(3,'在菜单里选「添加到主屏幕」','没看到就往下滑')}${step(4,'点右上角「添加」','桌面上会出现「薄肌导航」图标，之后从图标打开')}</ol></section>
       ${ios?'':`<section class="stack" style="gap:10px"><p class="eyebrow">安卓 · Chrome</p><ol class="how">${step(1,'用 Chrome 打开这个网址','')}${step(2,'点右上角「⋮」菜单','')}${step(3,'选「安装应用」或「添加到主屏幕」','')}</ol></section>`}
       <section class="stack" style="gap:6px"><p class="eyebrow">注意</p>
-        <p class="small muted">主屏 App 和浏览器里的数据是分开存的：在浏览器里填过的尺寸、照片不会自动带过去，从主屏图标打开后再测量一次就好。照片和数据都只存在这台手机上。</p></section>`;
+        <p class="small muted">主屏 App 和浏览器里的数据是分开存的：在浏览器里设置的计划和训练记录不会自动带过去，从主屏图标打开后重新设置一次就好。数据只存在这台手机上。</p></section>`;
   }},
   posture:{title:'体态',render(){
-    return `<p class="small muted">照片看不出来，手动勾选。会加入纠正动作和拉伸。</p><div style="border-top:1px solid var(--line)">${sw('rounded','圆肩','肩膀前扣、含胸；自然站立时手背朝前')}${sw('apt','骨盆前倾','靠墙站，腰后能塞进一个拳头')}</div>`;
+    return `<p class="small muted">可选。勾选后会在训练里加入对应的纠正和拉伸。</p><div style="border-top:1px solid var(--line)">${sw('rounded','圆肩','肩膀前扣、含胸；自然站立时手背朝前')}${sw('apt','骨盆前倾','靠墙站，腰后能塞进一个拳头')}</div>`;
   }},
   about:{title:'关于',render(){
     return `<section class="stack" style="gap:16px;font-size:14.5px">
-      <div><p class="eyebrow">怎么算的</p><p>两种方式：手动输入软尺量的肩宽和围度；或拍一张正面照，用身高把像素换算成厘米，量出肩、腰、臀、腿的宽度。宽度和围度之间按椭圆换算：周长 ≈ π[3(a+b) − √((3a+b)(a+3b))]，a、b 是半宽和半厚，厚度按常见体型的厚宽比估算。肩腰比、臀腰比用正面宽度计算。</p></div>
-      <div><p class="eyebrow">准确度</p><p>2D 照片估算的围度会有 ±3–5 cm 的误差，适合看比例和变化趋势，不能代替软尺。3D 模型用 MakeHuman 女性基础网格，按你的肩宽、腰围、臀围、腿围调整四个形变，再缩放到你的身高，只表现比例。</p></div>
-      <div><p class="eyebrow">隐私</p><p>照片只保存在这台设备的浏览器里，识别也在本机完成，不上传。</p></div>
-      <div><p class="eyebrow">说明</p><p>目标比例是演示设定值。训练建议不替代专业教练或医疗意见。</p></div>
+      <div><p class="eyebrow">计划怎么来的</p><p>体型目标决定主练肌群（比如直角肩 → 三角肌中束、后束），每周次数决定分化方式，训练经验决定组数。主练肌群每周练 2–3 次，同一肌群两次训练间隔至少 48 小时；没选的肌群也安排基础训练量，避免比例失衡。每次先做复合动作、再做孤立动作。同样的设置永远得到同样的计划。</p></div>
+      <div><p class="eyebrow">漏练怎么办</p><p>计划按顺序往后排，不按星期几固定。漏练或点「今天不练」，下次打开还是没完成的那一次，不会累积欠练。</p></div>
+      <div><p class="eyebrow">隐私</p><p>训练记录、身体数据和照片只保存在这台设备的浏览器里，照片识别也在本机完成，不上传。</p></div>
+      <div><p class="eyebrow">免责声明</p><p>计划是通用训练建议，不构成医疗或专业指导。有伤病，或训练中出现疼痛，请先咨询医生或教练。</p></div>
       <p class="credits">动作照片：<a href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noopener">free-exercise-db</a>（Unlicense，公共领域）<br>肌群图：<a href="https://github.com/melihcolpan/MuscleMap" target="_blank" rel="noopener">MuscleMap</a> © Melih Colpan（MIT License）<br>3D 人体：<a href="https://github.com/makehumancommunity/mpfb2" target="_blank" rel="noopener">MakeHuman / MPFB2</a> 基础网格与形变（CC0）<br>3D 渲染：three.js（MIT License）<br>姿态识别：MediaPipe Pose Landmarker（Apache 2.0）</p>
     </section>`;
   }},
@@ -1287,13 +1157,14 @@ function startFrames(){ stopFrames(); FR.auto=!matchMedia('(prefers-reduced-moti
 function stopFrames(){ clearInterval(FR.t); FR.t=0; }
 
 /* ---------------- router ---------------- */
-let stack=[{p:'home'}];
+let stack=[{p:S.onb?'today':'onb'}];
 let curPage=null;
 function render(dir){
   const c=stack[stack.length-1], pg=P[c.p];
   if(curPage&&curPage!==pg&&curPage.leave) curPage.leave();
   if(c.p!=='session') stopSession();
-  if(c.p==='measure'||c.p==='refphoto'||c.p==='session') setTimeout(()=>mpLoad().catch(()=>{}),300);
+  if(!S.onb&&c.p!=='onb'&&c.p!=='about'){ stack=[{p:'onb'}]; return render(dir); } // 没完成引导前只能看引导
+  if(c.p==='measure'||c.p==='session') setTimeout(()=>mpLoad().catch(()=>{}),300);
   $('app').classList.toggle('immersive',!!pg.immersive);
   const title=typeof pg.title==='function'?pg.title(c.a):pg.title;
   const root=stack.length===1;
@@ -1302,7 +1173,8 @@ function render(dir){
   $('top').innerHTML=root?`<h1>${title}</h1><span class="aside">${aside}</span>`:`<button class="iconbtn" type="button" data-back="1" aria-label="返回">${I.back}</button><h1>${title}</h1><span></span>`;
   const v=$('view'); v.className='view'+(dir?' '+dir:''); v.innerHTML=pg.render(c.a);
   if(dir) v.scrollTop=0;
-  $('tabs').innerHTML=[['home','身材',I.body],['train','训练',I.train],['me','我的',I.me]].map(([id,l,ic])=>`<button type="button" data-tab="${id}" ${stack[0].p===id?'aria-current="page"':''}>${ic}<span>${l}</span></button>`).join('');
+  $('tabs').hidden=!S.onb;
+  $('tabs').innerHTML=[['today','训练',I.train],['atlas','肌群',I.body],['me','我的',I.me]].map(([id,l,ic])=>`<button type="button" data-tab="${id}" ${stack[0].p===id?'aria-current="page"':''}>${ic}<span>${l}</span></button>`).join('');
   curPage=pg;
   if(pg.after) pg.after(c.a);
 }
@@ -1338,7 +1210,7 @@ function scanMeas(){
 }
 /* 手动输入：软尺量的围度。围度 → 宽度按常见体型的厚宽比反推（周长对宽度是线性的），再走同一套 derive */
 const MAN_FIELDS=[
-  {k:'shoulder',name:'肩宽',hint:'两侧肩峰（肩膀最外侧的骨点）之间的直线距离',min:25,max:65,ph:{f:'36',m:'44'}},
+  {k:'shoulder',name:'肩宽',hint:'站直、手臂自然下垂，量两侧肩膀最外侧（三角肌外缘）之间的直线距离',min:25,max:65,ph:{f:'36',m:'44'}},
   {k:'waist',name:'腰围',hint:{f:'肚脐上方最细处绕一圈，自然呼气时量',m:'肚脐高度水平绕一圈，自然呼气时量'},min:45,max:150,ph:{f:'68',m:'80'}},
   {k:'hip',name:'臀围',hint:'臀部最翘、最宽处水平绕一圈',min:60,max:170,ph:{f:'92',m:'94'}},
   {k:'thigh',name:'大腿围',hint:'大腿根下方最粗处绕一圈，不填按臀围估算',min:30,max:95,ph:{f:'52',m:'55'},opt:1}
@@ -1365,93 +1237,18 @@ function readoutHTML(m){
     :'请再核对一下：腰围在肚脐高度、臀围在最宽处、腿围在大腿根下方最粗处。';
   const warn=adj.length?`<p class="status err">${adj.map(k=>DIMS.find(d=>d[0]===k)[1]).join('、')}和其他尺寸的组合不太符合常见人体比例（比如腿围通常是臀围的五到七成）。${why}</p>`:'';
   const cell=(k,v,u='cm',x='')=>`<div><span class="k">${k}${x}</span><span class="num">${v}<small class="mono xs muted"> ${u}</small></span></div>`;
-  return `${warn}<div class="readout">${cell('肩宽',f1(m.cm.shoulder))}${cell('腰围',Math.round(m.cm.waist),'cm',e('waist'))}${cell('臀围',Math.round(m.cm.hip),'cm',e('hip'))}${cell('大腿围',Math.round(m.cm.thigh),'cm',e('thigh'))}${cell('腰臀比',f2(m.whr),'')}${m.legR?cell('腿长比',Math.round(m.legR*100),'%'):''}${cell('肩腰比',f2(m.swr),'')}${cell('臀腰比',f2(m.hwr),'')}</div>
+  return `${warn}<div class="readout">${cell('肩宽',f1(m.cm.shoulder))}${cell('腰围',Math.round(m.cm.waist),'cm',e('waist'))}${cell('臀围',Math.round(m.cm.hip),'cm',e('hip'))}${cell('大腿围',Math.round(m.cm.thigh),'cm',e('thigh'))}</div>
     ${m.est.length?`<p class="xs muted">${m.src==='scan'?'标「估」的由照片宽度按常见体型估算，想更准可以切到「手动输入」用软尺量的数改一下。':'大腿围没填，按臀围估算。'}</p>`:''}`;
 }
-/* ---------------- 目标：逐项差距 ---------------- */
-const fmtD=(k,v)=>v==null?'—':k==='shoulder'?f1(v):String(Math.round(v));
-const GAP_TH={shoulder:.5,hip:1.5,thigh:1.5,waist:2};
-// 每项：要做什么、大约几周（按一个阶段 12 周走 STEP cm 估算）、是否已到骨架上限
-function gapRows(cc,tc,cap){
-  return `<div class="gaps">${DIMS.map(([k,n])=>{
-    if(tc[k]==null) return `<div class="gap"><span class="k">${n}</span><span class="v mono">${fmtD(k,cc[k])}</span><span class="d mono muted">—</span><span class="w xs muted">这个模板不设定</span></div>`;
-    const d=Math.round((k==='waist'?cc[k]-tc[k]:tc[k]-cc[k])*10)/10, th=GAP_TH[k], atCap=cap&&k!=='waist'&&cc[k]>=cap[k]-.3;
-    let cls='acc', sign='✓', why='已达到';
-    if(d>=th){ cls='warm'; sign=(k==='waist'?'−':'+')+f1(d); why=(k==='waist'?'靠整体体脂下降':'练'+DIM_MU[k])+` · 约 ${Math.max(2,Math.round(d/STEP[k]*12/2)*2)} 周`; }
-    else if(k==='thigh'&&d<=-2){ cls='under'; sign='−'+f1(-d); why='减少腿部训练量'; }
-    else if(k!=='waist'&&d<=-1) why='已超过目标';
-    return `<div class="gap"><span class="k">${n}</span><span class="v mono">${fmtD(k,cc[k])} → <b>${fmtD(k,tc[k])}</b></span><span class="d mono ${cls}">${sign}</span><span class="w xs muted">${why}${atCap?' · 已到骨架上限':''}</span></div>`;
-  }).join('')}</div>`;
+// 自己的变化：每次保存一条，只和自己第一次比，不和任何模板比
+function measHistory(){
+  const L=S.measLog||[]; if(!L.length) return '';
+  const f=L[0], v=(k,x)=>k==='shoulder'?f1(x):String(Math.round(x)), dv=(k,x)=>{ const d=Math.round((x-f.cm[k])*10)/10; return d?`<small class="mono xs muted"> ${d>0?'+':''}${d}</small>`:''; };
+  return `<section class="stack" style="gap:8px"><p class="eyebrow">我的记录 · 和第一次比</p>
+    <div class="tblwrap"><table class="tbl"><thead><tr><th>日期</th>${DIMS.map(([,n])=>`<th>${n}</th>`).join('')}</tr></thead>
+    <tbody>${L.slice().reverse().map(r=>`<tr><td class="mono">${r.d.slice(5)}</td>${DIMS.map(([k])=>`<td>${v(k,r.cm[k])}${r===f?'':dv(k,r.cm[k])}</td>`).join('')}</tr>`).join('')}</tbody></table></div></section>`;
 }
-
-/* ---------------- 参考照片 ----------------
-   和拍照扫描同一套点位与自动识别，只取像素比例（参考照片没有真实身高）。
-   全身照：各项宽度 ÷ 头顶到脚底高度，乘以你的身高；不是全身照：以你的腰围（不超过理想值）为基准按比例换算。
-   超过你骨架上限的项按上限算，并提示。 */
-function refCalc(){
-  const ph=T.ph.ref; if(!ph||!ph.pts||!ph.nw) return null;
-  const p=ph.pts, w=(a,b)=>Math.abs(p[b][0]-p[a][0])*ph.nw, H=(p.bot[1]-p.top[1])*ph.nh;
-  const sw=w('sl','sr'), ww=w('wl','wr'), hw=w('hl','hr'), tw=w('tl','tr'); if(ww<4||hw<4) return null;
-  const full=T.refFull!==false&&H>ww*3;
-  return {swr:sw/ww,hwr:hw/ww,thr:tw/hw,full,sH:sw/H,wH:ww/H};
-}
-// 正常人体正面比例的范围；超出多半是点位没放准（手臂和身体粘连、持物、侧身）
-const REF_OK={swr:[1.15,1.75],hwr:[1.1,1.75],thr:[.4,.7]};
-const refOdd=f=>Object.keys(REF_OK).filter(k=>f[k]<REF_OK[k][0]||f[k]>REF_OK[k][1]);
-function refToCm(f,m){
-  const c=m.cm, h=m.h||163, cap=capOf(h,S.af.frame), E=x=>ellipse(1,x), q={};
-  for(const k in REF_OK) q[k]=Math.min(REF_OK[k][1],Math.max(REF_OK[k][0],f[k]));
-  const ww=f.full?f.wH*h:Math.min(c.waist,cap.waist)/E(DK().waist);
-  const cm={shoulder:q.swr*ww,waist:ww*E(DK().waist),hip:q.hwr*ww*E(DK().hip),thigh:q.thr*q.hwr*ww*E(DK().thigh)}, clamped=[];
-  for(const k of ['shoulder','hip','thigh']){
-    if(cm[k]>cap[k]){ cm[k]=cap[k]; clamped.push(k); }
-    else if(cm[k]<c[k]-2*STEP[k]){ cm[k]=c[k]-2*STEP[k]; clamped.push(k); } // 不把「大幅减掉肌肉」当目标
-  }
-  if(cm.waist<cap.waist*.9){ cm.waist=cap.waist*.9; clamped.push('waist'); }
-  return {cm,clamped};
-}
-function refTags(f){
-  const t=[];
-  if(f.swr>=1.45) t.push('直角肩、背部有宽度'); else if(f.swr<=1.32) t.push('肩线柔和');
-  if(f.hwr>=1.42) t.push('臀部饱满、腰臀差明显'); else if(f.hwr<=1.3) t.push('胯窄、线条偏直');
-  if(f.thr<=.5) t.push('腿部纤细'); else if(f.thr>=.58) t.push('腿部有力量感');
-  if(f.full&&f.wH<=.145) t.push('腰很细');
-  if(f.swr>=1.42&&f.hwr>=1.42) t.push('X 型');
-  return t.length?t:['比例均衡'];
-}
-function refHTML(){
-  const f=refCalc(); if(!f) return '<p class="small muted">放好照片上的点之后，这里会出现提取到的特征，以及你和它的差距。</p>';
-  const m=cur(), R=refToCm(f,m), cap=capOf(m.h||163,S.af.frame);
-  const near=targetsOf(sx()).map(x=>({x,d:Math.hypot(x.swr-f.swr,x.hwr-f.hwr)})).sort((a,b)=>a.d-b.d)[0].x;
-  const cell=(k,v)=>`<div><span class="k">${k}</span><span class="num">${v}</span></div>`;
-  const cn=R.clamped.map(k=>DIMS.find(d=>d[0]===k)[1]).join('、');
-  const odd=refOdd(f).map(k=>({swr:'肩腰比',hwr:'臀腰比',thr:'腿臀比'})[k]);
-  return `${odd.length?`<p class="status err">${odd.join('、')}超出了常见人体范围，多半是点位没放准（手臂贴着身体、手里拿着东西、侧身都会影响）。请放大核对腰和腿的点；换算时已按常见范围的边界处理。</p>`:''}
-    <p class="eyebrow">提取到的特征</p>
-    <div class="chips">${refTags(odd.length?{...f,...Object.fromEntries(Object.entries(REF_OK).map(([k,[a,b]])=>[k,Math.min(b,Math.max(a,f[k]))])),full:false}:f).map(x=>`<span class="chip2" style="cursor:default">${x}</span>`).join('')}</div>
-    <div class="readout">${cell('肩腰比',f2(f.swr))}${cell('臀腰比',f2(f.hwr))}${cell('腿臀比',f2(f.thr))}${f.full?cell('肩宽 / 身高',f2(f.sH)):''}</div>
-    <p class="xs muted">最接近的预设：${near.name}。比例按正面宽度算，和你的测量口径一致。</p>
-    <p class="eyebrow" style="margin-top:6px">换算到你的身材 · ${f.full?`按身高 ${m.h||163} cm`:'按你的腰围'}</p>
-    ${gapRows(m.cm,R.cm,cap)}
-    ${cn?`<p class="xs muted">${cn}换算后超出了合理范围（高于你骨架的上限，或要大幅减掉肌肉），已按边界计算。这部分差距多半来自骨架、拍摄角度或修图，靠训练练不出来。</p>`:''}
-    <button class="btn block acc" type="button" data-act="useRef">设为我的目标</button>`;
-}
-const refUpdate=()=>{ const el=$('refout'); if(el) el.innerHTML=refHTML(); };
-P.refphoto={title:'参考照片',render(){
-  T.step='ref'; const ph=T.ph.ref, has=!!(ph&&ph.url);
-  return `<p class="small muted">选一张正面站直、穿贴身衣服的照片，头到脚都在画面里最准。照片只在这台设备上处理，不上传。</p>
-    <label class="drop" id="drop" ${has?'hidden':''}><input type="file" id="file" accept="image/*">${I.poseFront}<b>选择参考照片</b><span class="xs muted">自动识别轮廓，提取比例</span></label>
-    <div id="photoArea" ${has?'':'hidden'} class="stack" style="gap:8px"><div class="stage" id="stage"><img id="photo" alt="参考照片" ${has?`src="${ph.url}"`:''}><svg class="ov" id="lines" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div>
-      <p class="xs muted">点位已自动放好。不准的话按住拖动：肩取最外侧，腰取最细处，臀取最宽处，腿量一条大腿最粗处。</p></div>
-    <p class="status" id="pstatus"></p>
-    <div id="pbtns" class="stack" style="gap:10px" ${has?'':'hidden'}>
-      <div class="row2"><button class="btn ghost" type="button" data-act="auto" style="flex:1">重新识别</button><button class="btn ghost" type="button" data-act="deletePhoto" style="flex:1">换一张</button></div>
-      <div class="chips"><button class="chip2" type="button" data-act="refFull" aria-pressed="${T.refFull!==false}">照片是头到脚的全身照</button></div>
-    </div>
-    <section class="stack" id="refout" style="gap:12px">${refHTML()}</section>`;
-},after(){ setupPhoto(); }};
-
-P.measure={title:'测量身材',render(){
+P.measure={title:'身体数据',render(){
   T.step='front';
   const tabv=T.mtab, hasF=!!(T.ph.front&&T.ph.front.url);
   if(tabv==='manual') manFill();
@@ -1472,14 +1269,13 @@ P.measure={title:'测量身材',render(){
       <p class="status" id="pstatus"></p>
       <div id="pbtns" class="row2" ${hasF?'':'hidden'}><button class="btn ghost" type="button" data-act="auto" style="flex:1">重新识别</button><button class="btn ghost" type="button" data-act="deletePhoto" style="flex:1">换一张</button></div>`;
   }
-  const sexSeg=`<div class="mf"><span class="t">性别</span><div class="seg mtabs" role="group" aria-label="性别">${[['f','女'],['m','男']].map(([k,l])=>`<button type="button" data-act="setSex" data-arg="${k}" aria-pressed="${S.sex===k}">${l}</button>`).join('')}</div>
-    <span class="xs muted">男女的理想比例、目标模板和训练侧重不一样，先选好再填数据。</span></div>`;
-  if(!S.sex) return `<div class="stack" style="gap:8px"><p class="h2">先选择性别</p></div>${sexSeg}`;
   const m=draftMeas();
-  return `${sexSeg}<div class="seg mtabs" role="tablist" aria-label="测量方式">${[['manual','手动输入'],['scan','拍照扫描']].map(([k,l])=>`<button type="button" role="tab" data-act="mtab" data-arg="${k}" aria-selected="${tabv===k}" aria-pressed="${tabv===k}">${l}</button>`).join('')}</div>
+  return `<p class="small muted">可选。只记录你自己的数据和变化，不和任何模板比较；肌群图会按你的身形显示。尺寸会有误差，适合看自己的变化趋势。</p>
+    <div class="seg mtabs" role="tablist" aria-label="测量方式">${[['manual','手动输入'],['scan','拍照扫描']].map(([k,l])=>`<button type="button" role="tab" data-act="mtab" data-arg="${k}" aria-selected="${tabv===k}" aria-pressed="${tabv===k}">${l}</button>`).join('')}</div>
     ${body}
     <section class="stack" style="gap:14px" id="sumSec"><p class="eyebrow">测量结果</p><div id="readout">${readoutHTML(m)}</div>
-      <button class="btn block acc" type="button" data-act="saveMeas" ${m?'':'disabled style="opacity:.4"'}>保存为我的身材数据</button></section>`;
+      <button class="btn block acc" type="button" data-act="saveMeas" ${m?'':'disabled style="opacity:.4"'}>保存这次记录</button></section>
+    ${measHistory()}`;
 },after(){ setupPhoto(); }};
 
 function updateReadout(){ const el=$('readout'); if(el) el.innerHTML=readoutHTML(draftMeas()); const b=document.querySelector('[data-act="saveMeas"]'); if(b){ const ok=!!draftMeas(); b.disabled=!ok; b.style.opacity=ok?'':'.4'; } }
@@ -1654,7 +1450,9 @@ async function autoDetect(){
 }
 const MEAS_ACT={
   mtab(a){ if(T.mtab===a) return; T.mtab=a; if(a==='manual') T.man=null; refresh(); },
-  saveMeas(){ const m=draftMeas(); if(!m){ toast(T.mtab==='scan'?'先填身高、放好照片上的点':'先填好身高、肩宽、腰围、臀围'); return; } m.sex=sx(); S.meas=m; if(S.mode!=='photo'&&!S.postureSet){ S.rounded=false; S.apt=false; } S.mode='photo'; /* 样例的体态不带进自己的数据 */ save(); if(m.src==='scan') savePhoto('front'); toast('已保存'); T.hFocus=null; T.man=null; stack=[{p:'home'}]; render('back'); },
+  saveMeas(){ const m=draftMeas(); if(!m){ toast(T.mtab==='scan'?'先填身高、放好照片上的点':'先填好身高、肩宽、腰围、臀围'); return; }
+    m.sex=sx(); m.d=todayISO(); S.meas=m; S.measLog=(S.measLog||[]).filter(r=>r.d!==m.d); S.measLog.push({d:m.d,cm:pickCm(m.cm),h:m.h});
+    save(); if(m.src==='scan') savePhoto('front'); T.man=null; refresh(); toast('已保存，肌群图会按你的身形显示'); },
   auto:autoDetect, deletePhoto
 };
 /* ---------------- AI coach ---------------- */
@@ -1741,7 +1539,7 @@ function targetOf(e){
 const exSets=e=>{ const m=EX[e].reps.match(/(\d+)\s*×/); return m?+m[1]:3; };
 const isTracked=e=>!!TRK_OF[e]&&TRK_OF[e]!=='hold';
 function buildQueue(k){ if(k.startsWith('ex:')){ const [,e,n]=k.split(':'); return [{e,sets:+n||exSets(e),tg:targetOf(e),trk:TRK_OF[e]||'hold'}]; }
-  const plan=weekPlan(analyze()); return plan[k].items.map(it=>{const e=exOf(k,it);return {e,sets:it.stretch?1:it.sets,tg:targetOf(e),trk:TRK_OF[e]||'hold'};}); }
+  return sessionFor(nextKey(),todayISO()).items.map(it=>({e:it.e,sets:it.stretch?1:it.sets,tg:targetOf(it.e),trk:TRK_OF[it.e]||'hold'})); }
 
 /* voice
    iOS Safari：必须在一次点击里先真正说出一句话，之后定时器里的播报才有声音。
@@ -1934,22 +1732,22 @@ function finish(){
   C.phase='done'; clearInterval(C.timer); stopCam();
   const mins=Math.max(1,Math.round((Date.now()-C.t0)/60000));
   say(C.single?`${EX[C.q[0].e].name}完成，做得很好`:'今天的训练全部完成，做得很好',{urgent:true});
+  if(!C.single&&C.completed.size){ const st=todayState(); if(!st.doneToday) logDone(st.key,st.ses.mus); }
   setStat('完成','live'); $('ccount').innerHTML='';
   const fb=$('cfb'); fb.hidden=false; fb.innerHTML=`<span class="ok">${I.checkBig}</span><b>${C.single?EX[C.q[0].e].name+'完成了':'今天的训练完成了'}</b>`;
   $('cpanel').innerHTML=`<div class="pdots">${C.q.map(()=>'<i class="on"></i>').join('')}</div>
-    <p class="big">完成 ${C.completed.size} 个动作 · ${C.setsDone} 组</p><p class="muted small">用时约 ${mins} 分钟，已记入本周计划。</p>
-    ${C.single?`<button class="btn block" type="button" data-act="endCoach">返回动作</button>`:`<button class="btn block" type="button" data-tab="home">回到首页</button><button class="btn ghost block" type="button" data-tab="train">看训练</button>`}`;
+    <p class="big">完成 ${C.completed.size} 个动作 · ${C.setsDone} 组</p><p class="muted small">用时约 ${mins} 分钟${C.single?'':'，已记入周视图'}。</p>
+    ${C.single?`<button class="btn block" type="button" data-act="endCoach">返回动作</button>`:`<button class="btn block" type="button" data-tab="today">回到训练</button><button class="btn ghost block" type="button" data-tab="atlas">看今天练到的肌群</button>`}`;
 }
 const COACH_ACT={
   startCoach(k){ go('session',k); }, // 第一句播报在 startSession 里同步说出，借这次点击解锁 iOS 语音
-  coachKey(a){ T.coachKey=a; refresh(); },
   voiceTest(){
     if(!VO.ok){ toast('这个浏览器不支持语音播报'); return; }
     if(!S.voice){ S.voice=true; save(); refresh(); }
     say('语音提醒已开启。跟练时会提醒动作要点、报数和休息。',{urgent:true});
     setTimeout(()=>{ pickVoice(); if(!VO.voice&&speechSynthesis.getVoices().length) toast('这台设备没有中文语音，播报可能听不清'); },600);
   },
-  endCoach(){ const n=C?C.completed.size:0, single=C?C.single:stack[stack.length-1].a&&String(stack[stack.length-1].a).startsWith('ex:'); stopSession(); if(single&&stack.length>1) back(); else tab('train'); if(n) toast(single?'已记入今天的训练':`已记录 ${n} 个完成的动作`); },
+  endCoach(){ const n=C?C.completed.size:0, single=C?C.single:stack[stack.length-1].a&&String(stack[stack.length-1].a).startsWith('ex:'); stopSession(); if(single&&stack.length>1) back(); else tab('today'); if(n) toast(single?'已记入今天的训练':`已记录 ${n} 个完成的动作`); },
   voiceToggle(){ S.voice=!S.voice; save(); if(!S.voice) hush(); else say('语音已开启',{urgent:true}); const b=$('cvoice'); if(b) b.innerHTML=S.voice?I.vol:I.mute; },
   pauseCoach(){ if(!C||C.phase==='done') return; C.paused=!C.paused; say(C.paused?'已暂停':'继续',{urgent:true}); if(!C.manual&&C.stream) setStat(C.paused?'已暂停':'AI 识别中',C.paused?'warn':'live'); ui(); },
   plusOne(){ if(!C||C.paused) return; const cur=C.q[C.i];
@@ -1963,39 +1761,38 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden&&C&&!C.pau
 const NOTE_RULES=[[/耸肩/,()=>shrug],[/塌腰|腰塌|拱腰/,()=>bodyLine],[/内扣/,()=>valgus],[/后仰|仰/,()=>torso]];
 function noteChecks(e){ const txt=notesOf(e).map(n=>n.txt).join(' '); return NOTE_RULES.filter(([re])=>re.test(txt)).map(([,f])=>f()); }
 
+// 当天临时换动作：只记今天（daySwap），不改周计划
+function setDaySwap(t,base,x){ if(!S.daySwap||S.daySwap.d!==t) S.daySwap={d:t,m:{}}; if(x===base) delete S.daySwap.m[base]; else S.daySwap.m[base]=x; save(); }
+const todayItem=i=>sessionFor(nextKey(),todayISO()).items[+i];
 const ACT={
   ...COACH_ACT, ...MEAS_ACT,
-  setTarget(a){S.target=a;save();refresh();toast('目标已改为 '+target().name);},
-  afFrame(a){ S.af.frame=a; save(); refresh(); },
-  // 切换性别：模板、样例、进阶目标的默认侧重一起切；已有的测量数据保留
-  setSex(a){ if(!['f','m'].includes(a)||S.sex===a) return;
-    S.sex=a; if(!targetsOf(a).some(t=>t.id===S.target)&&!(S.target==='mine'&&S.tgt&&(S.tgt.sex||'f')===a)) S.target=DEF_TARGET[a];
-    if(SAMPLES[S.mode]&&SAMPLES[S.mode].sex!==a){ S.mode=samplesOf(a)[0]; S.rounded=SAMPLES[S.mode].rounded; S.apt=SAMPLES[S.mode].apt; }
-    S.af.foci=a==='m'?['shoulder','waist']:['shoulder','hip','waist']; T.man=null; T.hFocus=null; T.muscle=null;
-    save(); refresh(); toast(a==='m'?'已切换为男性：模板和训练计划已更新':'已切换为女性：模板和训练计划已更新'); },
-  afFocus(a){ const f=new Set(S.af.foci); f.has(a)?f.delete(a):f.add(a); S.af.foci=[...f]; save(); refresh(); },
-  useAuto(){ const m=cur(); S.tgt={kind:'auto',sex:sx(),name:'进阶 · 下一阶段',cm:cm1(autoCm(m,S.af)),frame:S.af.frame,foci:S.af.foci.slice(),at:todayISO()}; S.target='mine'; T.hFocus=null; save(); refresh(); toast('目标已改为下一阶段'); },
-  saveCustom(){ const cm={};
-    for(const [k,n] of DIMS){ const i=document.querySelector(`[data-tg="${k}"]`), v=parseFloat(i&&i.value); if(!(v>=15&&v<=200)){ toast(n+'填一个合理的数'); return; } cm[k]=v; }
-    S.tgt={kind:'custom',sex:sx(),name:'自定义目标',cm,at:todayISO()}; S.target='mine'; T.hFocus=null; save(); refresh(); toast('已保存自定义目标'); },
-  refFull(){ T.refFull=T.refFull===false; const b=document.querySelector('[data-act="refFull"]'); if(b) b.setAttribute('aria-pressed',String(T.refFull)); refUpdate(); },
-  useRef(){ const f=refCalc(); if(!f) return; const R=refToCm(f,cur());
-    S.tgt={kind:'ref',sex:sx(),name:'参考照片',cm:cm1(R.cm),ref:f,clamped:R.clamped,at:todayISO()}; S.target='mine'; T.hFocus=null; save(); savePhoto('ref'); stack=[{p:'home'}]; render('back'); toast('目标已改为参考照片'); },
-  toggle(a){S[a]=!S[a]; if(a==='rounded'||a==='apt') S.postureSet=true; save();refresh();},
-  mode(a){ if(a==='photo'&&!S.meas){ go('measure'); return; } S.mode=a; if(a!=='photo'){S.rounded=SAMPLES[a].rounded;S.apt=SAMPLES[a].apt;} save(); refresh(); },
-  focus(k){ T.hFocus=T.hFocus===k?null:k; applyFigFocus(); if(B3.r) B3.r.focus(T.hFocus); },
-  figView(v){ S.figView=v; save(); document.querySelectorAll('[data-act="figView"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.arg===v)));
-    if(B3.r) B3.r.turnTo(v==='back'?Math.PI:0); else { const h=$('body3d'); if(h&&h.classList.contains('flat')){ h.innerHTML=figureSVG(analyze(),v); applyFigFocus(); } } },
+  obd(a){ const d=T.obd, [k,v]=a.split(':'); if(!d) return;
+    if(k==='sex'){ if(d.sex!==v){ d.sex=v; d.goals=d.goals.filter(g=>GOALS[v].some(x=>x.id===g)); } }
+    else if(k==='goal'){ const i=d.goals.indexOf(v); if(i>=0) d.goals.splice(i,1); else if(d.goals.length>=3){ toast('最多选 3 个，先取消一个'); return; } else d.goals.push(v); }
+    else if(k==='freq') d.freq=+v; else if(k==='exp') d.exp=v;
+    else if(k==='eq'){ const i=d.eq.indexOf(v); i>=0?d.eq.splice(i,1):d.eq.push(v); }
+    refresh(); },
+  obdSave(){ const d=T.obd; if(!d||!d.goals.length){ toast('先选至少一个目标'); return; } const first=!S.onb;
+    Object.assign(S,{sex:d.sex,goals:d.goals.slice(),freq:d.freq,exp:d.exp,eq:d.eq.slice(),onb:true,daySwap:null});
+    T.obd=null; T.force=false; T.muscle=null; save(); stack=[{p:'today'}]; render('fwd'); toast(first?'计划生成好了':'计划已更新，从下一次训练开始'); },
+  // 一键换：在同肌群里轮换（优先有器械的），只对今天生效
+  swapToday(i){ const t=todayISO(), it=todayItem(i); if(!it||!it.mu) return; const base=it.orig||it.e, all=[base,...altsOf(base)], ok=all.filter(eqOK), L=ok.length>1?ok:all;
+    const nx=L[(L.indexOf(it.e)+1)%L.length]; setDaySwap(t,base,nx); refresh(); toast(nx===base?`换回「${EX[nx].name}」`:`今天换成「${EX[nx].name}」`); },
+  swapTo(a){ const [i,x]=a.split('|'), it=todayItem(i); if(!it) return; setDaySwap(todayISO(),it.orig||it.e,x); stack[stack.length-1].a=`${x}|today|${i}`; render(); },
+  keepSwap(i){ const it=todayItem(i); if(!it||!it.orig) return; S.swap[it.mu+':'+(it.v%2)]=it.e; delete S.daySwap.m[it.orig]; save(); refresh(); toast(`以后都用「${EX[it.e].name}」`); },
+  completeToday(){ const st=todayState(); logDone(st.key,st.ses.mus); T.force=false; refresh(); toast('完成！已记入周视图'); },
+  skipToday(){ logSkip(); refresh(); toast('计划顺延到下次'); },
+  unskip(){ const t=todayISO(); S.log=(S.log||[]).filter(l=>!(l.d===t&&l.st==='skip')); T.force=true; save(); refresh(); },
+  forceTrain(){ T.force=true; refresh(); },
+  toggle(a){ S[a]=!S[a]; save(); refresh(); },
   muscle(k){ T.muscle=k&&RINFO[k]?k:null; const p=$('mpanel'); if(p) p.innerHTML=musclePanel(T.muscle);
-    if(B3.r){ B3.r.paint(); if(T.muscle) B3.r.face(T.muscle); } },
-  selDay(a){ T.selDay=a; refresh(); },
-  openDay(a){ T.selDay=a; tab('train'); },
+    if(B3.r){ B3.r.paint(); if(T.muscle) B3.r.face(T.muscle); }
+    const h=$('hero'); if(h&&T.muscle) h.scrollIntoView({behavior:'smooth',block:'start'}); },
   frame(a){ stopFrames(); showFrame(+a); },
   noteChip(a){ const i=$('noteIn'); if(!i) return; i.value=i.value?i.value.replace(/[，,\s]*$/,'')+'，'+a:a; i.focus(); },
   addNote(e){ const i=$('noteIn'); const v=(i&&i.value||'').trim(); if(!v){ toast('先写点什么'); return; }
     const d=new Date(); (S.notes[e]=S.notes[e]||[]).unshift({txt:v.slice(0,140),t:`${d.getMonth()+1}月${d.getDate()}日`}); save(); refresh(); toast('记下了，下次跟练会提醒你'); },
   delNote(a){ const [e,j]=a.split('|'); const n=S.notes[e]; if(!n) return; n.splice(+j,1); if(!n.length) delete S.notes[e]; save(); refresh(); },
-  swapEx(a){ const [k,mu,x,date,i]=a.split('|'); S.swap[k+':'+mu]=x; save(); stack[stack.length-1].a=`${x}|${date}|${k}|${i}`; render(); },
   toggleDone(a){ const [date,e]=a.split('|'); const key=date+':'+e; const now=!S.done[key]; if(now) S.done[key]=1; else delete S.done[key]; save(); if(now){ toast('完成：'+EX[e].name); back(); } else refresh(); }
 };
 document.addEventListener('click',e=>{
