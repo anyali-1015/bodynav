@@ -6,165 +6,221 @@
 <title>薄肌比例导航</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: phone shell. Home = body vs target; one path into the week plan; settings live under 我的. */
+/* Layout: one-column phone shell. Home = rotatable 3D body (solid = now, dashed = target), one thesis line, four numbers, today. Everything else is one tap deeper. */
 :root{
-  --desk:#e3e8e5; --bg:#f5f7f6; --surface:#ffffff; --ink:#15201d; --muted:#66736f; --line:#e2e7e4;
-  --accent:#0d6b63; --accent-ink:#ffffff; --soft:#e2f1ee; --body:#d5ddda; --warm:#c4610a; --warm-soft:#fcecdc;
-  --display:"Bricolage Grotesque","PingFang SC","Noto Sans SC",system-ui,sans-serif;
-  --text:"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
-  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --desk:#e9ebe9; --bg:#f6f7f5; --surface:#ffffff; --ink:#121514; --muted:#6c7370; --faint:#a4aba8; --line:#e5e8e6;
+  --accent:#0e6b62; --accent-soft:#e4f0ed; --warm:#b4531b; --warm-soft:#f8ebe2; --body:#dfe3e1; --invert:#ffffff;
+  --num:"Instrument Serif","Songti SC",Georgia,serif;
+  --text:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --r:18px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --desk:#080c0b; --bg:#0e1413; --surface:#17201f; --ink:#e7eeec; --muted:#97a9a5; --line:#25302e;
-  --accent:#4cbcae; --accent-ink:#05201c; --soft:#173632; --body:#2e3b39; --warm:#f0a347; --warm-soft:#3a2a17; color-scheme:dark}}
+  --desk:#070908; --bg:#0d100f; --surface:#151918; --ink:#eef2f0; --muted:#97a19d; --faint:#5f6966; --line:#232927;
+  --accent:#5cc2b4; --accent-soft:#16302c; --warm:#ee9a5a; --warm-soft:#33241a; --body:#2a302e; --invert:#0d100f; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --desk:#080c0b; --bg:#0e1413; --surface:#17201f; --ink:#e7eeec; --muted:#97a9a5; --line:#25302e;
-  --accent:#4cbcae; --accent-ink:#05201c; --soft:#173632; --body:#2e3b39; --warm:#f0a347; --warm-soft:#3a2a17; color-scheme:dark}
+  --desk:#070908; --bg:#0d100f; --surface:#151918; --ink:#eef2f0; --muted:#97a19d; --faint:#5f6966; --line:#232927;
+  --accent:#5cc2b4; --accent-soft:#16302c; --warm:#ee9a5a; --warm-soft:#33241a; --body:#2a302e; --invert:#0d100f; color-scheme:dark}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
-body{background:var(--desk);color:var(--ink);font-family:var(--text);font-size:15px;line-height:1.5;overflow:hidden}
-button{font:inherit;color:inherit}
+body{background:var(--desk);color:var(--ink);font-family:var(--text);font-size:15px;line-height:1.55;overflow:hidden;-webkit-font-smoothing:antialiased}
+button,input,textarea{font:inherit;color:inherit}
 p,h1,h2,h3{margin:0}
-.app{position:relative;height:100%;max-width:430px;margin:0 auto;display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
-@media (min-width:600px){.app{height:calc(100% - 48px);max-height:880px;margin-top:24px;border-radius:32px;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.16)}}
+[hidden]{display:none!important}
+.app{position:relative;height:100%;max-width:440px;margin:0 auto;display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
+@media (min-width:600px){.app{height:calc(100% - 48px);max-height:900px;margin-top:24px;border-radius:36px;box-shadow:0 30px 80px rgba(0,0,0,.14),0 0 0 1px var(--line)}}
 
-.top{flex:none;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;height:52px;padding-left:max(6px,env(safe-area-inset-left,0px));padding-right:max(6px,env(safe-area-inset-right,0px))}
-.top h1{text-align:center;font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.top.root h1{grid-column:1 / 3;text-align:left;padding-left:10px;font-family:var(--display);font-size:22px}
+/* top bar */
+.top{flex:none;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;height:54px;padding-left:max(6px,env(safe-area-inset-left,0px));padding-right:max(6px,env(safe-area-inset-right,0px))}
+.top h1{text-align:center;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top.root{grid-template-columns:minmax(0,1fr) auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.top.root h1{text-align:left;font-size:13px;font-weight:500;color:var(--muted);letter-spacing:.02em}
+.top .aside{font:500 12px var(--mono);color:var(--faint)}
 .iconbtn{width:40px;height:40px;border:0;background:transparent;border-radius:12px;display:grid;place-items:center;cursor:pointer}
 .iconbtn svg{width:22px;height:22px}
 
-.view{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-block:4px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+.view{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-block:0 40px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:28px}
 .view>*{flex-shrink:0}
-[hidden]{display:none!important}
-.view.fwd{animation:inR .22s ease-out}.view.back{animation:inL .22s ease-out}
-@keyframes inR{from{transform:translateX(24px);opacity:.4}to{transform:none;opacity:1}}
-@keyframes inL{from{transform:translateX(-24px);opacity:.4}to{transform:none;opacity:1}}
-@media (prefers-reduced-motion: reduce){.view,.sheet{animation:none!important}}
+.view.fwd{animation:inR .26s cubic-bezier(.2,.8,.2,1)}.view.back{animation:inL .26s cubic-bezier(.2,.8,.2,1)}
+@keyframes inR{from{transform:translateX(18px);opacity:0}to{transform:none;opacity:1}}
+@keyframes inL{from{transform:translateX(-18px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion: reduce){.view,.sheet,.fade{animation:none!important}}
 
-.tabs{flex:none;display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border-top:1px solid var(--line)}
-.tabs button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 10px;font-size:11px;color:var(--muted);cursor:pointer}
-.tabs button svg{width:24px;height:24px}
-.tabs button[aria-current="page"]{color:var(--accent);font-weight:600}
+.tabs{flex:none;display:grid;grid-template-columns:repeat(3,1fr);background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:2px}
+.tabs button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0 10px;font-size:11px;color:var(--faint);cursor:pointer}
+.tabs button svg{width:22px;height:22px}
+.tabs button[aria-current="page"]{color:var(--ink)}
 
-.card{background:var(--surface);border-radius:20px;padding:16px 18px}
-.label{font-size:12px;color:var(--muted);letter-spacing:.06em}
+/* type */
+.eyebrow{font:500 11px/1.4 var(--mono);color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.h1{font-size:26px;line-height:1.25;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+.h2{font-size:19px;line-height:1.35;font-weight:600;text-wrap:balance}
+.num{font-family:var(--num);font-weight:400;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .muted{color:var(--muted)}
 .small{font-size:13px}
-.big{font-family:var(--display);font-size:22px;line-height:1.3;text-wrap:balance}
-.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.xs{font-size:12px}
+.warm{color:var(--warm)}
+.acc{color:var(--accent)}
+.stack{display:flex;flex-direction:column;gap:10px}
+.row2{display:flex;gap:10px;align-items:center}
+.between{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
 
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:52px;border-radius:16px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:16px;cursor:pointer}
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 22px;border-radius:999px;border:0;background:var(--ink);color:var(--invert);font-weight:600;font-size:15px;cursor:pointer;transition:transform .12s}
+.btn:active{transform:scale(.98)}
+.btn.block{width:100%}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.btn.acc{background:var(--accent);color:#fff}
 .btn svg{width:18px;height:18px}
-.btn.ghost{background:transparent;color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent)}
-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.link{border:0;background:none;padding:6px 0;color:var(--accent);font-weight:500;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.link svg{width:15px;height:15px}
+.linkbtn{border:0;background:none;color:var(--muted);font-size:13px;padding:6px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-/* home: body */
-.bodyfig{display:flex;justify-content:center;margin:2px 0 4px}
-.bodyfig svg{width:100%;max-width:165px;height:auto}
-.legend{display:flex;justify-content:center;gap:18px;font-size:12.5px;color:var(--muted)}
-.legend span{display:inline-flex;align-items:center;gap:6px}
-.legend i{width:20px;height:0;border-top:2px solid var(--ink)}
-.legend i.dash{border-top:2px dashed var(--accent)}
+/* list rows: hairlines, no boxes */
+.list{border-top:1px solid var(--line)}
+.li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;width:100%;padding:15px 2px;border:0;border-bottom:1px solid var(--line);background:transparent;text-align:left;cursor:pointer}
+.li:disabled{cursor:default}
+.li .t{display:block;font-weight:500}
+.li .s{display:block;font-size:13px;color:var(--muted);margin-top:1px}
+.li .r{display:flex;align-items:center;gap:6px;color:var(--faint);font-size:13px}
+.li .r svg{width:16px;height:16px}
+.idx{width:26px;font:500 13px var(--mono);color:var(--faint);text-align:left}
+.idx.done{color:var(--accent)}
+.idx svg{width:16px;height:16px}
+.thumb{width:52px;height:40px;border-radius:9px;object-fit:cover;background:var(--line);filter:grayscale(1) contrast(1.05)}
 
-.gap{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
-.gap:first-child{border-top:0}
-.gap .n{font-size:13.5px;color:var(--muted)}
-.gap .v{font-family:var(--mono);font-size:13px;text-align:right;white-space:nowrap}
-.gap .v b{font-size:16px}
-.gap .d{grid-column:2 / -1;font-family:var(--mono);font-size:12px;color:var(--warm)}
-.gap .d.ok{color:var(--accent)}
-.track{position:relative;height:8px;border-radius:4px;background:var(--line)}
-.track .fill{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--ink)}
-.track .tgt{position:absolute;top:-5px;bottom:-5px;width:0;border-left:2px dashed var(--accent)}
+/* 3D hero */
+.hero{position:relative;margin:0 -20px;height:min(54vh,430px);min-height:320px;touch-action:pan-y;cursor:grab;user-select:none}
+.hero canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
+.hero .tag{position:absolute;transform:translate(-50%,-50%);font:500 11px var(--mono);white-space:nowrap;pointer-events:none;color:var(--muted);transition:opacity .2s}
+.hero .tag b{color:var(--warm);font-weight:500}
+.hero .tag.ok b{color:var(--accent)}
+.hero .legend{position:absolute;left:20px;bottom:10px;display:flex;gap:14px;font-size:11.5px;color:var(--muted)}
+.hero .legend i{display:inline-block;width:16px;vertical-align:middle;margin-right:5px;border-top:1.5px solid var(--ink)}
+.hero .legend i.d{border-top:1.5px dashed var(--accent)}
+.hero .hint{position:absolute;right:20px;bottom:10px;font-size:11.5px;color:var(--faint)}
+.hero .fallback{position:absolute;inset:0;display:grid;place-items:center}
+.hero .fallback svg{height:92%;width:auto}
 
-/* week strip */
-.week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
-.week .d{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
-.dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600}
-.dot.train{background:var(--soft);color:var(--accent)}
-.dot.rest{color:var(--muted)}
-.dot.done{background:var(--accent);color:var(--accent-ink)}
-.dot.today{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--ink)}
-.dot svg{width:16px;height:16px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0 12px}
+.metric{display:flex;flex-direction:column;gap:2px;border:0;background:none;text-align:left;padding:0 6px;cursor:pointer;border-left:1px solid var(--line)}
+.metric:first-child{border-left:0;padding-left:2px}
+.metric .num{font-size:28px;line-height:1}
+.metric .num small{font:500 11px var(--mono);color:var(--muted);margin-left:2px}
+.metric .k{font-size:12px;color:var(--muted)}
+.metric .d{font:500 11px var(--mono)}
+.metric[aria-pressed="true"] .k{color:var(--ink);font-weight:600}
 
-/* rows */
-.rows{background:var(--surface);border-radius:20px;overflow:hidden}
-.row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;width:100%;padding:15px 16px;border:0;border-top:1px solid var(--line);background:transparent;text-align:left;cursor:pointer}
-.row:first-child{border-top:0}
-.row:active{background:var(--bg)}
-.row[disabled]{cursor:default}
-.row .t{display:block;font-weight:600}
-.row .s{display:block;font-size:13px;color:var(--muted);margin-top:1px}
-.row .r{display:flex;align-items:center;gap:4px;color:var(--muted);font-size:13px}
-.row .r svg{width:16px;height:16px}
-.day{width:42px;text-align:center}
-.day b{display:block;font-size:15px}
-.day span{font-size:11px;color:var(--muted)}
-.num{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--accent);font-family:var(--mono);font-size:13px;font-weight:600}
-.num.done{background:var(--accent);color:var(--accent-ink)}
-.num svg{width:15px;height:15px}
-.tag{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--soft);color:var(--accent);margin-left:6px;vertical-align:1px}
-.tag.today{background:var(--ink);color:var(--surface)}
-.prog{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
-.prog i{display:block;height:100%;background:var(--accent)}
+.ratio{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:4px 12px;align-items:center}
+.track{position:relative;height:2px;background:var(--line)}
+.track .fill{position:absolute;left:0;top:0;bottom:0;background:var(--ink)}
+.track .tgt{position:absolute;top:-6px;bottom:-6px;border-left:1.5px dashed var(--accent)}
+.track .dot{position:absolute;top:50%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--ink)}
 
-/* options */
-.opt{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;width:100%;padding:12px 16px;border:0;border-top:1px solid var(--line);background:transparent;text-align:left;cursor:pointer}
-.opt:first-child{border-top:0}
-.opt svg.mini{width:34px;height:60px}
-.radio{width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--muted);display:grid;place-items:center}
-.opt[aria-checked="true"] .radio{background:var(--accent);box-shadow:none;color:var(--accent-ink)}
-.radio svg{width:14px;height:14px}
-.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--line);border-radius:12px;padding:3px;gap:3px}
-.seg button{border:0;background:transparent;border-radius:9px;padding:9px 4px;font-size:14px;cursor:pointer;color:var(--muted)}
-.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600}
-.switch{width:46px;height:28px;border-radius:14px;background:var(--line);position:relative;flex:none}
-.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
+.today{display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:var(--r);background:var(--surface);box-shadow:0 0 0 1px var(--line)}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.week button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 0;font-size:11px;color:var(--faint);cursor:pointer}
+.week .dd{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font:500 12px var(--mono);color:var(--muted)}
+.week .train .dd{color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.week .done .dd{background:var(--accent);color:#fff;box-shadow:none}
+.week .done .dd svg{width:14px;height:14px}
+.week .sel .dd{box-shadow:inset 0 0 0 1.5px var(--ink)}
+.week .sel{color:var(--ink)}
+.week .today-mark{width:4px;height:4px;border-radius:50%;background:var(--warm)}
+
+/* segmented */
+.seg{display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--line);border-radius:999px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;border-radius:999px;padding:7px 14px;font-size:13px;cursor:pointer;color:var(--muted);white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+/* options & switches */
+.opt{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;width:100%;padding:14px 2px;border:0;border-bottom:1px solid var(--line);background:transparent;text-align:left;cursor:pointer}
+.opt svg.mini{width:30px;height:56px}
+.radio{width:20px;height:20px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--faint);display:grid;place-items:center}
+.opt[aria-checked="true"] .radio{background:var(--ink);box-shadow:none;color:var(--invert)}
+.radio svg{width:12px;height:12px}
+.switch{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;flex:none;transition:background .15s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
 [aria-checked="true"] .switch{background:var(--accent)}
 [aria-checked="true"] .switch::after{transform:translateX(18px)}
 
-/* photo */
-.drop{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;border:1.5px dashed var(--muted);border-radius:16px;padding:26px 12px;cursor:pointer;text-align:center}
+/* measure */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.steps button{border:0;background:none;padding:0 0 8px;text-align:left;cursor:pointer;color:var(--faint);font-size:13px;border-bottom:2px solid var(--line)}
+.steps button b{display:block;font:500 11px var(--mono);letter-spacing:.06em}
+.steps button[aria-current="step"]{color:var(--ink);border-color:var(--ink)}
+.steps button.done{color:var(--muted)}
+.steps button.done b{color:var(--accent)}
+.field{display:flex;align-items:baseline;gap:8px;border-bottom:1px solid var(--line);padding:6px 0}
+.field input{border:0;background:none;font-family:var(--num);font-size:56px;line-height:1.1;width:3.2ch;padding:0;outline:none}
+.field span{font:500 13px var(--mono);color:var(--muted)}
+.drop{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:220px;border-radius:var(--r);background:var(--surface);box-shadow:0 0 0 1px var(--line);padding:24px 16px;cursor:pointer;text-align:center}
 .drop input{position:absolute;opacity:0;width:1px;height:1px}
+.drop svg.pose{width:64px;height:120px;color:var(--faint)}
 .stage{position:relative;border-radius:14px;overflow:hidden;background:var(--line);touch-action:none;user-select:none}
 .stage img{display:block;width:100%;height:auto}
-.stage svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.stage svg.ov{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .pt{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;touch-action:none;cursor:grab;outline:none}
 .pt::before{content:"";position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px #fff,0 1px 4px rgba(0,0,0,.5)}
-.pt::after{content:"";position:absolute;left:50%;top:50%;width:1px;height:1px;margin:-.5px 0 0 -.5px;background:#fff}
+.pt.h::before{width:18px;height:8px;margin:-4px 0 0 -9px;border-radius:4px}
 .pt.on::before{width:6px;height:6px;margin:-3px 0 0 -3px;box-shadow:0 0 0 1.5px #fff}
 .pt:focus-visible::before{box-shadow:0 0 0 2px #fff,0 0 0 5px var(--accent)}
-.pt b{position:absolute;left:50%;bottom:31px;transform:translateX(-50%);font:600 10px/1 system-ui,sans-serif;padding:3px 5px;border-radius:5px;background:rgba(0,0,0,.55);color:#fff;white-space:nowrap;pointer-events:none}
+.pt b{position:absolute;left:50%;bottom:31px;transform:translateX(-50%);font:500 10px/1 var(--text);padding:3px 5px;border-radius:5px;background:rgba(0,0,0,.55);color:#fff;white-space:nowrap;pointer-events:none}
 .pt.on b{opacity:0}
 .loupe{position:absolute;top:10px;width:132px;height:132px;border-radius:50%;border:2px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.45);pointer-events:none;overflow:hidden;background:#000;z-index:3}
 .loupe canvas{display:block;width:100%;height:100%}
-.ptip{font-size:12px;color:var(--muted);margin:6px 2px 0}
-.status{font-size:13px;color:var(--muted)}
+.status{font-size:13px;color:var(--muted);min-height:20px}
 .status.err{color:var(--warm)}
+.readout{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 18px}
+.readout div{display:flex;flex-direction:column}
+.readout .num{font-size:30px;line-height:1.05}
+.readout .k{font-size:12px;color:var(--muted)}
+.est{font:500 10px var(--mono);color:var(--warm);margin-left:4px;letter-spacing:.04em}
 
-/* sheet + toast */
-.scrim{position:absolute;inset:0;background:rgba(0,0,0,.42);z-index:20;display:flex;align-items:flex-end}
-.sheet{width:100%;max-height:88%;overflow-y:auto;background:var(--surface);border-radius:24px 24px 0 0;padding-block:10px 22px;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px;animation:up .2s ease-out}
-.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto}
-@keyframes up{from{transform:translateY(40px)}to{transform:none}}
-ol.steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;counter-reset:s}
-ol.steps li{display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;counter-increment:s;font-size:14.5px}
-ol.steps li::before{content:counter(s);width:26px;height:26px;border-radius:50%;background:var(--soft);color:var(--accent);font-family:var(--mono);font-size:12px;font-weight:600;display:grid;place-items:center}
-.tip{border-radius:14px;padding:11px 14px;font-size:13.5px;background:var(--soft)}
-.tip.warn{background:var(--warm-soft)}
-.alts{display:flex;flex-wrap:wrap;gap:8px}
-.alt{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-size:14px;cursor:pointer}
-.alt[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);font-weight:600}
-.toast{position:absolute;left:50%;bottom:84px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;white-space:nowrap;z-index:30}
+/* exercise page */
+.media{position:relative;margin:0 -20px;aspect-ratio:3/2;max-width:calc(100% + 40px);background:var(--line);overflow:hidden}
+.media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.06) brightness(1.04);transition:opacity .5s}
+.media .ph{position:absolute;left:20px;bottom:12px;display:flex;gap:6px}
+.media .ph button{border:0;border-radius:999px;padding:4px 10px;font:500 11px var(--mono);background:rgba(255,255,255,.85);color:#121514;cursor:pointer}
+.media .ph button[aria-pressed="true"]{background:#121514;color:#fff}
+.media .credit{position:absolute;right:12px;bottom:12px;font:500 9.5px var(--mono);color:rgba(255,255,255,.85)}
+.muscles{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end}
+.muscles svg{width:100%;height:auto;max-height:260px}
+.mkey{display:flex;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.mkey i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+ol.how{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;counter-reset:s}
+ol.how li{display:grid;grid-template-columns:26px minmax(0,1fr);gap:8px;counter-increment:s}
+ol.how li::before{content:counter(s,decimal-leading-zero);font:500 12px/1.9 var(--mono);color:var(--faint)}
+.callout{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.callout .k{font:500 11px/1.9 var(--mono);letter-spacing:.06em;color:var(--muted)}
+.callout.avoid .k{color:var(--warm)}
+.note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--warm-soft)}
+.note p{flex:1;min-width:0;font-size:14.5px}
+.note small{display:block;font:500 11px var(--mono);color:var(--muted);margin-top:2px}
+.note button{border:0;background:none;color:var(--muted);cursor:pointer;padding:2px;width:28px;height:28px;display:grid;place-items:center}
+.note button svg{width:15px;height:15px}
+.composer{display:flex;gap:8px;align-items:flex-end;border-bottom:1px solid var(--line);padding:4px 0}
+.composer textarea{flex:1;min-width:0;border:0;background:none;resize:none;padding:10px 0;font-size:15px;line-height:1.5;outline:none;max-height:120px}
+.composer button{flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip2{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;color:var(--ink)}
+.chip2[aria-pressed="true"]{border-color:var(--ink);font-weight:600}
+.badge{display:inline-block;font:500 10.5px var(--mono);padding:1px 7px;border-radius:999px;background:var(--warm-soft);color:var(--warm);margin-left:6px;vertical-align:1px}
+.badge.acc{background:var(--accent-soft);color:var(--accent)}
+.toast{position:absolute;left:50%;bottom:86px;transform:translateX(-50%);background:var(--ink);color:var(--invert);padding:10px 16px;border-radius:999px;font-size:13.5px;white-space:nowrap;z-index:30;animation:fadeup .2s ease-out}
+@keyframes fadeup{from{opacity:0;transform:translate(-50%,6px)}to{opacity:1;transform:translate(-50%,0)}}
+.credits{font-size:12px;color:var(--faint);line-height:1.6}
+.credits a{color:inherit}
 
-/* coach */
+/* coach session (dark, immersive) */
 .app.immersive .top,.app.immersive .tabs{display:none}
 .app.immersive .view{padding:0;gap:0;overflow:hidden}
-.sess{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;background:var(--surface)}
+.sess{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;background:var(--bg)}
 .cam{position:relative;flex:1 1 55%;min-height:220px;background:#0b0f0e;overflow:hidden}
 .cam video,.cam canvas{position:absolute;inset:0;width:100%;height:100%;transform:scaleX(-1)}
 .cam video{object-fit:cover}
@@ -172,34 +228,29 @@ ol.steps li::before{content:counter(s);width:26px;height:26px;border-radius:50%;
 .camtop button{width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.45);color:#fff;display:grid;place-items:center;cursor:pointer}
 .camtop svg{width:20px;height:20px}
 .chip{background:rgba(0,0,0,.5);color:#fff;font-size:12.5px;padding:6px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:6px}
-.chip i{width:8px;height:8px;border-radius:50%;background:#9aa6a3}
+.chip i{width:7px;height:7px;border-radius:50%;background:#9aa6a3}
 .chip.live i{background:#4ade80}
 .chip.warn i{background:#f0a347}
-.bigcount{position:absolute;left:max(16px,env(safe-area-inset-left,0px));bottom:14px;color:#fff;font-family:var(--mono);font-size:58px;font-weight:600;line-height:1;text-shadow:0 2px 12px rgba(0,0,0,.55);z-index:2;transition:transform .12s}
-.bigcount small{font-size:19px;opacity:.85;margin-left:6px;font-weight:400}
-.bigcount.pop{transform:scale(1.18)}
-.camfb{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;padding:64px 28px 90px;color:#e7eeec;text-align:center;font-size:13.5px;line-height:1.6;z-index:1}
+.bigcount{position:absolute;left:max(18px,env(safe-area-inset-left,0px));bottom:12px;color:#fff;font-family:var(--num);font-size:76px;line-height:1;text-shadow:0 2px 14px rgba(0,0,0,.5);z-index:2;transition:transform .12s}
+.bigcount small{font:400 16px var(--mono);opacity:.85;margin-left:8px}
+.bigcount.pop{transform:scale(1.14)}
+.camfb{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;padding:64px 28px 100px;color:#e7eeec;text-align:center;font-size:13.5px;line-height:1.6;z-index:1}
 .camfb b{font-size:16px}
 .camfb .ok{font-size:64px;line-height:1}
-.panel{flex:0 0 auto;padding-block:14px 16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px}
-.cue{border-radius:14px;padding:11px 14px;font-size:14.5px;background:var(--soft);min-height:44px}
-.cue.bad{background:var(--warm-soft);font-weight:600}
-.nextup{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--muted);padding:0 2px}
-.nextup b{color:var(--ink);text-align:right}
+.panel{flex:0 0 auto;padding-block:16px 18px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:12px}
+.cue{border-radius:14px;padding:11px 14px;font-size:14.5px;background:var(--accent-soft);min-height:44px}
+.cue.bad{background:var(--warm-soft);color:var(--warm);font-weight:600}
+.cue.mine{background:var(--warm-soft)}
+.nextup{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.nextup b{color:var(--ink);text-align:right;font-weight:500}
 .pdots{display:flex;gap:4px}
-.pdots i{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.pdots i{flex:1;height:2px;border-radius:1px;background:var(--line)}
 .pdots i.on{background:var(--accent)}
 .pdots i.cur{background:var(--ink)}
 .ctrl{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:8px}
-.ctrl .btn{min-height:48px;font-size:15px}
-.coach-hero{background:var(--accent);color:var(--accent-ink);display:flex;flex-direction:column;gap:10px}
-.coach-hero .label,.coach-hero .muted{color:inherit;opacity:.85}
-.coach-hero .btn{background:var(--surface);color:var(--accent)}
-.coach-hero .seg{background:rgba(255,255,255,.18)}
-.coach-hero .seg button{color:inherit}
-.coach-hero .seg button[aria-pressed="true"]{color:var(--ink)}
-.mtag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:999px;background:var(--soft);color:var(--accent);margin-left:6px;vertical-align:1px;font-weight:600}
-.mtag.t{background:var(--line);color:var(--muted)}
+.ctrl .btn{min-height:48px;font-size:14.5px;padding:0 8px}
+.big{font-size:22px;font-weight:600;line-height:1.3}
+.label{font:500 11px var(--mono);letter-spacing:.06em;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -208,24 +259,30 @@ ol.steps li::before{content:counter(s);width:26px;height:26px;border-radius:50%;
   <main class="view" id="view"></main>
   <nav class="tabs" id="tabs" aria-label="主导航"></nav>
 </div>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
 "use strict";
 const $=id=>document.getElementById(id);
 const f2=v=>(Math.round(v*100)/100).toFixed(2);
+const f1=v=>(Math.round(v*10)/10).toFixed(1);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 const I={
-  coach:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2.5"/><path d="M16 10.5l5-3v9l-5-3"/><circle cx="9.5" cy="12" r="2.2"/></svg>',
-  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
-  vol:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5v14l-4.5-4.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
-  mute:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5v14l-4.5-4.5H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>',
-  checkBig:'<svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="#4cbcae" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>',
-  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20H14.5v-6h-5v6H4z"/></svg>',
-  me:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c1-3.8 4-6 7.5-6s6.5 2.2 7.5 6"/></svg>',
-  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
-  chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
-  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
+  coach:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2.5"/><path d="M16 10.5l5-3v9l-5-3"/></svg>',
+  train:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/></svg>',
+  body:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.6" r="2"/><path d="M8 21l1-7.5L7.5 9.5c1.4-.9 2.9-1.3 4.5-1.3s3.1.4 4.5 1.3L15 13.5 16 21"/></svg>',
+  me:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c1-3.8 4-6 7.5-6s6.5 2.2 7.5 6"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  vol:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5v14l-4.5-4.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
+  mute:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5v14l-4.5-4.5H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>',
+  checkBig:'<svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="#5cc2b4" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg>',
+  poseFront:'<svg class="pose" viewBox="0 0 64 120" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="12" r="8"/><path d="M20 28h24l4 34M20 28l-4 34M24 28l-2 40 4 46M40 28l2 40-4 46M32 70v44"/></svg>',
+  poseSide:'<svg class="pose" viewBox="0 0 64 120" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="12" r="8"/><path d="M28 24c-4 10-4 22-2 34 1 7 6 10 6 18l-2 40M36 24c4 8 4 18 2 28-2 8 4 12 2 24l-2 40M32 30l2 30"/></svg>'
 };
 
 /* ---------------- data ---------------- */
@@ -236,33 +293,36 @@ const TARGETS=[
   {id:'athletic',name:'运动 X 型',swr:1.50,hwr:1.45,note:'肩和臀都有明显宽度'},
   {id:'ballet',name:'纤长芭蕾',swr:1.30,hwr:1.30,note:'整体线条纤细'}
 ];
+/* 演示数据：正面宽度 / 侧面厚度，单位 cm */
 const SAMPLES={
-  a:{label:'样例 A',m:{swr:1.22,hwr:1.31},rounded:true,apt:false},
-  b:{label:'样例 B',m:{swr:1.37,hwr:1.17},rounded:false,apt:true}
+  a:{label:'样例 A',h:163,raw:{shoulderW:34.5,waistW:27.5,hipW:35.6,thighW:16.4,waistD:19.6,hipD:23.8,thighD:16.2},legR:.47,rounded:true,apt:false},
+  b:{label:'样例 B',h:168,raw:{shoulderW:39.4,waistW:28.6,hipW:33.4,thighW:15.6,waistD:20.4,hipD:21.2,thighD:15.0},legR:.49,rounded:false,apt:true}
 };
+/* img = free-exercise-db 图片 id；p/s = 主要/辅助发力肌群（MuscleMap 区块） */
 const EX={
-  lat_raise:{name:'哑铃侧平举',reps:'12–15 次',steps:['站直，手肘微屈，哑铃在身体两侧','手肘带动手臂向两侧抬到与肩同高','顶端停 1 秒，2–3 秒慢慢放下'],cue:'想象把哑铃往远处推，而不是往上举',avoid:'耸肩、甩起来'},
-  cable_lat:{name:'绳索单侧侧平举',reps:'12–15 次/侧',steps:['侧身站在绳索旁，远端的手握把手','手臂从身前向侧上方抬起','控制回落，做完换另一侧'],cue:'底部不要完全放松',avoid:'身体跟着倾斜'},
-  band_lat:{name:'弹力带侧平举',reps:'15–20 次',steps:['双脚踩住弹力带中间','双手握两端，向两侧抬到与肩同高','慢慢放下'],cue:'适合在家练',avoid:'耸肩'},
-  pulldown:{name:'高位下拉',reps:'10–12 次',steps:['握距略宽于肩，挺胸坐稳','手肘向下向后拉，横杆到锁骨附近','慢慢还原'],cue:'把手肘往裤兜方向拉',avoid:'身体大幅后仰'},
-  db_row:{name:'单臂哑铃划船',reps:'10–12 次/侧',steps:['一手一膝撑凳，背部平直','另一手把哑铃拉向髋部','慢慢放下'],cue:'手肘贴着身体往后走',avoid:'转身借力'},
-  face_pull:{name:'面拉',reps:'15 次',steps:['绳索与眼睛同高，双手握绳','向脸部方向拉，手肘向外打开','停 1 秒后还原'],cue:'拉到最后双手在耳朵两侧',avoid:'腰向后仰'},
-  reverse_fly:{name:'反向飞鸟',reps:'15–20 次',steps:['俯身约 45°，背部平直','双臂向两侧打开到与身体平齐','夹一下肩胛，慢慢放下'],cue:'重量轻，感受后肩',avoid:'耸肩代偿'},
-  band_pull:{name:'弹力带拉开',reps:'15–20 次',steps:['双手与肩同宽握弹力带，手臂前伸','向两侧拉开到胸前','慢慢还原'],cue:'肩膀往下沉',avoid:'耸肩'},
-  pushup:{name:'俯卧撑',reps:'8–12 次',steps:['双手略宽于肩，身体成一条直线','屈肘下降，胸口接近地面','推起到手臂伸直'],cue:'手肘与身体约成 45°',avoid:'塌腰'},
-  dead_bug:{name:'死虫',reps:'8 次/侧',steps:['仰卧，手臂向上，屈髋屈膝 90°','对侧手脚同时慢慢伸远','还原后换另一侧'],cue:'腰始终贴地',avoid:'憋气、腰离地'},
-  plank:{name:'平板支撑',reps:'30–45 秒',steps:['前臂撑地，手肘在肩膀正下方','身体成直线，收紧臀部','均匀呼吸'],cue:'骨盆微微后卷',avoid:'塌腰或撅臀'},
-  hip_thrust:{name:'臀推',reps:'10–12 次',steps:['上背靠凳，哑铃放在髋部','脚跟发力，把髋推到与身体平齐','顶端夹紧 1 秒再放下'],cue:'下巴微收，肋骨下压',avoid:'用腰往上顶'},
-  glute_bridge:{name:'臀桥',reps:'15 次',steps:['仰卧屈膝，双脚与髋同宽','脚跟发力把髋抬起','顶端夹紧臀部，慢慢放下'],cue:'适合在家练',avoid:'腰拱起'},
-  band_walk:{name:'弹力带侧向走',reps:'15 步/侧',steps:['弹力带套在膝盖上方','半蹲，向一侧迈小步','走完换方向'],cue:'膝盖始终往外推',avoid:'身体左右晃'},
-  side_leg:{name:'侧卧抬腿',reps:'15 次/侧',steps:['侧卧，下侧腿屈膝','上侧腿伸直，脚尖略朝下','向上抬到约 45°，慢慢放下'],cue:'腿略向后方抬',avoid:'髋向后翻'},
-  rdl:{name:'罗马尼亚硬拉',reps:'8–10 次',steps:['双脚与髋同宽，膝盖微屈','髋向后推，哑铃沿大腿下滑','大腿后侧有拉伸感时站起'],cue:'背部全程平直',avoid:'弯腰去够'},
-  leg_curl:{name:'俯卧腿弯举',reps:'12 次',steps:['俯卧，脚踝在垫子下','屈膝把垫子拉向臀部','慢慢放回'],cue:'髋部贴紧垫子',avoid:'抬臀借力'},
-  goblet:{name:'高脚杯深蹲',reps:'10 次',steps:['胸前捧住哑铃，脚略宽于肩','蹲到大腿接近水平','脚掌发力站起'],cue:'膝盖朝脚尖方向',avoid:'膝盖内扣'},
-  split_squat:{name:'分腿蹲',reps:'8 次/侧',steps:['前后分腿，后脚跟抬起','身体垂直下降','前脚发力站起'],cue:'上身直立',avoid:'前膝过度前冲'},
-  hipflex_stretch:{name:'髋屈肌拉伸',reps:'每侧 2×30 秒',steps:['单膝跪地，前腿屈膝 90°','收紧后侧臀部，骨盆微微后卷','身体前移，感受大腿前侧上方拉伸'],cue:'先卷骨盆，再前移',avoid:'腰向前塌'},
-  chest_stretch:{name:'门框胸部拉伸',reps:'2×30 秒',steps:['前臂贴住门框，手肘与肩同高','身体慢慢向前','感受胸前拉伸'],cue:'肩膀不要耸起',avoid:'拉到疼'}
+  lat_raise:{name:'哑铃侧平举',reps:'12–15 次',img:'Side_Lateral_Raise',p:['deltoids'],s:['trapezius'],steps:['站直，手肘微屈，哑铃在身体两侧','手肘带动手臂向两侧抬到与肩同高','顶端停 1 秒，2–3 秒慢慢放下'],cue:'想象把哑铃往远处推，而不是往上举',avoid:'耸肩、甩起来'},
+  cable_lat:{name:'绳索单侧侧平举',reps:'12–15 次/侧',img:'Side_Lateral_Raise',p:['deltoids'],s:['trapezius'],steps:['侧身站在绳索旁，远端的手握把手','手臂从身前向侧上方抬起','控制回落，做完换另一侧'],cue:'底部不要完全放松',avoid:'身体跟着倾斜'},
+  band_lat:{name:'弹力带侧平举',reps:'15–20 次',img:'Side_Lateral_Raise',p:['deltoids'],s:['trapezius'],steps:['双脚踩住弹力带中间','双手握两端，向两侧抬到与肩同高','慢慢放下'],cue:'适合在家练',avoid:'耸肩'},
+  pulldown:{name:'高位下拉',reps:'10–12 次',img:'Wide-Grip_Lat_Pulldown',p:['upperBack'],s:['biceps','rhomboids'],steps:['握距略宽于肩，挺胸坐稳','手肘向下向后拉，横杆到锁骨附近','慢慢还原'],cue:'把手肘往裤兜方向拉',avoid:'身体大幅后仰、耸肩'},
+  db_row:{name:'单臂哑铃划船',reps:'10–12 次/侧',img:'One-Arm_Dumbbell_Row',p:['upperBack','rhomboids'],s:['biceps','deltoids'],steps:['一手一膝撑凳，背部平直','另一手把哑铃拉向髋部','慢慢放下'],cue:'手肘贴着身体往后走',avoid:'转身借力'},
+  face_pull:{name:'面拉',reps:'15 次',img:'Face_Pull',p:['deltoids','rhomboids'],s:['trapezius'],steps:['绳索与眼睛同高，双手握绳','向脸部方向拉，手肘向外打开','停 1 秒后还原'],cue:'拉到最后双手在耳朵两侧',avoid:'腰向后仰'},
+  reverse_fly:{name:'反向飞鸟',reps:'15–20 次',img:'Reverse_Flyes',p:['deltoids','rhomboids'],s:['trapezius'],steps:['俯身约 45°，背部平直','双臂向两侧打开到与身体平齐','夹一下肩胛，慢慢放下'],cue:'重量轻，感受后肩',avoid:'耸肩代偿'},
+  band_pull:{name:'弹力带拉开',reps:'15–20 次',img:'Band_Pull_Apart',p:['deltoids','rhomboids'],s:['trapezius'],steps:['双手与肩同宽握弹力带，手臂前伸','向两侧拉开到胸前','慢慢还原'],cue:'肩膀往下沉',avoid:'耸肩'},
+  pushup:{name:'俯卧撑',reps:'8–12 次',img:'Pushups',p:['chest'],s:['triceps','deltoids','abs'],steps:['双手略宽于肩，身体成一条直线','屈肘下降，胸口接近地面','推起到手臂伸直'],cue:'手肘与身体约成 45°',avoid:'塌腰'},
+  dead_bug:{name:'死虫',reps:'8 次/侧',img:'Dead_Bug',p:['abs'],s:['obliques'],steps:['仰卧，手臂向上，屈髋屈膝 90°','对侧手脚同时慢慢伸远','还原后换另一侧'],cue:'腰始终贴地',avoid:'憋气、腰离地'},
+  plank:{name:'平板支撑',reps:'30–45 秒',img:'Plank',p:['abs'],s:['obliques','deltoids'],steps:['前臂撑地，手肘在肩膀正下方','身体成直线，收紧臀部','均匀呼吸'],cue:'骨盆微微后卷',avoid:'塌腰或撅臀'},
+  hip_thrust:{name:'臀推',reps:'10–12 次',img:'Barbell_Hip_Thrust',p:['gluteal'],s:['hamstring','quadriceps'],steps:['上背靠凳，哑铃放在髋部','脚跟发力，把髋推到与身体平齐','顶端夹紧 1 秒再放下'],cue:'下巴微收，肋骨下压',avoid:'用腰往上顶'},
+  glute_bridge:{name:'臀桥',reps:'15 次',img:'Butt_Lift_Bridge',p:['gluteal'],s:['hamstring'],steps:['仰卧屈膝，双脚与髋同宽','脚跟发力把髋抬起','顶端夹紧臀部，慢慢放下'],cue:'适合在家练',avoid:'腰拱起'},
+  band_walk:{name:'弹力带侧向走',reps:'15 步/侧',img:'Monster_Walk',p:['gluteal'],s:['quadriceps'],steps:['弹力带套在膝盖上方','半蹲，向一侧迈小步','走完换方向'],cue:'膝盖始终往外推',avoid:'身体左右晃'},
+  side_leg:{name:'侧卧抬腿',reps:'15 次/侧',img:'Side_Leg_Raises',p:['gluteal'],s:['obliques'],steps:['侧卧，下侧腿屈膝','上侧腿伸直，脚尖略朝下','向上抬到约 45°，慢慢放下'],cue:'腿略向后方抬',avoid:'髋向后翻'},
+  rdl:{name:'罗马尼亚硬拉',reps:'8–10 次',img:'Romanian_Deadlift',p:['hamstring','gluteal'],s:['lowerBack'],steps:['双脚与髋同宽，膝盖微屈','髋向后推，哑铃沿大腿下滑','大腿后侧有拉伸感时站起'],cue:'背部全程平直',avoid:'弯腰去够'},
+  leg_curl:{name:'俯卧腿弯举',reps:'12 次',img:'Lying_Leg_Curls',p:['hamstring'],s:['calves'],steps:['俯卧，脚踝在垫子下','屈膝把垫子拉向臀部','慢慢放回'],cue:'髋部贴紧垫子',avoid:'抬臀借力'},
+  goblet:{name:'高脚杯深蹲',reps:'10 次',img:'Goblet_Squat',p:['quadriceps','gluteal'],s:['adductors','abs'],steps:['胸前捧住哑铃，脚略宽于肩','蹲到大腿接近水平','脚掌发力站起'],cue:'膝盖朝脚尖方向',avoid:'膝盖内扣'},
+  split_squat:{name:'分腿蹲',reps:'8 次/侧',img:'Split_Squats',p:['quadriceps','gluteal'],s:['hamstring','adductors'],steps:['前后分腿，后脚跟抬起','身体垂直下降','前脚发力站起'],cue:'上身直立',avoid:'前膝过度前冲'},
+  hipflex_stretch:{name:'髋屈肌拉伸',reps:'每侧 2×30 秒',img:'Kneeling_Hip_Flexor',p:['quadriceps'],s:['abs'],steps:['单膝跪地，前腿屈膝 90°','收紧后侧臀部，骨盆微微后卷','身体前移，感受大腿前侧上方拉伸'],cue:'先卷骨盆，再前移',avoid:'腰向前塌'},
+  chest_stretch:{name:'门框胸部拉伸',reps:'2×30 秒',img:'Chest_And_Front_Of_Shoulder_Stretch',p:['chest'],s:['deltoids'],steps:['前臂贴住门框，手肘与肩同高','身体慢慢向前','感受胸前拉伸'],cue:'肩膀不要耸起',avoid:'拉到疼'}
 };
+const SLUG_CN={deltoids:'三角肌',trapezius:'斜方肌',upperBack:'背阔肌',rhomboids:'菱形肌',biceps:'肱二头肌',triceps:'肱三头肌',chest:'胸大肌',abs:'腹直肌',obliques:'腹斜肌',gluteal:'臀肌',hamstring:'腘绳肌',quadriceps:'股四头肌',adductors:'内收肌',calves:'小腿',lowerBack:'下背'};
 const MUSCLES={
   delt:{name:'三角肌中束',area:'肩部外侧',ex:['lat_raise','cable_lat','band_lat']},
   lats:{name:'背阔肌',area:'上背两侧',ex:['pulldown','db_row']},
@@ -279,19 +339,42 @@ const LVNAME={focus:'重点',boost:'加强',keep:'保持',less:'少量'};
 const UPPER=['delt','lats','rear','pecs'], LOWER=['gmax','gmed','hams','quads'];
 const DOW=['日','一','二','三','四','五','六'];
 const SCHED={1:'A',3:'B',5:'C'}; // 周一 / 周三 / 周五
+const DAYNAME={A:'上肢',B:'下肢',C:'重点强化'};
 
 /* ---------------- state ---------------- */
-const KEY='bodynav.v3';
-const S={mode:'a',target:'square',rounded:true,apt:false,photoM:null,done:{},swap:{},voice:true,countVoice:true};
-const T={photoURL:null,pts:null,photoM:null,coachKey:'A'};
-try{const r=localStorage.getItem(KEY); if(r) Object.assign(S,JSON.parse(r));}catch(e){}
+const KEY='bodynav.v4';
+const S={mode:'a',target:'square',rounded:true,apt:false,meas:null,done:{},swap:{},notes:{},voice:true,countVoice:true,h:null};
+const T={ph:{front:null,side:null},step:'h',coachKey:'A',draft:null,hFocus:null,selDay:null};
+try{
+  const r=localStorage.getItem(KEY);
+  if(r) Object.assign(S,JSON.parse(r));
+  else{ const o=JSON.parse(localStorage.getItem('bodynav.v3')||'null'); if(o){ ['target','rounded','apt','done','swap','voice','countVoice'].forEach(k=>{ if(k in o) S[k]=o[k]; }); } }
+}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
 
-/* ---------------- logic ---------------- */
+/* ---------------- body math ---------------- */
+// 椭圆周长（Ramanujan 近似），宽 w、厚 d
+const ellipse=(w,d)=>{ const a=w/2,b=d/2; return Math.PI*(3*(a+b)-Math.sqrt((3*a+b)*(a+3*b))); };
+// 没有侧面照时，按常见体型的厚宽比估算
+const DEPTH_K={waist:.72,hip:.70,thigh:1.0};
+function derive(raw,h,legR){
+  const est=[];
+  const d=k=>{ if(raw[k+'D']) return raw[k+'D']; est.push(k); return raw[k+'W']*DEPTH_K[k]; };
+  const waistD=d('waist'), hipD=d('hip'), thighD=d('thigh');
+  const cm={shoulder:raw.shoulderW,waistW:raw.waistW,hipW:raw.hipW,thighW:raw.thighW,waistD,hipD,thighD,
+    waist:ellipse(raw.waistW,waistD),hip:ellipse(raw.hipW,hipD),thigh:ellipse(raw.thighW,thighD)};
+  return {swr:raw.shoulderW/raw.waistW,hwr:raw.hipW/raw.waistW,whr:cm.waist/cm.hip,cm,h,legR,est};
+}
 const target=()=>TARGETS.find(t=>t.id===S.target)||TARGETS[0];
-const cur=()=>S.mode==='photo'?S.photoM:SAMPLES[S.mode].m;
+function cur(){
+  if(S.mode==='photo'&&S.meas) return S.meas;
+  const s=SAMPLES[S.mode==='photo'?'a':S.mode]||SAMPLES.a; return derive(s.raw,s.h,s.legR);
+}
+const isSample=()=>!(S.mode==='photo'&&S.meas);
+
+/* ---------------- plan logic ---------------- */
 function analyze(){
-  const m=cur(); if(!m) return null; const t=target();
+  const m=cur(); const t=target();
   const dS=t.swr-m.swr, dH=t.hwr-m.hwr, L={};
   const up=(id,lv)=>{ if(!L[id]||W[lv]>W[L[id]]) L[id]=lv; };
   if(dS>=0.10){up('delt','focus');up('lats','boost');} else if(dS>=0.04){up('delt','boost');up('lats','boost');}
@@ -303,11 +386,13 @@ function analyze(){
   const wsum=Object.values(L).reduce((a,lv)=>a+W[lv],0);
   const sets={}; for(const id in L) sets[id]=Math.max(1,Math.round(36*W[L[id]]/wsum));
   const focus=Object.keys(L).filter(id=>L[id]==='focus');
+  // 用 cm 表达差距：腰宽不变，肩/臀需要多出的宽度
+  const gS=t.swr*m.cm.waistW-m.cm.shoulder, gH=t.hwr*m.cm.waistW-m.cm.hipW;
   let head;
-  if(Math.max(dS,dH)<0.04) head='已经很接近目标了';
-  else if(dS>=dH) head='主要差在肩部宽度';
-  else head='主要差在臀部外侧';
-  return {m,t,dS,dH,L,sets,focus,head};
+  if(Math.max(dS,dH)<0.04) head=Math.min(dS,dH)<=-0.04?'比例已经超过目标':'已经很接近目标';
+  else if(dS>=dH) head=`肩宽 <span class="num">+${f1(gS)}</span> cm 到目标`;
+  else head=`臀宽 <span class="num">+${f1(gH)}</span> cm 到目标`;
+  return {m,t,dS,dH,gS,gH,L,sets,focus,head};
 }
 function weekPlan(r){
   const D={A:{name:'上肢',items:[]},B:{name:'下肢',items:[]},C:{name:'重点强化',items:[]}};
@@ -331,8 +416,9 @@ function weekDates(){
 const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const todayISO=()=>iso(new Date());
 function dayProgress(date,key,plan){ const its=plan[key].items; const n=its.filter(it=>S.done[date+':'+exOf(key,it)]).length; return {n,total:its.length}; }
+const notesOf=e=>S.notes[e]||[];
 
-/* ---------------- drawing ---------------- */
+/* ---------------- 2D fallback figure ---------------- */
 function smooth(p){
   const F=v=>v.toFixed(1),n=p.length; let d=`M${F(p[0][0])},${F(p[0][1])}`;
   for(let i=0;i<n;i++){const a=p[(i-1+n)%n],b=p[i],c=p[(i+1)%n],e=p[(i+2)%n];
@@ -344,199 +430,610 @@ function bodyPath(cx,hw,swr,hwr){
   const R=[[9,62],[hS*.6,76],[hS,92],[hS*.94,114],[ua,135],[hw,185],[hH,232],[hH*.93,268],[hH*.68,330],[hH*.5,372],[hH*.44,410],[hH*.2,414],[hH*.17,372],[hH*.16,320],[4,280]];
   return smooth(R.map(([x,y])=>[cx+x,y]).concat(R.map(([x,y])=>[cx-x,y]).reverse()));
 }
-function figure(m,t){
-  const w=34,cx=120;
-  const lab=(y,d,x)=> d>=0.04?`<text x="${x.toFixed(1)}" y="${y+4}" style="fill:var(--warm);font:600 19px var(--mono)">+${f2(d)}</text>`:'';
-  const arr=(y,a,b)=> b-a>1.2?[1,-1].map(k=>`<line x1="${(cx+k*a).toFixed(1)}" y1="${y}" x2="${(cx+k*b).toFixed(1)}" y2="${y}" style="stroke:var(--warm)" stroke-width="2.5" stroke-linecap="round"/>`).join(''):'';
-  return `<svg viewBox="0 0 260 430" role="img" aria-label="实线为现在的身材，虚线为目标身材">
-    <circle cx="${cx}" cy="40" r="20" style="fill:var(--body);stroke:var(--ink)" stroke-width="1.5"/>
-    <path d="${bodyPath(cx,w,m.swr,m.hwr)}" style="fill:var(--body);stroke:var(--ink)" stroke-width="1.5"/>
-    <path d="${bodyPath(cx,w,t.swr,t.hwr)}" style="fill:none;stroke:var(--accent)" stroke-width="2.2" stroke-dasharray="6 5"/>
-    ${arr(92,w*m.swr,w*t.swr)}${arr(232,w*m.hwr,w*t.hwr)}
-    ${lab(92,t.swr-m.swr,cx+w*Math.max(m.swr,t.swr)+8)}${lab(232,t.hwr-m.hwr,cx+w*Math.max(m.hwr,t.hwr)+8)}
+function figure2d(m,t){
+  const w=30,cx=120;
+  return `<svg viewBox="40 10 160 410" role="img" aria-label="实线为现在的身材，虚线为目标身材">
+    <circle cx="${cx}" cy="40" r="18" style="fill:var(--body);stroke:var(--ink)" stroke-width="1.2"/>
+    <path d="${bodyPath(cx,w,m.swr,m.hwr)}" style="fill:var(--body);stroke:var(--ink)" stroke-width="1.2"/>
+    <path d="${bodyPath(cx,w,t.swr,t.hwr)}" style="fill:none;stroke:var(--accent)" stroke-width="1.6" stroke-dasharray="5 4"/>
   </svg>`;
 }
-const mini=t=>`<svg class="mini" viewBox="60 15 120 410" aria-hidden="true"><circle cx="120" cy="40" r="18" style="fill:none;stroke:var(--accent)" stroke-width="5" stroke-dasharray="10 8"/><path d="${bodyPath(120,34,t.swr,t.hwr)}" style="fill:none;stroke:var(--accent)" stroke-width="6" stroke-dasharray="14 10"/></svg>`;
-function gapRow(name,c,tg){
-  const lo=1.0,hi=1.6,pc=v=>Math.max(0,Math.min(100,(v-lo)/(hi-lo)*100)); const d=tg-c;
-  return `<div class="gap"><span class="n">${name}</span>
-    <div class="track"><span class="fill" style="width:${pc(c)}%"></span><span class="tgt" style="left:${pc(tg)}%"></span></div>
-    <span class="v"><b>${f2(c)}</b> / ${f2(tg)}</span>
-    <span class="d ${Math.abs(d)<0.04?'ok':''}">${Math.abs(d)<0.04?'已达标':(d>0?'还差 ':'超出 ')+f2(Math.abs(d))}</span></div>`;
+const mini=t=>`<svg class="mini" viewBox="60 15 120 410" aria-hidden="true"><circle cx="120" cy="40" r="18" style="fill:none;stroke:currentColor" stroke-width="5" stroke-dasharray="10 8"/><path d="${bodyPath(120,34,t.swr,t.hwr)}" style="fill:none;stroke:currentColor" stroke-width="6" stroke-dasharray="14 10"/></svg>`;
+
+/* ---------------- 3D body (three.js) ----------------
+   参数化人体：每一层是一个超椭圆截面，宽/厚来自测量（cm）。
+   实线环 = 现在，虚线环 = 目标（腰宽不变，按目标比例放大肩/臀）。 */
+const B3={r:null};
+function css(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim()||'#888'; }
+function bodySpec(m,t){
+  const H=m.h||163, k=H/163, c=m.cm;
+  const sw=c.shoulder/2, ww=c.waistW/2, wd=c.waistD/2, hw=c.hipW/2, hd=c.hipD/2, tw=c.thighW/2, td=c.thighD/2;
+  const yW=(m.waistF||.615)*H, yH=(m.hipF||.51)*H;
+  const lerp=(a,b,u)=>a+(b-a)*u;
+  const torso=[
+    {y:.478*H,w:hw*.72,d:hd*.70,z:-hd*.02},
+    {y:.495*H,w:hw*.95,d:hd*.94,z:-hd*.06},
+    {y:yH,w:hw,d:hd,z:-hd*.08},
+    {y:lerp(yH,yW,.45),w:lerp(hw,ww,.62),d:lerp(hd,wd,.55),z:-hd*.03},
+    {y:yW,w:ww,d:wd,z:0},
+    {y:.695*H,w:ww*1.07,d:wd*1.10,z:wd*.04},
+    {y:.725*H,w:Math.max(ww*1.10,sw*.70),d:wd*1.30,z:wd*.12},
+    {y:.755*H,w:Math.max(ww*1.08,sw*.70),d:wd*1.16,z:wd*.04},
+    {y:.792*H,w:sw*.70,d:wd*.98,z:0},
+    {y:.815*H,w:sw*.50,d:wd*.80,z:0},
+    {y:.834*H,w:5.4*k,d:5.6*k,z:0},
+    {y:.868*H,w:4.9*k,d:5.1*k,z:.4*k}
+  ];
+  const armR=Math.max(3.8,c.shoulder*.12);
+  const ax=sw-armR*1.02;
+  const ab=y=>Math.max(0,.80*H-y)*.07; // 手臂略微外展，和躯干分开
+  const arm=s=>[
+    {y:.812*H,x:s*(ax-.8*k),w:armR*.9,d:armR*1.0,z:0},
+    {y:.79*H,x:s*ax,w:armR,d:armR*1.05,z:0},
+    {y:.70*H,x:s*(ax+ab(.70*H)),w:armR*.80,d:armR*.88,z:0},
+    {y:.625*H,x:s*(ax+ab(.625*H)),w:armR*.62,d:armR*.68,z:.4*k},
+    {y:.56*H,x:s*(ax+ab(.56*H)),w:armR*.66,d:armR*.62,z:1.0*k},
+    {y:.485*H,x:s*(ax+ab(.485*H)),w:armR*.46,d:armR*.40,z:1.4*k},
+    {y:.45*H,x:s*(ax+ab(.45*H)),w:armR*.52,d:armR*.30,z:1.6*k},
+    {y:.40*H,x:s*(ax+ab(.40*H)),w:armR*.36,d:armR*.22,z:1.6*k}
+  ];
+  const lx0=Math.max(tw*.92,hw-tw*1.04); // 大腿外缘和臀宽对齐
+  const leg=s=>[
+    {y:.53*H,x:s*lx0*.92,w:tw*1.02,d:td*1.05,z:-1.4*k},
+    {y:.49*H,x:s*lx0,w:tw*1.04,d:td*1.04,z:-.6*k},
+    {y:.455*H,x:s*lx0,w:tw,d:td,z:0},
+    {y:.40*H,x:s*lx0*.93,w:tw*.88,d:td*.90,z:.2*k},
+    {y:.33*H,x:s*lx0*.80,w:tw*.66,d:td*.70,z:.6*k},
+    {y:.285*H,x:s*lx0*.74,w:tw*.56,d:td*.62,z:.8*k},
+    {y:.205*H,x:s*lx0*.72,w:tw*.62,d:td*.72,z:-.6*k},
+    {y:.12*H,x:s*lx0*.70,w:tw*.40,d:td*.44,z:0},
+    {y:.05*H,x:s*lx0*.70,w:3.1*k,d:3.4*k,z:0},
+    {y:.03*H,x:s*lx0*.70,w:3.4*k,d:4.0*k,z:1.5*k}
+  ];
+  const tgtS=t?t.swr*c.waistW/2:sw, tgtH=t?t.hwr*c.waistW/2:hw;
+  return {H,k,torso,arms:[arm(-1),arm(1)],legs:[leg(-1),leg(1)],head:{y:.928*H,rx:7.3*k,ry:10.6*k,rz:9.3*k},
+    feet:[-1,1].map(s=>({x:s*lx0*.70,y:.018*H,len:23*k,w:4.4*k})),
+    rings:{
+      shoulder:{y:.79*H,w:sw,d:wd*1.30,tw:tgtS,td:wd*1.30},
+      waist:{y:yW,w:ww,d:wd,tw:ww,td:wd},
+      hip:{y:yH,w:hw,d:hd,tw:tgtH,td:hd*(tgtH/hw),z:-hd*.08},
+      thigh:{y:.44*H,w:tw,d:td,x:-lx0*.97,z:.1*k}
+    }};
 }
+function catmull(p0,p1,p2,p3,u){ const u2=u*u,u3=u2*u; return .5*((2*p1)+(-p0+p2)*u+(2*p0-5*p1+4*p2-p3)*u2+(-p0+3*p1-3*p2+p3)*u3); }
+function loftGeometry(secs,{n=44,sub=6,e=2.4,capTop=true,capBot=true}={}){
+  const THREE=window.THREE; const rings=[];
+  const K=['x','y','z','w','d'];
+  for(let i=0;i<secs.length-1;i++){
+    for(let s=0;s<sub;s++){
+      const u=s/sub, g=j=>secs[Math.max(0,Math.min(secs.length-1,j))];
+      const o={}; K.forEach(key=>{ o[key]=catmull(g(i-1)[key]||0,g(i)[key]||0,g(i+1)[key]||0,g(i+2)[key]||0,u); });
+      rings.push(o);
+    }
+  }
+  const L=secs[secs.length-1]; rings.push({x:L.x||0,y:L.y,z:L.z||0,w:L.w,d:L.d});
+  const pos=[], idx=[], ex=2/e;
+  rings.forEach(r=>{ for(let j=0;j<n;j++){ const a=j/n*Math.PI*2, c=Math.cos(a), s=Math.sin(a);
+    pos.push(r.x+Math.sign(c)*Math.pow(Math.abs(c),ex)*r.w, r.y, r.z+Math.sign(s)*Math.pow(Math.abs(s),ex)*r.d); } });
+  for(let i=0;i<rings.length-1;i++) for(let j=0;j<n;j++){ const a=i*n+j,b=i*n+(j+1)%n,c=(i+1)*n+j,d=(i+1)*n+(j+1)%n; idx.push(a,c,b,b,c,d); }
+  const cap=(ri,up)=>{ const r=rings[ri], ci=pos.length/3; pos.push(r.x,r.y+(up?.01:-.01),r.z);
+    for(let j=0;j<n;j++){ const a=ri*n+j,b=ri*n+(j+1)%n; if(up) idx.push(a,b,ci); else idx.push(b,a,ci); } };
+  if(capBot) cap(0,false); if(capTop) cap(rings.length-1,true);
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); g.setIndex(idx); g.computeVertexNormals();
+  // 截面从下往上排时三角形朝向相反，统一一下
+  return g;
+}
+function ringMesh(r,dashed,color,rad){
+  const THREE=window.THREE; const grp=new THREE.Group();
+  const w=dashed?r.tw:r.w, d=dashed?r.td:r.d, cx=r.x||0, cz=r.z||0, pad=1.025;
+  class Arc extends THREE.Curve{ constructor(a0,a1){ super(); this.a0=a0; this.a1=a1; }
+    getPoint(t,o=new THREE.Vector3()){ const a=this.a0+(this.a1-this.a0)*t; return o.set(cx+Math.cos(a)*w*pad, r.y, cz+Math.sin(a)*d*pad); } }
+  const mat=new THREE.MeshBasicMaterial({color,depthTest:false,transparent:true});
+  if(!dashed){ grp.add(new THREE.Mesh(new THREE.TubeGeometry(new Arc(0,Math.PI*2),96,rad,6,true),mat)); }
+  else { const N=28; for(let i=0;i<N;i++){ const a0=i/N*Math.PI*2; grp.add(new THREE.Mesh(new THREE.TubeGeometry(new Arc(a0,a0+Math.PI*2/N*.55),6,rad,5,false),mat)); } }
+  grp.children.forEach(c=>c.renderOrder=dashed?3:2);
+  return grp;
+}
+function mount3D(el,m,t,onTags){
+  unmount3D();
+  const THREE=window.THREE;
+  if(!THREE){ el.insertAdjacentHTML('beforeend',`<div class="fallback">${figure2d(m,t)}</div>`); return; }
+  let renderer;
+  try{ renderer=new THREE.WebGLRenderer({antialias:true,alpha:true}); }catch(e){ el.insertAdjacentHTML('beforeend',`<div class="fallback">${figure2d(m,t)}</div>`); return; }
+  const spec=bodySpec(m,t), H=spec.H;
+  renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+  el.appendChild(renderer.domElement);
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(24,1,1,2000);
+  const body=new THREE.Group(); scene.add(body);
+  const skin=new THREE.MeshStandardMaterial({color:new THREE.Color(css('--body')).multiplyScalar(.93),roughness:.78,metalness:0,side:THREE.DoubleSide});
+  body.add(new THREE.Mesh(loftGeometry(spec.torso,{e:2.25}),skin));
+  spec.arms.forEach(a=>body.add(new THREE.Mesh(loftGeometry(a,{e:2.1}),skin)));
+  spec.legs.forEach(l=>body.add(new THREE.Mesh(loftGeometry(l,{e:2.15}),skin)));
+  const head=new THREE.Mesh(new THREE.SphereGeometry(1,40,28),skin); head.scale.set(spec.head.rx,spec.head.ry,spec.head.rz); head.position.set(0,spec.head.y,.6*spec.k); body.add(head);
+  spec.feet.forEach(f=>{ const g=new THREE.Mesh(new THREE.SphereGeometry(1,24,14),skin); g.scale.set(f.w,f.w*.55,f.len/2); g.position.set(f.x,f.y+1,f.len*.32); body.add(g); });
+  const ink=new THREE.Color(css('--ink')), acc=new THREE.Color(css('--accent'));
+  const rings={};
+  for(const key of ['shoulder','waist','hip','thigh']){
+    const r=spec.rings[key];
+    const now=ringMesh(r,false,ink,.16*spec.k); now.renderOrder=2; body.add(now);
+    let tgt=null; if(key!=='thigh'&&key!=='waist'){ tgt=ringMesh(r,true,acc,.2*spec.k); tgt.renderOrder=3; body.add(tgt); }
+    rings[key]={now,tgt,r};
+  }
+  scene.add(new THREE.HemisphereLight(0xffffff,0x9aa39f,.55));
+  const key=new THREE.DirectionalLight(0xffffff,.95); key.position.set(-160,240,220); scene.add(key);
+  const fill=new THREE.DirectionalLight(0xffffff,.25); fill.position.set(200,60,160); scene.add(fill);
+  const rim=new THREE.DirectionalLight(0xffffff,.45); rim.position.set(140,160,-240); scene.add(rim);
+  const tgtY=H*.52;
+  const st={rot:-.35,vel:0,auto:!matchMedia('(prefers-reduced-motion: reduce)').matches,drag:false,lx:0,raf:0,alive:true,last:performance.now()};
+  function size(){ const w=el.clientWidth,h=el.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); cam.aspect=w/h;
+    const fit=(H*.56)/Math.tan(cam.fov*Math.PI/360); const dist=fit*Math.max(1,.62/cam.aspect); cam.position.set(0,tgtY+dist*.16,dist); cam.lookAt(0,tgtY,0); cam.updateProjectionMatrix(); }
+  const tags=onTags?onTags(el):null;
+  const v=new THREE.Vector3();
+  function placeTags(){
+    if(!tags) return;
+    for(const k in tags){ const R=rings[k]; if(!R) continue; const r=R.r, w=Math.max(r.w,r.tw||0)*1.06;
+      // 取环在屏幕上最靠右的点
+      let best=null; for(let i=0;i<24;i++){ const a=i/24*Math.PI*2; v.set((r.x||0)+Math.cos(a)*w,r.y,(r.z||0)+Math.sin(a)*(Math.max(r.d,r.td||0))); v.applyMatrix4(body.matrixWorld).project(cam); if(!best||v.x>best.x) best=v.clone(); }
+      const x=(best.x*.5+.5)*el.clientWidth+14, y=(-best.y*.5+.5)*el.clientHeight;
+      tags[k].style.left=Math.min(el.clientWidth-40,x)+'px'; tags[k].style.top=y+'px'; }
+  }
+  function focus(k){ for(const key in rings){ const on=!k||key===k; rings[key].now.children.forEach(c=>c.material.opacity=on?1:.18); rings[key].now.children.forEach(c=>c.material.transparent=!on); if(rings[key].tgt) rings[key].tgt.children.forEach(c=>{c.material.transparent=!on;c.material.opacity=on?1:.18;}); if(tags&&tags[key]) tags[key].style.opacity=on?1:.25; } kick(); }
+  function frame(now){
+    st.raf=0; if(!st.alive) return;
+    const dt=Math.min(.05,(now-st.last)/1000); st.last=now;
+    if(!st.drag){ if(Math.abs(st.vel)>.0005){ st.rot+=st.vel; st.vel*=.92; } else if(st.auto) st.rot+=dt*.32; }
+    body.rotation.y=st.rot; body.updateMatrixWorld();
+    renderer.render(scene,cam); placeTags();
+    if(st.drag||st.auto||Math.abs(st.vel)>.0005) st.raf=requestAnimationFrame(frame);
+  }
+  function kick(){ if(!st.raf&&st.alive){ st.last=performance.now(); st.raf=requestAnimationFrame(frame); } }
+  const cv=renderer.domElement;
+  const down=e=>{ st.drag=true; st.auto=false; st.lx=e.clientX; st.vel=0; el.style.cursor='grabbing'; kick(); };
+  const move=e=>{ if(!st.drag) return; const dx=e.clientX-st.lx; st.lx=e.clientX; st.vel=dx*.012; st.rot+=dx*.012; };
+  const up=()=>{ if(!st.drag) return; st.drag=false; el.style.cursor=''; kick(); };
+  cv.addEventListener('pointerdown',down); window.addEventListener('pointermove',move); window.addEventListener('pointerup',up); window.addEventListener('pointercancel',up);
+  const ro=new ResizeObserver(()=>{ size(); kick(); }); ro.observe(el);
+  size(); kick();
+  B3.r={renderer,ro,st,focus,dispose(){ st.alive=false; cancelAnimationFrame(st.raf); ro.disconnect(); window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); window.removeEventListener('pointercancel',up);
+    scene.traverse(o=>{ if(o.geometry) o.geometry.dispose(); if(o.material) o.material.dispose(); }); renderer.dispose(); renderer.domElement.remove(); }};
+  if(T.hFocus) focus(T.hFocus);
+}
+function unmount3D(){ if(B3.r){ try{B3.r.dispose();}catch(e){} B3.r=null; } }
+
+/* ---------------- muscle map ----------------
+   人体肌群轮廓来自 MuscleMap（Melih Colpan，MIT License），女性正/背面。 */
+const MM={"front":{"neck":["M 332.05,262.18 c -0.78,8.99 -5.96,18.06 -11.27,26.44 a 0.35,0.35 0 0 1 -0.59,0.01 q -6.05,-9.29 -9.58,-18.59 -1.68,-4.42 -1.62,-8.04 0.06,-3.36 4.03,-3.55 6.44,-0.31 14.09,-0.13 c 2.41,0.05 5.19,0.99 4.94,3.86 z","M 290.15,290.93 c 3.28,4.65 5.62,9.8 7.15,15.32 0.7,2.53 -1.37,5.04 -3.97,5.05 q -6.56,0.04 -11.88,-2.03 a 2.07,2.06 14.4 0 1 -1.3,-2.18 c 0.77,-5.99 4.87,-11.91 8.89,-16.23 a 0.72,0.71 -41.3 0 1 1.11,0.07 z","M 301.06,294.13 c -3.51,-6.07 -6.56,-12.38 -9.23,-18.87 q -1.42,-3.46 -1.56,-6.85 -0.36,-8.56 0.86,-17.74 a 0.44,0.44 0 0 1 0.53,-0.37 q 0.46,0.1 0.79,0.48 4.65,5.35 7.86,11.31 c 6.42,11.93 11.65,25.19 18.44,37.61 a 5.28,5.26 30.8 0 1 0.66,2.59 L 319.3,321 a 0.79,0.79 0 0 1 -0.79,0.79 c -1.83,0 -3.44,-1.1 -4.21,-2.73 q -5.68,-11.89 -13.24,-24.93 z","M 328.11,315.98 c -1.39,2.8 -1.85,5.31 -5.45,5.84 a 0.92,0.91 85.6 0 1 -1.04,-0.9 q -0.09,-9.72 -0.08,-18.23 0,-1.57 0.75,-3.05 6.71,-13.16 12.25,-25.58 c 3.49,-7.85 8.12,-17.17 14.42,-23.56 q 0.19,-0.18 0.45,-0.19 a 0.43,0.42 -3.6 0 1 0.44,0.38 q 0.95,7.84 0.93,15.61 -0.02,4.3 -1.34,7.91 -3.03,8.27 -7.56,16.2 -8.05,14.11 -13.77,25.57 z","M 343.58,306.54 c 1.42,-5.58 3.9,-10.86 7.19,-15.57 a 0.69,0.68 -50.1 0 1 1.04,-0.1 c 3.9,3.84 9.01,11.14 8.89,17.13 a 1.07,1.06 79.1 0 1 -0.65,0.97 q -5.44,2.34 -12.5,2.38 c -2.39,0.01 -4.57,-2.43 -3.97,-4.81 z"],"trapezius":["M 241.01,294.28 c 12.76,-8.28 25.21,-16.07 39.54,-21.44 2.58,-0.96 6.02,0.04 5.63,3.51 q -0.44,3.92 -1.62,5.3 c -6.48,7.58 -12.74,12.81 -19.24,19.14 -1.03,1.01 -1.87,1.15 -3.25,1.03 q -8.13,-0.69 -18.79,-2.97 -2.99,-0.65 -2.7,-3.86 0.05,-0.46 0.43,-0.71 z","M 366.31,275.29 c 12,4.97 22.67,11.96 33.55,18.94 q 0.51,0.33 0.54,0.94 c 0.08,1.63 -0.71,3.2 -2.44,3.59 q -9.65,2.18 -18.62,2.99 c -1.26,0.11 -2.4,0.24 -3.39,-0.7 q -5.03,-4.78 -10.97,-10.25 -6.53,-6.01 -8.56,-9.16 -1.87,-2.89 -1.63,-6.77 0.03,-0.49 0.35,-0.85 c 3.04,-3.4 7.94,-0.07 11.17,1.27 z"],"hair":["M 274.27,0 h 7.5 q 18.53,1.85 32.68,8.03 c 12.49,5.46 24.03,14.94 27.55,28.42 a 2.51,2.49 89.9 0 0 1.78,1.79 c 62.05,16.11 59.99,92.38 46.77,140.06 q -2.56,9.24 -6.49,17.96 c -2.53,5.64 -4.61,7.93 -10.53,9.62 l -0.26,-0.1 q -0.2,-0.09 -0.11,-0.29 3.73,-8.25 6.16,-16.1 a 1.18,1.17 -83.3 0 1 1.03,-0.82 c 9.73,-0.81 11.84,-26.25 11.81,-33.17 q 0,-2.26 -1.89,-3.46 -0.54,-0.35 -1.17,-0.24 -2.13,0.37 -4.08,0.23 c -5.7,-0.39 -8.68,-13.45 -9.55,-17.9 q -2.57,-13.24 -5.09,-28.6 -0.65,-3.97 -2.37,-7.72 a 2.7,2.65 86.8 0 0 -1.54,-1.4 C 357.04,93.05 347.03,89.65 337,88.5 q -7.76,-0.88 -14.28,3.52 c -7.75,5.24 -15.65,10.37 -23.95,14.33 q -15.27,7.3 -31.5,12.13 a 1.86,1.85 -0.3 0 0 -1.25,1.26 c -2.08,7.3 -3.02,14.59 -4.33,22.04 -0.77,4.35 -2.6,10.1 -8.02,10.27 q -1.4,0.05 -2.82,-0.07 -0.58,-0.04 -0.95,0.42 -1.31,1.64 -1.26,3.95 0.23,12.21 3.9,23.14 c 1.3,3.87 3.66,8.51 8.11,9.16 a 1.22,1.22 0 0 1 0.99,0.84 q 5.67,17.91 15.65,33.72 0.59,0.93 0.76,2 0.62,15.66 -0.31,31.34 -0.33,0.59 -0.86,1.05 -10.81,9.38 -25.26,12.16 -3.21,-0.66 -6.4,-1 -2.96,-0.31 -6.35,-1.14 -4.1,-0.99 -8.5,-0.85 -19.12,0.63 -38.2,1.5 -7.58,0.35 -14.57,-0.86 a 1.74,1.73 -87.9 0 1 -1.44,-1.56 c -0.81,-8.45 2.45,-17.97 5.45,-25.54 7.91,-19.94 16.52,-39.52 21.72,-59.8 q 3.8,-14.84 3.36,-29.24 -0.62,-20.32 -5.16,-56.52 -0.99,-7.83 -0.58,-13.57 1.97,-27.81 13.7,-48.73 C 220.38,22.24 229.09,15.56 238.9,9.81 Q 254.97,0.39 274.27,0 Z m 61.27,35.35 c -9.93,-7.61 -23.32,-7.23 -32.78,1.35 q -1.11,1.01 0.36,0.73 c 10.93,-2.09 20.77,-2.59 31.88,-0.82 q 2.75,0.43 0.54,-1.26 z","M 302.76,36.7 c 9.46,-8.58 22.85,-8.96 32.78,-1.35 q 2.21,1.69 -0.54,1.26 c -11.11,-1.77 -20.95,-1.27 -31.88,0.82 q -1.47,0.28 -0.36,-0.73 z"],"deltoids":["M 215.94,289.45 c -21.5,15.97 -35.81,41.69 -45.18,66.64 a 0.54,0.54 0 0 1 -0.75,0.3 c -1.36,-0.68 -2.91,-1.32 -2.88,-3.16 q 0.36,-18.38 4.6,-33.36 c 4.12,-14.55 12.32,-23.54 25.35,-31.51 5.06,-3.09 15.01,-5.79 18.99,0.41 a 0.51,0.51 0 0 1 -0.13,0.68 z","M 233,326.79 c -5.53,27.66 -26.78,45.52 -55.22,43.68 a 0.54,0.54 0 0 1 -0.5,-0.61 c 4.48,-32.74 28.09,-58.38 54.53,-76.41 q 2.3,-1.57 4.86,-0.86 a 1.61,1.61 0 0 1 1.18,1.72 Q 236,311.81 233,326.79 Z","M 470.13,355.96 C 463.5,338.45 454.92,322.09 443.6,307.63 q -8.16,-10.43 -18.47,-18.02 a 0.95,0.94 33.2 0 1 -0.26,-1.22 c 3.34,-5.94 13.06,-3.27 17.74,-0.68 13.57,7.5 23.02,17.38 27.32,32.28 q 3.99,13.8 4.29,33.5 0.02,0.68 -0.47,1.17 -1.06,1.07 -2.71,1.71 a 0.71,0.71 0 0 1 -0.91,-0.41 z","M 463.02,370.48 c -23.85,1.37 -44.22,-11.24 -52.35,-33.91 q -2.31,-6.45 -3.64,-14.34 -2.64,-15.63 -3.89,-27.26 -0.28,-2.56 2.36,-2.63 1.96,-0.05 4.36,1.61 c 25.95,18.03 49.33,43.22 53.78,75.78 q 0.1,0.71 -0.62,0.75 z"],"head":["M 333.98559,84.905706 c 18.21278,1.634629 31.69605,8.136487 37.2945,12.907787 5.05164,4.305277 7.19576,45.031667 12.65256,51.693107 1.8636,2.27501 8.59028,-1.54865 8.92968,2.02054 0.963,10.12704 -1.13955,23.87461 -5.01774,34.09876 -2.76635,7.29296 -5.63968,2.08994 -7.32662,6.61326 -4.20041,11.26291 -13.37526,37.43537 -39.7435,47.10729 -18.23028,5.87857 -27.73171,4.95957 -42.38166,-0.61061 -10.53425,-7.41801 -26.32238,-15.61151 -35.48901,-45.82179 -2.15595,-7.10532 -5.07953,-2.63217 -8.24698,-7.1806 -8.2816,-11.89228 -6.24233,-24.37427 -6.11257,-33.09312 1.24002,-3.08768 8.39807,0.42491 9.86574,-4.98496 1.75809,-6.48033 5.74751,-21.52642 6.67934,-30.11758 42.80886,-10.2119 49.53647,-34.194904 68.89626,-32.632084 z"],"chest":["M 215.31,402.8 c 3.26,-19.61 9.28,-38.69 19.81,-54.85 q 13.83,-21.23 37.68,-27.16 c 4.19,-1.04 8.16,-1.75 12.65,-1.52 q 12.07,0.63 26.16,3.99 1.78,0.43 1.87,2.25 1.29,25.82 3.16,54.8 0.99,15.38 0.3,27.45 -0.37,6.41 -1.94,10.48 c -1.58,4.08 -6.16,7.97 -9.72,10.84 -4.33,3.5 -10.61,4.16 -16,3.9 q -10.92,-0.53 -23.26,-4.83 c -17.71,-6.16 -33.56,-14.26 -50.09,-24.02 a 1.31,1.29 20.5 0 1 -0.62,-1.33 z","M 363.91,319.81 c 13.87,2.63 26.6,9.35 35.84,20.13 14.46,16.89 22.21,40.73 25.93,63.05 q 0.11,0.67 -0.48,1.03 -23.28,13.86 -44.52,22.12 c -11.73,4.57 -25.54,8.27 -37.94,6.2 -5.84,-0.97 -14.69,-8.68 -16.85,-14.18 q -1.62,-4.13 -2.04,-13.18 -0.45,-9.71 0.29,-21.75 1.69,-27.64 3.41,-58.27 a 1.18,1.16 -22 0 1 0.33,-0.76 q 0.76,-0.78 1.88,-1.05 11.52,-2.78 22.73,-3.71 6.58,-0.54 11.42,0.37 z"],"biceps":["M 155.35,437.19 c 0.88,-13.89 5.09,-26.01 11.66,-38.24 4.28,-7.95 13.01,-13.06 21.68,-14.64 q 5.04,-0.91 8.47,-1.31 c 3.81,-0.44 9.89,1.7 10.16,6.4 q 0.6,10.54 -0.27,19.31 c -1.87,18.75 -10.06,34.69 -22.69,48.75 q -8.64,9.63 -17.84,18.84 a 1.95,1.9 16.8 0 1 -0.98,0.51 q -3.19,0.6 -7.01,-0.16 c -1.52,-0.3 -2.45,-1.78 -2.7,-3.22 -0.63,-3.64 -1.32,-7.25 -1.31,-10.96 q 0.05,-12.9 0.83,-25.28 z","M 478.52,408.27 q 5.57,13 6.67,24.56 1.21,12.62 1.22,28.51 0,5.95 -1.27,12.12 c -0.81,3.98 -5.47,3.81 -8.54,3.62 q -1.7,-0.11 -3.27,-1.75 c -13.93,-14.57 -28.48,-28.44 -35.35,-48.06 -4.33,-12.36 -5.34,-25.85 -4.21,-39.01 q 0.06,-0.73 0.51,-1.3 c 2.72,-3.44 6.57,-4.44 11.44,-3.76 q 7.25,1.01 11.78,2.52 9.47,3.16 14.86,10.89 3.02,4.33 6.16,11.66 z"],"triceps":["M 203.67,452.99 c -7.1,14.55 -18.61,30.01 -32.29,39.49 q -2.32,1.61 -4.85,0.35 l -0.31,-0.15 q -2.42,-1.22 -0.37,-2.98 c 17.2,-14.83 28.72,-32 37.23,-52.62 q 0.8,-1.93 2.34,-3.04 a 1.28,1.28 0 0 1 1.8,0.31 q 1.35,1.95 0.97,4.41 -1.1,7.22 -4.52,14.23 z","M 442.12,446.42 q 12.14,25.77 33.26,43.55 1.47,1.24 -0.14,2.3 l -0.63,0.42 a 4.39,4.37 45.8 0 1 -4.92,-0.08 q -8.08,-5.68 -15.21,-13.9 c -9.9,-11.44 -19.12,-25.17 -21.69,-39.38 q -0.62,-3.4 1.39,-5.43 0.44,-0.44 0.99,-0.15 1.54,0.81 2.17,2.22 2.35,5.31 4.78,10.45 z"],"obliques":["M 234.32,446.92 c -0.55,-2.95 -0.73,-5.84 -1.94,-8.63 q -4.84,-11.24 -8.61,-21.89 -1.12,-3.17 1.19,-0.73 c 6.09,6.44 10.93,13.52 16.12,20.74 a 1.71,1.68 28.7 0 1 0.33,1.09 q -0.53,11.15 -1.88,22.64 -0.27,2.38 -1.24,0.18 -2.52,-5.75 -3.97,-13.4 z","M 242.67,456.5 c 3.65,1.14 7.61,3.78 10.54,6.08 q 2.32,1.82 2.25,4.78 l -0.21,8.13 q -0.04,1.79 -1.45,0.68 -5.7,-4.52 -10.18,-10.21 c -1.95,-2.48 -2.49,-5.57 -2.19,-8.64 a 0.96,0.96 0 0 1 1.24,-0.82 z","M 246.6,490.48 c -6.03,-4.05 -7.7,-15.15 -7.34,-21.92 a 0.29,0.29 0 0 1 0.5,-0.19 c 4.79,4.87 9.23,10.01 14.82,13.93 a 1.71,1.7 17.7 0 1 0.72,1.39 l -0.03,11.84 a 0.6,0.6 0 0 1 -0.96,0.47 q -4.04,-3.05 -7.71,-5.52 z","M 252.02,456.3 c -3.08,-1.43 -6.59,-6.27 -8.84,-9.51 q -1.03,-1.49 -0.89,-3.31 a 1.39,1.38 -88.2 0 1 1.35,-1.28 q 2.27,-0.04 4.18,0.73 4.36,1.77 9.23,3.14 0.54,0.15 0.58,0.71 0.4,6.12 -1.21,11.67 a 0.35,0.35 0 0 1 -0.56,0.18 q -1.73,-1.34 -3.84,-2.33 z","M 257.8,616.66 c -4.79,-0.24 -10.33,-3.88 -14.25,-6.47 -3.22,-2.12 -4.01,-14.52 -4.21,-18.14 q -0.65,-12.12 -0.53,-21.74 0.32,-25.23 0.51,-50.71 c 0.03,-4.43 0.42,-8.84 0.73,-13.1 q 0.3,-4 1.6,-7.53 0.76,-2.05 2.82,-1.27 c 12.29,4.68 12.69,15.09 12.12,26.28 q -0.16,3.03 0.13,5.86 2.02,19.75 1.8,41.33 -0.05,4.7 0.76,9.52 1.4,8.43 2.19,17.36 0.85,9.42 -2.51,17.86 a 1.18,1.17 -77.7 0 1 -1.16,0.75 z","M 259.53,441.27 c -6.09,-0.94 -15.24,-7.47 -17.83,-12.96 a 1.96,1.95 -46.6 0 1 -0.04,-1.54 c 0.68,-1.67 2.51,-1.45 3.82,-0.88 q 8.66,3.77 17.36,6.42 a 0.45,0.45 0 0 1 0.31,0.35 q 0.79,4.96 -2.71,8.32 -0.38,0.37 -0.91,0.29 z","M 384.22,445.83 c 4.32,-0.61 8.05,-3.04 12.37,-3.63 q 1.44,-0.19 1.87,1.19 0.52,1.66 -0.54,3.18 c -4.17,5.96 -7.23,9.14 -12.91,11.89 a 0.38,0.38 0 0 1 -0.53,-0.24 q -1.53,-5.28 -1.13,-11.45 a 1.03,1.01 88.3 0 1 0.87,-0.94 z","M 393.51,426.7 q 1.7,-0.72 3.57,-1.16 a 1.83,1.83 0 0 1 1.91,0.73 c 0.66,0.94 0.41,2.29 -0.25,3.15 q -6.32,8.23 -15.71,11.52 -3.03,1.06 -4.1,-1.97 -1.12,-3.14 -1.26,-3.53 -1.02,-2.87 1.9,-3.71 6.45,-1.87 13.94,-5.03 z","M 397.15,610.37 c -3.94,2.47 -9.2,6.06 -13.86,6.26 a 1.49,1.48 77.9 0 1 -1.43,-0.93 q -3.33,-8.47 -2.36,-18.41 0.73,-7.6 1.89,-14.77 1,-6.17 0.99,-11.23 c -0.02,-13.26 0.27,-26.67 1.74,-39.85 q 0.47,-4.28 0.19,-8.9 c -0.66,-10.78 0.81,-21.31 12.66,-24.94 a 1.78,1.77 69.5 0 1 2.14,0.98 q 1,2.27 1.34,4.92 1.19,9.27 1.26,20.24 0.16,23.43 0.38,48.3 c 0.09,11.08 -0.18,22.85 -2.37,33.89 -0.34,1.72 -0.99,3.45 -2.57,4.44 z","M 398.41,456.38 a 0.8,0.8 0 0 1 1.09,0.63 c 0.86,5.62 -1.96,9.16 -5.73,13.05 q -3.65,3.78 -7.3,6.56 a 0.41,0.41 0 0 1 -0.66,-0.3 q -0.29,-4.61 -0.24,-8.98 0.03,-3.34 2.9,-5.44 4.69,-3.42 9.94,-5.52 z","M 401.76,469.17 c 0.19,6.21 -1.1,14.25 -5.22,19.11 -2.62,3.1 -6.7,5.34 -10.07,7.78 q -0.73,0.53 -0.74,-0.38 l -0.07,-12.12 q 0,-0.59 0.46,-0.96 8.07,-6.31 14.53,-13.82 1.06,-1.24 1.11,0.39 z","M 417.44,415.21 c -2.14,7.47 -5.47,14.6 -8.52,22.06 q -1.36,3.31 -1.79,6.59 -1.11,8.53 -4.58,16.68 -0.79,1.86 -1.07,-0.14 -1.42,-10.38 -1.9,-22.98 a 1.58,1.57 -28.9 0 1 0.29,-1 q 6.57,-9.46 12.8,-17.21 1.87,-2.32 4.3,-4.31 0.73,-0.59 0.47,0.31 z"],"abs":["M 261.73,482.62 c 0.12,-10.88 -0.33,-22.8 7.93,-31.04 10.43,-10.39 25.75,-12.91 39.95,-10.63 q 0.47,0.08 0.45,0.54 l -0.87,24.33 a 0.96,0.95 88.3 0 1 -0.86,0.92 q -8.51,0.88 -17.53,2.35 c -11.22,1.83 -20.06,5.16 -28.09,13.92 q -1,1.08 -0.98,-0.39 z","M 263.89,560.38 c 18.37,-2.6 32.63,0.35 44.32,15.16 q 0.72,0.91 0.91,2.02 0.98,5.72 1.19,10.92 2.01,48.7 2.07,81.21 0.01,2.91 -2.63,5.03 c -2.77,2.21 -10.61,5.88 -13.52,2.38 -6.1,-7.32 -10.49,-16.08 -14.05,-25.36 q -14.5,-37.75 -18.65,-78.2 -0.6,-5.83 -0.33,-12.39 0.03,-0.68 0.69,-0.77 z","M 283.92,476.78 q 12.55,-5.43 25.84,-3.32 0.36,0.06 0.36,0.42 0.41,19.6 -0.86,38.86 a 0.91,0.91 0 0 1 -1,0.85 c -13.44,-1.32 -28.43,-1.82 -41.54,1.88 q -1.32,0.37 -1.93,-0.86 c -9,-18.41 3.35,-31 19.13,-37.83 z","M 300.31,556.68 q -4.15,-2.21 -8.98,-2.91 -13.66,-2 -27.37,-1.31 a 0.95,0.95 0 0 1 -0.97,-0.72 q -2.73,-10.93 -1.37,-23.2 0.2,-1.78 1.77,-2.92 c 6.36,-4.65 14.69,-8.3 22.33,-8.94 q 12.38,-1.05 23.44,4.26 a 2.06,2.06 0 0 1 1.17,1.89 q -0.3,18.75 -1.38,35.86 -0.03,0.52 -0.55,0.61 c -2.7,0.45 -5.69,-1.34 -8.09,-2.62 z","M 349.65,553.77 c -5.34,0.78 -9.22,3.16 -13.94,5.24 q -1.59,0.69 -3.28,0.24 a 0.64,0.63 -83.8 0 1 -0.47,-0.59 q -1.23,-19.64 -1.28,-36.09 a 1.7,1.68 -13.4 0 1 0.95,-1.53 c 15.64,-7.64 31.83,-5.42 45.86,4.48 0.94,0.67 1.65,1.44 1.78,2.61 q 1.39,12.16 -1.2,23.23 -0.25,1.07 -1.34,1.03 -13.86,-0.54 -27.08,1.38 z","M 354.08,475.63 c 16.7,6.15 32.39,19.94 21.71,39.55 a 0.9,0.9 0 0 1 -1.05,0.43 c -13.38,-3.92 -27.7,-3.22 -41.96,-2.05 a 0.9,0.9 0 0 1 -0.97,-0.78 c -1.62,-12.74 -1.1,-26.27 -1.03,-38.85 a 0.48,0.47 86.4 0 1 0.4,-0.46 q 11.86,-1.91 22.9,2.16 z","M 362.23,642.32 c -4.21,12.26 -9.35,24.52 -17.49,34.79 q -0.9,1.12 -2.2,1.22 -6.54,0.54 -11.69,-3.91 c -1.34,-1.16 -2.37,-2.61 -2.35,-4.44 q 0.27,-32.33 1.7,-73.01 0.36,-10.37 1.51,-19.31 0.12,-0.89 0.67,-1.6 c 11.52,-15 26.64,-18.71 44.72,-15.65 a 0.85,0.84 -86 0 1 0.71,0.83 q 0.06,12.43 -1.93,25.22 -4.56,29.34 -13.65,55.86 z","M 378.34,483.09 c -8.04,-8.87 -17.3,-12.26 -29.19,-14.16 q -8.48,-1.35 -16.49,-2.17 a 1.05,1.04 2.2 0 1 -0.93,-1 l -0.83,-24.24 q -0.02,-0.53 0.51,-0.61 18.35,-2.62 31.52,4.43 14.18,7.59 15.53,22.29 0.76,8.32 0.7,15.15 -0.01,1.2 -0.82,0.31 z"],"forearm":["M 80.93,647.88 c 14.1,-28.26 32.44,-54.05 52.98,-78.01 6.28,-7.32 12.52,-13.04 22.3,-14.76 a 0.44,0.44 0 0 1 0.44,0.67 q -33.59,51.14 -75.12,92.53 -1.62,1.61 -0.6,-0.43 z","M 85.85,647.42 q 11.51,-11.53 23.19,-23.33 6.63,-6.71 16.74,-19.55 c 13.51,-17.18 26.63,-37.24 39.52,-56.02 a 1.08,1.08 0 0 1 1.85,0.11 q 0.51,0.96 0.26,2.09 c -1.73,8.15 -5.44,14.39 -10.55,22.73 q -11.14,18.18 -25.7,34.1 -18.98,20.74 -39.21,37.61 -2.7,2.25 -6.02,3.82 -0.28,0.13 -0.57,0.24 -1.42,0.54 -1.26,-0.09 0.03,-0.14 0.14,-0.23 0.8,-0.67 1.61,-1.48 z","M 158.49,493 c -4.72,28.27 -19.05,55.5 -36.58,78.04 q -10.8,13.89 -20.36,28.46 -4.33,6.6 -7.59,13.38 c -5.52,11.5 -11.24,22.8 -19.41,32.11 q -1.49,1.7 -0.81,-0.46 c 3.77,-11.82 9.38,-23.48 14.74,-35.02 3.82,-8.21 7.5,-17.64 10.42,-26.75 7.62,-23.71 16.99,-47.77 29.34,-68.38 7.41,-12.37 17.14,-24.67 29.9,-31.38 a 0.72,0.71 -14.7 0 1 1.05,0.61 q 0.12,4.42 -0.7,9.39 z","M 176.77,536.74 c -5.58,2.64 -11.34,4.68 -16.45,7.91 -5.83,3.68 -11.93,7.82 -18.84,8.99 a 1.21,1.21 0 0 1 -1.41,-1.13 c -0.29,-5.42 4.57,-12.34 7.66,-16.52 q 10.15,-13.75 23.71,-26.94 c 1.35,-1.32 3.26,-2.11 5.16,-1.83 a 1.02,1.02 0 0 1 0.86,0.86 q 2.03,13.42 -0.05,27.79 a 1.12,1.12 0 0 1 -0.64,0.87 z","M 478.46,543.49 c -4.04,-2.35 -8.89,-4.3 -13.28,-6.25 -2.13,-0.95 -1.9,-3.18 -2.11,-5.15 q -1.32,-12.65 0.43,-23.9 a 1.38,1.38 0 0 1 1.54,-1.16 c 1.68,0.21 3.26,0.93 4.5,2.12 q 12.39,11.96 22.31,25.05 c 2.67,3.51 10.26,13.94 8.99,18.38 a 1.51,1.51 0 0 1 -1.8,1.06 q -5.3,-1.25 -8.83,-3.31 -5.39,-3.14 -11.75,-6.84 z","M 480.72,568.04 c -3.26,-5.55 -5.96,-11.12 -7.24,-17.31 q -0.33,-1.61 0.58,-2.51 a 1.03,1.03 0 0 1 1.57,0.16 c 13.24,19.66 27,40.11 41.05,58.18 11.56,14.88 25.47,28 38.8,41.13 q 0.56,0.55 1.06,1.21 0.78,1.05 -0.44,0.58 -3.39,-1.29 -6.75,-4.08 -19.67,-16.3 -37.87,-35.97 -17.53,-18.94 -30.76,-41.39 z","M 484.61,555.07 c 11.21,1.91 17.39,8.95 24.45,17.26 18.64,21.97 34.4,44.56 47.76,69.37 q 1.9,3.52 3.32,6.62 0.61,1.33 -0.43,0.3 -42.24,-42.1 -75.48,-92.97 -0.48,-0.73 0.38,-0.58 z","M 540.63,578.72 c 5.89,18.68 13.76,35.38 21.55,52.65 q 2.61,5.79 4.88,12.9 0.81,2.52 -0.89,0.5 c -7.48,-8.88 -12.5,-17.92 -17.97,-29.24 q -6.73,-13.92 -15.23,-25.62 -8.17,-11.25 -17.48,-23.63 c -15.23,-20.26 -27.78,-45.5 -32.6,-70.62 q -1.21,-6.31 -1.13,-11.97 0.01,-1.19 1.06,-0.64 c 10.4,5.42 18.51,14.3 25.31,24.31 13.82,20.33 24.84,47.05 32.5,71.36 z"],"hands":["M 76.9,699.46 c -1.68,6.93 -4.86,14.23 -9.75,19.73 -3.68,4.16 -10.21,-0.6 -12.84,-3.77 q -4.85,-5.86 -10.18,-10.8 c -2.03,-1.88 -9.58,-5.18 -8.37,-9.02 2,-6.4 4.37,-11.1 8.21,-16.74 q 5.74,-8.42 12.12,-17.03 2.99,-4.03 5.79,-6.44 1.65,-1.41 4.25,-0.76 7.51,1.87 13.62,4.2 a 0.47,0.47 0 0 1 0.29,0.4 q 1.61,20.71 -3.14,40.23 z","M 22.64,686.61 q -4.35,2.68 -8.97,5.43 -2,1.2 -3.76,0.73 -2.04,-0.55 -3.53,-1.72 a 1.59,1.59 0 0 1 -0.52,-1.77 q 0.73,-2.04 2.74,-3 5.14,-2.46 10.34,-5.1 a 13.93,13.75 -80.7 0 0 3.47,-2.53 c 3.04,-3.03 6.28,-5.7 9.81,-8.15 q 6.86,-4.77 13.58,-9.74 c 1.68,-1.24 2.71,-1.36 4.54,-0.38 4.66,2.47 -4.59,11.2 -6.57,12.67 -6.61,4.92 -13.95,9.14 -21.13,13.56 z","M 32.82,715.26 q -5.43,14.93 -12.06,27.84 -1.98,3.85 -4.71,6.75 a 1.67,1.66 51.8 0 1 -2.66,-0.32 c -2.02,-3.56 1,-13.05 2.6,-16.84 q 6.53,-15.37 13.87,-30.34 1.12,-2.28 2.93,-0.51 l 2.38,2.35 q 1.73,1.69 0.66,3.87 -1.5,3.03 -3.01,7.2 z","M 32.18,751.27 q -3.61,7.78 -7.04,13.77 -0.8,1.41 -2.48,1.29 a 2.04,2.04 0 0 1 -1.82,-1.48 q -0.59,-2.11 -0.16,-4.36 1.46,-7.75 4.24,-15.75 5.55,-15.95 13.53,-31.52 a 0.92,0.91 -74.1 0 1 0.89,-0.5 c 2.55,0.22 5.63,1.06 5.19,4.36 q -0.48,3.64 -1.61,7.19 -3.97,12.44 -10.74,27 z","M 54.56,726.38 c -4.87,12.51 -10.55,24.74 -16.83,36.91 q -1.47,2.85 -4.02,0.9 -0.2,-0.16 -0.33,-0.36 -1.89,-2.86 -0.7,-5.81 c 4.9,-12.05 9.63,-24.27 15.68,-36.05 q 0.94,-1.84 2.66,-0.68 l 2.47,1.68 q 1.89,1.28 1.07,3.41 z","M 53.04,752.14 c 1.93,-10.58 3.66,-20.18 11.74,-27.88 a 0.88,0.88 0 0 1 1.43,0.33 q 0.18,0.48 0.07,0.95 -3.65,14.78 -9.97,27.42 -0.75,1.49 -1.97,2.17 a 1.06,1.06 0 0 1 -1.57,-1.02 q 0.09,-0.98 0.27,-1.97 z","M 572.57,717.95 c -4.99,-6.62 -7.75,-14.53 -9.42,-22.45 q -3.74,-17.75 -2.3,-36.07 0.04,-0.54 0.55,-0.72 6.91,-2.55 14.55,-4.31 a 3.01,2.98 -33.7 0 1 2.4,0.47 q 2.39,1.67 4.36,4.26 11.12,14.61 17.14,24.22 2.19,3.48 3.91,8.26 c 1.42,3.93 2.9,6.43 -1.05,8.84 -6.91,4.23 -11.6,9.71 -16.7,15.64 q -2.2,2.56 -5.58,4.02 -4.71,2.02 -7.86,-2.16 z","M 629.7,692.91 q -0.88,0.05 -1.63,-0.39 -16.99,-9.79 -30.39,-19.09 -5.44,-3.78 -8.34,-10.22 a 1.71,1.66 45.9 0 1 0,-1.38 c 0.82,-1.77 3.4,-2.74 5.14,-1.47 6.84,4.98 13.95,9.43 20.22,14.76 2.49,2.13 4.62,4.61 7.54,6.13 q 5.16,2.68 10.13,5.06 1.59,0.76 2.51,2.34 a 1.98,1.97 56.7 0 1 -0.53,2.58 q -2.03,1.52 -4.65,1.68 z","M 619.38,741.59 c -5.55,-10.95 -9.91,-22.4 -14.42,-34.16 q -0.76,-1.97 0.82,-3.38 1.39,-1.24 2.48,-2.21 1.76,-1.58 2.8,0.54 8.21,16.69 14.65,32.42 2.73,6.68 2.32,13.6 -0.1,1.72 -1.83,1.98 a 1.61,1.58 -24.2 0 1 -1.45,-0.54 q -2.91,-3.38 -5.37,-8.25 z","M 615.42,764.65 c -7.37,-14.18 -14.47,-29.6 -18.64,-45 q -0.59,-2.21 -0.29,-4.52 0.07,-0.54 0.54,-0.83 1.9,-1.18 4.13,-1.51 1,-0.15 1.46,0.75 7.03,13.62 12.86,29.78 3.2,8.87 4.64,16.66 0.36,1.96 0.12,4.04 c -0.34,2.92 -3.74,2.72 -4.82,0.63 z","M 603.2,763.32 C 597.32,751.95 590.92,738.6 586.42,726.4 q -0.8,-2.15 1.08,-3.48 l 2.22,-1.57 q 1.83,-1.29 2.86,0.69 c 6.13,11.73 10.79,24.28 15.74,36.17 q 1.16,2.78 -0.76,5.72 -0.12,0.18 -0.3,0.32 -2.58,1.93 -4.06,-0.93 z","M 585.43,754.04 c -5.15,-8.61 -8.65,-19.26 -10.81,-28.78 q -0.46,-2.03 1.32,-0.96 1.2,0.73 2.2,1.88 c 6.71,7.78 8.51,18.11 10.03,28.15 a 0.6,0.59 -12.9 0 1 -0.42,0.66 q -1.5,0.43 -2.32,-0.95 z"],"adductors":["M 286.21,731.89 c 5.1,-12.47 11.15,-24.68 16.82,-36.79 a 1.17,1.17 0 0 1 1.84,-0.38 q 0.8,0.71 0.75,1.93 c -0.46,12.38 -1.19,24.44 -2.76,37.71 -1.13,9.56 -1.91,19.14 -3.49,28.56 -0.69,4.17 -2.41,8.04 -4.32,11.69 a 2.22,2.21 29.3 0 1 -3.12,0.87 q -1.32,-0.8 -1.28,-2.41 0.2,-8.82 0.13,-17.67 -0.01,-1.4 -0.62,-2.66 c -2.16,-4.44 -4.98,-9.87 -5.17,-14.91 q -0.11,-2.7 1.22,-5.94 z","M 292.87,682.52 c -3.12,14.57 -9.61,27.39 -18.76,39.63 q -0.68,0.91 -1.28,-0.05 c -2.93,-4.74 -4.21,-9.67 -4.63,-15.36 q -0.45,-5.9 -1.09,-8.14 -1.89,-6.56 -4.75,-13.01 c -2.76,-6.23 -4.28,-13.06 -7.14,-19.37 -7.35,-16.19 -16.26,-33.86 -22.42,-51.48 q -0.08,-0.21 -0.01,-0.42 a 0.26,0.26 0 0 1 0.46,-0.06 q 10.77,14.73 21.98,28.77 11.5,14.4 17.6,19.88 7.55,6.77 14.86,13.4 2.74,2.48 4.97,5.3 a 1.11,1.09 32.6 0 1 0.21,0.91 z","M 300.1,836.83 q 1.64,19.12 2.22,36.73 0.11,3.47 -0.89,0.14 -2.42,-8.03 -4.58,-16.34 c -4.22,-16.26 -9.63,-31.97 -14.75,-48.34 q -2.58,-8.25 -6.48,-18.58 -14.03,-37.14 -28.05,-75.59 -3.75,-10.3 -6.6,-19.52 -5.15,-16.64 -9.78,-32.48 c -4.96,-16.95 -8.01,-35.46 -8.1,-52.91 q -0.02,-2.71 0.71,-0.1 9.47,34.09 24.55,65.57 c 6.56,13.69 13.54,27.25 19.02,40.89 q 15.49,38.57 24.83,67.42 2.41,7.47 3.31,17.16 c 1.12,12.19 3.56,24.02 4.59,35.95 z","M 338.67,872.66 c 0.73,-20.39 1.92,-38.3 4.91,-57.16 1.83,-11.53 2.14,-23.33 6.03,-34.79 q 10.93,-32.22 23.86,-64.19 c 5.7,-14.09 12.7,-27.77 19.13,-41.2 q 15.32,-32.04 24.53,-65.61 0.65,-2.39 0.64,0.08 c -0.12,28.68 -7.98,55.21 -17.34,83.63 -1.78,5.41 -3.2,10.88 -5.19,16.32 -10.25,27.99 -20.2,55.76 -30.81,83.12 q -2.8,7.2 -4.91,13.95 -5.59,17.81 -11.19,35.6 c -3.34,10.63 -5.96,21.88 -9.13,32.74 q -0.27,0.92 -0.4,-0.03 -0.18,-1.22 -0.13,-2.46 z","M 394.37,647.3 c -4.46,9.4 -9.38,19.33 -12.44,29.17 q -1.3,4.17 -2.83,7.95 c -2.26,5.61 -4.97,10.94 -5.74,16.89 -0.99,7.53 -1.06,14.75 -5.53,21.2 a 0.5,0.5 0 0 1 -0.83,0.01 q -4.34,-6.22 -7.72,-11.72 -7.96,-12.97 -11.16,-28.21 a 1.61,1.61 0 0 1 0.35,-1.37 q 2.44,-2.82 5.14,-5.21 c 9.88,-8.72 18.7,-16.83 27.48,-27.39 q 13.43,-16.14 25.97,-33.56 0.32,-0.44 0.43,-0.49 0.87,-0.39 0.54,0.51 -5.81,15.68 -13.66,32.22 z","M 352.83,748.3 c -2.02,3.67 -2.95,6.58 -2.78,11.03 q 0.26,6.53 0.21,13.72 c -0.01,1.58 -1.13,2.86 -2.75,2.9 q -0.58,0.01 -0.9,-0.48 C 342.49,769 341.27,763.08 340.41,755 q -1.04,-9.79 -2.26,-19.97 c -1.6,-13.31 -2.43,-25.65 -2.79,-38.57 q -0.03,-1.03 0.53,-1.68 a 1.21,1.2 52.6 0 1 2.01,0.27 q 6.87,14.67 13.39,28.8 2.2,4.77 3.93,9.5 1.07,2.92 0.68,5.46 -0.83,5.42 -3.07,9.49 z"],"quadriceps":["M 250.69,888.3 q -16.76,-40.15 -28.04,-78.67 -9.66,-32.96 -14.75,-66.84 c -6.22,-41.38 -6.25,-81.5 4.58,-120.54 q 0.12,-0.43 0.43,-0.11 0.42,0.42 0.59,0.99 22.71,76.86 50.06,155.88 0.82,2.37 1.12,4.78 4.02,31.91 4.89,65.81 c 0.88,34.39 -0.14,66.83 -3.55,99.57 -0.42,4.08 -1.48,7.64 -3.4,11.1 a 1.74,1.74 0 0 1 -1.36,0.9 c -3.47,0.33 -9.58,0.21 -9.46,-4.63 q 0.8,-32.72 -0.01,-63.12 -0.07,-2.67 -1.1,-5.12 z","M 237.75,955.7 c -18.56,-47.89 -33.57,-96.23 -39.84,-146.62 -3.58,-28.72 -3.69,-58.65 1.76,-86.95 q 0.62,-3.18 0.81,0.06 0.5,8.53 1.83,17.04 3.42,21.88 10.35,47.5 6.6,24.41 13.5,49.26 2.72,9.81 5.92,19.09 4.05,11.74 7.55,25.02 1.76,6.7 2.16,12.33 2,28.5 1.14,55.08 c -0.12,3.52 -0.98,6.35 -3.98,8.55 a 0.79,0.79 0 0 1 -1.2,-0.36 z","M 301.11,919.16 c -0.02,16.26 -1.13,34.39 -10.87,47.81 -1.99,2.73 -6.98,1.8 -10.02,1.14 -1.09,-0.24 -1.35,-1.1 -1.62,-2.04 -3.49,-11.83 -3.03,-24.65 -1.79,-37.03 q 1.41,-14.09 3.35,-26.37 1.6,-10.13 1.54,-18.61 -0.09,-12.6 -1.48,-24.36 c -1.65,-13.85 -3.88,-27.85 -2.4,-41.77 a 0.32,0.32 0 0 1 0.4,-0.28 q 0.4,0.1 0.57,0.48 c 14.17,32.12 22.37,65.88 22.32,101.03 z","M 390.96,886.41 q -1.98,4.65 -2.04,9.09 -0.45,33.06 0.22,61.74 c 0.09,3.94 -6.78,4.21 -9.43,3.95 a 1.8,1.79 -10.8 0 1 -1.44,-0.97 c -1.51,-2.91 -2.67,-5.71 -3.07,-9.04 q -1.93,-16.27 -2.84,-32.46 c -2.55,-44.99 -1.64,-90.5 3.77,-134.26 q 0.37,-2.95 1.26,-5.54 26.45,-76.29 50.24,-156.54 a 0.39,0.38 21.6 0 1 0.55,-0.23 q 0.31,0.16 0.41,0.51 c 10.18,37.82 10.57,76.54 5.14,115.55 q -4.46,32.04 -13.33,63.85 -12.28,44.03 -29.44,84.35 z","M 441.32,723.15 q 5.4,27.88 3.91,59.43 c -1.5,31.66 -7.16,62.78 -15.56,93.66 q -10.93,40.18 -26.56,79.46 a 0.8,0.8 0 0 1 -1.23,0.34 c -4.09,-3.18 -3.84,-7.55 -3.96,-12.09 q -0.59,-24.2 1.07,-50.23 0.42,-6.4 2.05,-12.77 3.38,-13.22 8.06,-26.98 3.21,-9.44 5.93,-19.09 c 7.96,-28.15 15.34,-53.97 20.99,-81.11 q 3.3,-15.87 4.53,-32.62 0.01,-0.1 0.11,-0.14 l 0.25,-0.09 q 0.11,-0.04 0.12,0.07 0.06,0.98 0.29,2.16 z","M 350.02,966.12 c -9.24,-14.15 -10.21,-31.4 -10.24,-48.19 -0.07,-33.99 8.51,-69.02 22.57,-100.06 a 0.51,0.49 -76.6 0 1 0.45,-0.29 q 0.28,0 0.31,0.28 c 0.83,7.48 0.62,15.88 -0.25,23.21 -1.72,14.59 -3.74,28.99 -3.61,44.11 q 0.06,8 1.44,16.9 1.82,11.87 3.26,24.93 c 1.49,13.54 2.18,28.24 -1.97,40.04 a 1.57,1.55 2.7 0 1 -1.11,1 q -3.84,0.9 -7.13,0.61 -2.19,-0.19 -3.72,-2.54 z"],"knees":["M 258.39,1012.52 q -5.64,-13.48 -7.66,-29.52 -0.05,-0.4 0.28,-0.64 10.7,-7.7 22.82,-4.11 c 5.29,1.57 4.59,5.57 4.3,9.79 -0.9,12.75 -3.27,25.99 -10.59,36.26 a 1.05,1.05 0 0 1 -1.64,0.09 q -4.73,-5.21 -7.51,-11.87 z","M 258.71,1030.63 c 3.61,6.97 7.98,15.68 6.95,23.65 a 0.48,0.48 0 0 1 -0.72,0.35 l -18.34,-11.02 q -0.38,-0.23 -0.55,-0.64 -1,-2.44 -1.32,-4.76 -3.61,-26.35 -4.29,-51.87 -0.06,-2.2 0.39,-0.04 c 3.24,15.52 10.35,29.77 17.88,44.33 z","M 288.4,985.22 q 1.73,22.58 1.26,41.7 -0.04,1.47 -0.76,3.07 -4.6,10.16 -10.25,24.15 c -2.27,5.6 -3.1,11.54 -5.89,17 q -0.2,0.39 -0.5,0.07 -0.38,-0.42 -0.45,-1 c -1.47,-12.75 1.68,-26.74 4.89,-38.94 4.36,-16.65 9.53,-33.85 10.59,-51.47 q 0.01,-0.22 0.19,-0.33 0.05,-0.02 0.1,-0.02 0.14,0.02 0.16,0.16 0.44,2.76 0.66,5.61 z","M 367.17,978.19 c 7.47,-2.33 16.25,-0.86 22.63,4.13 q 0.45,0.35 0.38,0.92 -1.87,15.08 -7.33,28.55 -2.94,7.24 -7.89,12.74 a 0.87,0.87 0 0 1 -1.34,-0.05 c -8.34,-10.84 -10.82,-27.73 -10.91,-41.25 -0.01,-2.65 2.18,-4.32 4.46,-5.04 z","M 369.06,1070.47 q -0.22,1.65 -1.01,0.18 c -2.79,-5.17 -3.42,-10.89 -5.57,-16.11 q -5.2,-12.65 -10.53,-24.91 c -0.38,-0.88 -0.8,-1.93 -0.81,-2.92 q -0.26,-23.13 1.85,-46.89 a 0.27,0.26 -77 0 1 0.36,-0.23 l 0.25,0.11 q 0.13,0.05 0.14,0.19 0.36,9.87 2.31,18.26 4.17,17.95 9.24,37.46 c 3.02,11.63 5.3,23.46 3.77,34.86 z","M 378.49,1038.47 q 5.25,-11 11.25,-23 6.8,-13.59 10.56,-29.93 0.03,-0.15 0.18,-0.19 0.05,-0.01 0.1,0 0.1,0.01 0.09,0.11 -0.84,19 -2.62,37.31 -1.13,11.63 -2.64,19.1 -0.25,1.26 -1.49,1.99 -10.01,5.93 -17.84,10.76 a 0.53,0.53 0 0 1 -0.8,-0.37 c -0.79,-5.16 1.07,-11.29 3.21,-15.78 z"],"tibialis":["M 260.21,1135.29 c 4.48,29.68 7.59,58.82 9.36,87.72 0.53,8.66 1.47,17.39 2.79,25.97 q 1.84,11.96 7.34,33.23 0.5,1.94 1.04,7.01 0.48,4.54 -2.34,7.74 a 0.6,0.6 0 0 1 -0.99,-0.15 q -1.61,-3.47 -2.33,-7.07 -5.47,-27.17 -8.25,-45.03 -4.18,-26.84 -7.6,-47.71 -0.97,-5.95 -2.27,-12 -7.08,-33.02 -14.69,-65.86 -1.12,-4.84 -2.44,-9.69 -1.98,-7.22 -2.28,-9.76 -2.41,-20.6 1.44,-43.08 0.25,-1.46 0.73,-0.06 7.12,20.57 13.32,44.54 4.83,18.73 7.17,34.2 z","M 367.02,1257.45 q 3.27,-15.94 4.47,-35.75 2.4,-39.61 7.94,-77.98 2.44,-16.87 5.47,-30.17 6.3,-27.69 16.13,-56.67 0.69,-2.03 1.04,0.08 2.43,14.55 2.2,31.01 -0.15,10.91 -2.78,20.08 -1.29,4.53 -2.34,9.1 -7.34,31.94 -13.88,61.81 -2.12,9.66 -3.56,18.43 c -4.93,29.99 -9.41,60.77 -15.76,91.85 q -0.74,3.61 -2.23,7.21 a 0.86,0.86 0 0 1 -1.48,0.19 q -2.35,-3.11 -2.05,-7.14 0.36,-4.83 1.56,-9.43 3.01,-11.58 5.27,-22.62 z"],"calves":["M 273.89,1099.95 c 3.37,-15.16 7.39,-30.47 12.61,-44.88 q 0.67,-1.85 1.28,0.01 4.41,13.38 7.29,29.13 3.29,18.03 6.8,44.66 2.68,20.36 2.76,35.74 0.04,6.36 -1.26,13.77 -3.67,20.9 -7.39,37.94 -6.52,29.95 -12.99,57.95 -0.31,1.31 -0.67,0.01 -3.32,-11.98 -5.27,-24.29 -5.82,-36.85 -4.93,-74.51 c 0.46,-19.33 0.09,-35.61 0.04,-57.98 q -0.03,-9.65 1.73,-17.55 z","M 272.32,1289.43 q 0.14,1.3 -0.7,0.3 -1.96,-2.32 -3.31,-4.94 -4.85,-9.47 -8.79,-20.24 -9.58,-26.21 -15.83,-53.09 -1,-4.3 -2.77,-8.19 c -8,-17.6 -12.77,-36.6 -13.83,-55.89 q -1.45,-26.23 4.89,-54.26 0.41,-1.85 1,-0.05 1.2,3.7 2.35,7.92 c 6.05,22.14 11.41,47.6 16.75,71.19 q 2.42,10.71 3.46,19.48 2.54,21.38 5.09,39.58 c 2.14,15.29 4.57,31.52 9.27,46.7 q 1.76,5.67 2.42,11.49 z","M 351.12,1061.47 q 0.86,-3.24 2.27,-6.95 a 0.37,0.37 0 0 1 0.67,-0.04 q 0.6,1.15 1.07,2.55 4.5,13.38 8.77,29.36 3.17,11.88 4.35,21.44 0.65,5.26 0.58,16.16 c -0.12,17.19 -0.49,33.53 -0.01,50.26 q 0.96,33.46 -3.97,69.04 -2.3,16.62 -6.18,31.23 -0.05,0.18 -0.19,0.29 a 0.25,0.25 0 0 1 -0.39,-0.14 c -7.63,-32.4 -14.66,-63.57 -20.38,-95.86 q -1.46,-8.28 -1.39,-15.2 0.13,-12.7 1.63,-25.36 c 2.86,-24.12 6.38,-51.37 13.17,-76.78 z","M 400.56,1202.06 c -1.03,2.29 -2.11,4.68 -2.7,7.11 -5.58,23.36 -12.43,46.15 -21.19,67.15 q -3.13,7.49 -7.08,13.12 -0.19,0.27 -0.47,0.44 -0.68,0.4 -0.57,-0.38 0.79,-5.61 2.43,-11.29 5.47,-18.91 8.27,-39.41 3.36,-24.7 6.32,-48.64 1.04,-8.33 3.58,-19.59 5.82,-25.8 11.4,-49.84 3.49,-14.99 7.21,-27.24 0.18,-0.58 0.63,-1.01 0.33,-0.31 0.43,0.13 c 8.56,36.96 7.32,74.95 -8.26,109.45 z"],"ankles":["M 279.42,1326.07 q -2.66,-6.02 -11.2,-17.08 -1.56,-2.02 -1.72,-4 c -0.22,-2.73 1.78,-5.75 4.12,-7.13 q 0.49,-0.29 0.97,0.02 8.39,5.34 14.89,11.86 1.95,1.97 2.11,4.51 0.86,13.41 -1.46,27.53 a 0.31,0.31 0 0 1 -0.45,0.22 q -0.14,-0.08 -0.27,-0.19 -0.12,-0.1 -0.18,-0.24 -3.39,-7.76 -6.81,-15.5 z","M 284.58,1349.02 q 5.05,11.98 7,21.38 3.39,16.32 -0.69,32.76 a 0.43,0.43 0 0 1 -0.76,0.16 c -10.12,-13.11 -21.17,-25.72 -34.11,-35.39 a 1.63,1.62 16.1 0 1 -0.65,-1.17 q -0.75,-8.89 2.46,-14.38 0.98,-1.67 1.18,-3.55 1.38,-12.95 2.87,-26.6 a 0.7,0.7 0 0 1 0.91,-0.59 c 11.21,3.6 17.28,16.67 21.79,27.38 z","M 353.36,1339.65 q -1.77,-13.46 -1.06,-24.75 0.06,-0.96 0.22,-1.92 c 0.7,-4.2 12.74,-12.42 16.33,-14.86 q 1.07,-0.72 2.08,0.08 c 3.24,2.56 4.92,6.49 2.19,10.15 -5.11,6.84 -9.99,13.59 -13.3,21.5 q -2.27,5.41 -5.06,11.31 -0.76,1.62 -1.15,-0.12 -0.15,-0.68 -0.25,-1.39 z","M 379.01,1322.5 c 1.17,9.01 1.97,18.19 3.1,26.72 0.13,0.98 0.26,1.92 0.78,2.79 q 3.21,5.33 2.84,13.44 -0.1,2.05 -1.78,3.29 c -12.07,8.93 -22.71,21.31 -32.45,33.67 q -0.48,0.61 -1.15,0.95 a 0.24,0.24 0 0 1 -0.34,-0.16 q -5.23,-21.38 1.99,-42.64 2.82,-8.31 6.7,-16.77 c 4.2,-9.17 9.45,-18.49 19,-22.07 a 0.98,0.97 -14.1 0 1 1.31,0.78 z"],"feet":["M 268.26,1427.94 c -13.55,0.97 -28,-0.1 -40.94,-5.21 a 0.76,0.76 0 0 1 -0.35,-1.14 c 8.83,-12.76 18.97,-25.24 27.65,-37.39 q 0.72,-1 1.89,-0.61 11.12,3.76 18.81,14.19 c 1.66,2.25 0.2,9.63 -0.4,12.23 q -2.17,9.25 -5.67,17.23 a 1.19,1.17 -79.8 0 1 -0.99,0.7 z","M 279.15,1427.43 c -2.43,-4.43 -2.1,-22.42 2.82,-25.6 q 0.48,-0.31 0.93,0.02 c 4.5,3.21 11.09,10.03 10.33,15.88 q -0.43,3.39 -0.54,7.02 a 3.3,3.3 0 0 1 -3.32,3.21 l -9.41,-0.05 q -0.55,0 -0.81,-0.48 z","M 382.04,1384.42 q 1.51,-0.66 3.03,-0.87 0.57,-0.07 0.91,0.39 l 27.73,37.1 a 1.23,1.22 61 0 1 -0.53,1.87 c -12.37,4.87 -27.24,6.04 -40.29,5.05 a 1.5,1.49 81 0 1 -1.27,-0.93 c -3.14,-7.8 -6.11,-16.5 -6.82,-25.44 q -0.2,-2.47 0.96,-4.02 6.68,-8.97 16.28,-13.15 z","M 347.64,1416.45 c -0.34,-4.76 6.41,-11.73 10.12,-14.46 a 1.41,1.4 -37.2 0 1 1.94,0.26 c 2.44,3.09 2.86,7.16 3.19,10.93 q 0.6,6.77 -0.53,13.21 a 1.96,1.95 5.2 0 1 -1.95,1.62 l -9.39,-0.1 a 2.74,2.74 0 0 1 -2.7,-2.53 q -0.35,-4.33 -0.68,-8.93 z"]},"back":{"hair":["M 1096.04,0 h 7.79 c 22.49,2.45 53.18,10.99 60.21,36.27 q 0.46,1.66 2,2.05 c 64.38,16.44 60.01,99.49 44.24,147.61 q -2.62,7.99 -6.55,14.81 -0.51,0.89 -1.22,1.68 -0.97,1.07 -1.52,1.32 -3.63,1.58 -6.55,2.8 -14.77,6.1 -29.14,11 -0.74,0.26 -0.59,1.19 -0.52,-0.76 -1.47,-0.46 -4.4,1.42 -10.86,2.97 -3.97,1 -6.62,1.12 -5.28,0.24 -12.66,-0.36 -5.76,-0.52 -11.15,-2.21 -0.54,-0.17 -0.85,-0.03 -0.45,0.2 -0.58,0.77 0.26,-1.02 -0.52,-1.24 -9.76,-2.78 -19.21,-7.04 a 0.46,0.46 0 0 0 -0.65,0.43 l 0.39,12.23 q 0.49,15.83 -0.42,30.63 l -0.91,9.16 a 2.42,2.42 0 0 1 -1.99,2.15 q -11.5,2.06 -22.86,2.63 -5.84,0.05 -10.69,-1.12 -4.96,-1.19 -7,-1.31 -3.7,-0.23 -7.48,-0.12 -17.27,0.5 -33.97,1.33 -7.72,0.38 -15.15,-0.74 a 2.13,2.12 0.2 0 1 -1.78,-1.78 c -1,-6.77 1.75,-15.8 4.22,-22.15 q 5.88,-15.15 12.89,-32.55 c 7.85,-19.49 14.27,-41.02 13.35,-61.3 q -1.03,-22.68 -5.37,-57.36 -0.67,-5.33 -0.4,-10.31 0.98,-18.63 7.84,-37.04 5.87,-15.78 15.35,-24.54 c 7.92,-7.32 19.98,-14.55 31.09,-17.67 q 9.1,-2.55 18.79,-2.82 z m 40.66,79.56 c 15.08,3.29 29.45,-7.8 30.48,-23.26 q 0.15,-2.22 -0.63,-0.14 -6.61,17.62 -24.72,17.97 c -5.78,0.12 -11.81,-2.36 -16.39,-6.42 -1.53,-1.35 -3.74,-3.16 -5.84,-2.98 a 0.62,0.62 0 0 0 -0.5,0.9 q 5.86,11.37 17.6,13.93 z","M 1167.18,56.3 c -1.03,15.46 -15.4,26.55 -30.48,23.26 Q 1124.96,77 1119.1,65.63 a 0.62,0.62 0 0 1 0.5,-0.9 c 2.1,-0.18 4.31,1.63 5.84,2.98 4.58,4.06 10.61,6.54 16.39,6.42 q 18.11,-0.35 24.72,-17.97 0.78,-2.08 0.63,0.14 z"],"neck":["M 1133.1,222 -1.89,61.8 q -0.02,0.66 -0.62,0.4 -22.28,-9.35 -45.91,-9.91 a 0.77,0.77 0 0 1 -0.6,-1.22 q 1.38,-1.89 3.31,-2.48 c 6.78,-2.07 12.31,-3.9 18.36,-8.33 q 5.08,-3.71 7.66,-8.78 c 5.15,-10.11 6.3,-21.91 7.11,-32.95 q 0.13,-0.57 0.58,-0.77 0.31,-0.14 0.85,0.03 5.39,1.69 11.15,2.21 z","M 1164.71,218.73 c 1.42,12.25 1.86,24.62 7.81,35.59 3.46,6.38 11.4,11.41 17.38,13.62 q 4.31,1.6 8.68,2.96 1.85,0.58 2.75,2.35 a 0.65,0.65 0 0 1 -0.56,0.94 q -23.87,0.79 -45.98,10.03 a 0.34,0.34 0 0 1 -0.47,-0.3 l -1.94,-62.68 q 6.46,-1.55 10.86,-2.97 0.95,-0.3 1.47,0.46 z"],"trapezius":["M 1135.46,406.92 c -18.92,-8.6 -32.13,-23.67 -41.02,-42.55 q -5.92,-12.58 -12.01,-29.57 c -8.17,-22.8 -18.79,-46.58 -45.58,-51.11 q -2.73,-0.46 -0.13,-1.41 4.88,-1.81 11.29,-2.14 31.93,-1.68 62.2,8.18 c 8.7,2.84 17.39,6.76 24.41,12.87 q 2.26,1.96 2.37,4.56 c 1.34,31.32 1.02,63.51 1.17,95.68 q 0.01,2.48 -0.9,4.77 -0.52,1.31 -1.8,0.72 z","M 1207.43,323.66 c -6.47,16.09 -12.05,33.31 -20.26,48.12 q -13.47,24.27 -37.07,35.13 a 1.54,1.53 -20.3 0 1 -2.12,-0.97 q -0.48,-1.66 -0.5,-3.37 -0.3,-43.8 0.71,-95.35 c 0.05,-2.69 0.7,-4.25 2.8,-6.09 q 6.04,-5.32 13.64,-8.64 c 21.78,-9.51 47.77,-13.62 71.23,-12.54 4.41,0.2 9.17,0.92 13.49,2.46 q 1.76,0.62 -0.05,1.06 c -2.97,0.73 -5.89,1.25 -8.8,2.31 -17.14,6.22 -26.43,21.36 -33.07,37.88 z"],"deltoids":["M 1015.26,291.32 c 13.82,-8.28 31.54,1.05 42.43,10.31 a 0.79,0.78 46.2 0 1 -0.02,1.22 c -24.49,19.25 -48.03,41.91 -64.52,68.41 q -0.81,1.29 -0.91,-0.22 c -0.55,-8.02 -1.66,-16.16 -1.47,-24.04 q 0.34,-14.94 4.17,-28.72 4.91,-17.72 20.32,-26.96 z","M 1269.98,290.8 c 13.79,8.38 20.48,19.55 22.26,34.89 1.11,9.5 1.29,18.77 0.46,28.54 q -0.73,8.56 -1.29,17.08 -0.08,1.29 -0.8,0.22 c -16.86,-25.21 -37.38,-47.58 -59.38,-68.88 q -0.46,-0.45 0,-0.88 c 9.46,-8.91 18.65,-15.05 32.34,-13.43 2.34,0.28 4.42,1.25 6.41,2.46 z"],"upperBack":["M 1136.59,472.49 c -4.61,16.03 -15.02,30.53 -26.92,42.6 q -13.41,13.6 -29.37,25.62 -0.65,0.5 -0.73,-0.32 -5.92,-63.46 -22.92,-123.09 -4.96,-17.4 -9.99,-34.68 a 0.7,0.7 0 0 1 0.74,-0.89 q 8.92,0.83 16.32,1.52 10.81,1.01 19.97,-4.41 0.54,-0.32 1,0.1 1.78,1.59 3.48,3.41 22.52,24.07 30.7,32.06 7.98,7.79 16.19,14.02 0.79,0.6 1.05,1.52 6.33,22.2 0.48,42.54 z","M 1238.86,382.59 c -6.36,21.96 -12.97,44.37 -18.07,65.96 q -10.8,45.75 -14.79,91.85 a 0.46,0.46 0 0 1 -0.74,0.33 Q 1184.28,525.02 1169.34,508 c -8.23,-9.38 -15.46,-20.54 -19.54,-32.61 q -6.78,-20.06 -1.17,-43.01 c 0.49,-1.99 0.83,-3.24 2.53,-4.57 17.75,-13.89 33.26,-32.01 49.33,-48.67 q 0.64,-0.67 1.43,-0.19 9.01,5.38 20.51,4.24 7.75,-0.76 15.78,-1.39 a 0.62,0.62 0 0 1 0.65,0.79 z"],"rhomboids":["M1138.1 373.1L1137.9 342.2L1137.4 318.1L1080.2 328.6L1087.4 348L1093.5 362.2L1098.6 372.3L1104.2 381Z","M1148 318.1L1147.4 373.1L1181.3 381L1186.9 372.3L1192.2 361.7L1197.4 349.6L1205.5 328.6Z"],"lowerBack":["M 1068.62,544.21 c 7.96,11.18 10.18,25.23 10.98,38.79 a 1.16,1.16 0 0 1 -0.56,1.06 l -18.13,10.62 a 0.4,0.39 -13.5 0 1 -0.6,-0.36 q 1.04,-16.62 2.69,-32.09 0.79,-7.45 2.8,-14.26 0.6,-2.03 1.74,-3.74 a 0.66,0.65 -45.9 0 1 1.08,-0.02 z","M 1133.23,596.5 c -0.34,6.54 -1.25,13 -1.82,19.57 q -0.07,0.85 -0.6,0.17 -3.62,-4.73 -6.59,-7.98 -9.72,-10.63 -18.63,-20.4 -12.89,-14.11 -23.33,-31.15 a 0.57,0.57 0 0 1 0.2,-0.78 q 7.87,-4.59 14.81,-11.15 c 12.33,-11.64 23.63,-24.56 35.33,-36.99 q 0.87,-0.93 0.88,0.34 c 0.19,29.32 1.27,58.9 -0.25,88.37 z","M 1199.62,562.36 c -10.91,16.62 -23.7,30.13 -37.46,44.84 q -3.74,4 -7.34,8.9 -0.68,0.93 -0.82,-0.22 c -1.8,-15.45 -2.6,-31.26 -2.53,-47.01 q 0.14,-30.97 0.58,-60.87 0.02,-1.16 0.8,-0.31 13.63,14.85 25.73,27.71 7.18,7.63 15.56,14.48 4.25,3.47 8.77,5.95 0.51,0.27 0.23,0.78 -1.61,2.85 -3.52,5.75 z","M 1205.91,583.12 c 0.67,-13.86 3,-27.66 11.11,-39.08 a 0.57,0.57 0 0 1 0.96,0.06 q 1.93,3.49 2.75,7.64 c 2.78,13.99 3.44,28.55 4.52,42.69 a 0.37,0.36 13.1 0 1 -0.55,0.34 l -18.27,-10.7 a 1.05,1.04 16.6 0 1 -0.52,-0.95 z"],"triceps":["M 976.72,479.34 q -0.46,-17.73 -0.59,-32.11 c -0.22,-24.28 5.62,-47.43 19.17,-67.7 q 0.38,-0.55 0.24,0.1 -9.84,49.08 -17.78,99.12 a 0.83,0.82 -4 0 1 -0.58,0.66 l -0.25,0.08 q -0.21,0.06 -0.21,-0.15 z","M 990.45,481.03 c -2.39,-3.13 -3.03,-8.64 -3.15,-12.61 q -0.81,-26.18 5.96,-50.71 a 0.37,0.37 0 0 1 0.61,-0.17 q 0.16,0.15 0.19,0.37 c 2.18,16.06 4.1,31.34 3.14,46.56 -0.33,5.2 -1.01,12.19 -4.17,16.53 a 1.61,1.61 0 0 1 -2.58,0.03 z","M 1028.38,422.24 c 0.27,25.48 -7.52,49.09 -23.37,68.41 q -1.16,1.41 -0.93,-0.4 0.44,-3.53 0.41,-7.83 -0.06,-10.3 -1.3,-22.14 -2.2,-20.98 -3.39,-41.99 -0.61,-10.99 0.7,-23.78 c 1.65,-15.98 6.95,-30.6 19.9,-39.63 a 0.42,0.41 73.8 0 1 0.65,0.36 q -0.32,8.22 1.06,16.55 c 2.81,16.86 6.09,33.63 6.27,50.45 z","M 1281,491.32 c -15.93,-19.27 -23.98,-42.53 -23.89,-67.9 q 0.04,-11.8 1.5,-21.9 2.13,-14.76 4.78,-30.03 1.39,-8.03 1.05,-16.2 a 0.44,0.44 0 0 1 0.7,-0.38 c 15.59,11.17 19.78,29.71 20.57,48.58 q 0.43,10.46 -0.35,21.17 -1.37,18.51 -3.48,40.31 -1.27,13.12 -0.53,26.21 0.03,0.6 -0.35,0.14 z","M 1290.47,379.83 c 11.24,17.52 17.33,36.08 18.47,57.41 0.75,14.09 0.07,27.95 0.05,41.97 a 0.28,0.28 0 0 1 -0.41,0.24 l -0.26,-0.14 q -0.65,-0.34 -0.76,-1.06 -7.8,-49.99 -17.59,-98.21 -0.29,-1.43 0.5,-0.21 z","M 1291.39,418.15 q 0.03,-0.24 0.18,-0.46 0.48,-0.71 0.7,0.12 6.89,26.33 5.89,50.76 c -0.16,3.99 -0.69,8.84 -2.91,12.24 a 1.69,1.68 -51.8 0 1 -2.56,0.31 c -2.76,-2.6 -3.77,-9.43 -4.13,-13.42 -1.44,-16.19 0.36,-32.39 2.83,-49.55 z"],"forearm":["M 930.6,575.85 q 12.51,-34.52 28.14,-65.44 0.43,-0.86 0.47,0.1 c 0.49,12.97 -1.54,25.43 -3.91,38.74 -2.51,14.09 -8.58,26.84 -13.42,40.42 q -1.72,4.85 -6.72,12.65 -6.65,10.39 -13.96,19.24 -0.97,1.19 -0.94,-0.34 0.15,-6.74 1.54,-13.78 3.2,-16.15 8.8,-31.59 z","M 941.59,538.06 c -10.38,28.73 -19.89,57.37 -27.03,86.93 q -2.23,9.27 -3.43,18.85 -0.08,0.65 -0.71,0.78 -2.96,0.63 -5.97,-0.23 c -6.64,-1.91 -6.12,-8.24 -4.18,-13.33 q 16.12,-42.22 33.46,-84.93 5.37,-13.2 12.03,-26.13 2.79,-5.42 6.2,-10.06 1.45,-1.95 0.5,0.29 -5.71,13.57 -10.87,27.83 z","M 975.21,499.01 c 1.84,-4.34 5.3,-10.94 10.55,-11.69 3.15,-0.45 8.93,-1.45 11.43,0.58 q 3.23,2.63 1.33,6.34 -3.58,7.04 -8.39,12.41 -7.93,8.86 -17.96,19.2 a 0.33,0.32 -34.8 0 1 -0.53,-0.09 q -1.15,-2.76 -1.06,-6.04 0.31,-10.51 4.63,-20.71 z","M 999.09,525.32 q -17.79,35.36 -41.48,67.79 c -7.52,10.28 -15.96,20.81 -26,28.74 a 0.38,0.38 0 0 1 -0.53,-0.06 q -0.12,-0.14 -0.06,-0.3 11.88,-29.53 23.3,-54.73 6.13,-13.51 13.08,-26.59 3.39,-6.37 7.64,-12.19 c 1.13,-1.54 2.35,-1.94 4.17,-1.93 q 4.02,0.02 8.07,0.22 c 3.63,0.18 9.88,-4.42 13.11,-6.8 0.2,-0.14 0.64,-0.23 0.88,-0.2 a 0.39,0.39 0 0 1 0.32,0.53 q -1.15,2.82 -2.5,5.52 z","M 1287.36,495.1 q -0.66,-1.22 -1,-2.61 c -0.91,-3.66 3.19,-5.9 6.21,-5.78 q 4.25,0.16 7.87,0.8 c 8.25,1.44 13.07,19.85 14.04,26.73 q 0.78,5.48 -0.26,11.26 a 0.58,0.57 -61.9 0 1 -0.98,0.3 q -8.13,-8.44 -16.02,-16.95 -5.71,-6.16 -9.86,-13.75 z","M 1374.91,644.61 a 0.63,0.62 -88.1 0 1 -0.49,-0.53 q -1.21,-9.55 -3.48,-19.07 c -6.9,-28.95 -17.02,-59.28 -27.49,-88.05 q -4.81,-13.23 -10.53,-26.85 -0.87,-2.08 0.48,-0.27 2.91,3.89 5.26,8.23 6.11,11.31 10.9,22.92 19.34,46.92 36.37,92.34 1.24,3.29 0.04,6.8 c -1.45,4.24 -7.09,5.35 -11.06,4.48 z","M 1326.82,510.35 c 12.89,26.28 24.62,53.47 32.98,80.83 q 4.59,15.02 5.5,30.08 0.09,1.54 -0.91,0.36 -9.8,-11.56 -17.28,-24.72 -2.96,-5.2 -5.36,-12.12 -2.76,-7.98 -6.01,-15.96 c -4.29,-10.55 -5.9,-21.36 -7.75,-32.59 q -2.18,-13.15 -1.71,-25.77 0.04,-1.12 0.54,-0.11 z","M 1354.08,620.73 q 0.96,2.42 -1,0.71 -9.65,-8.41 -17.52,-18.38 -24.99,-31.7 -45.4,-70.39 -3.25,-6.15 -6.17,-12.68 -0.09,-0.2 -0.03,-0.4 a 0.51,0.51 0 0 1 0.78,-0.29 c 4.23,2.88 9.9,7.54 15.41,6.95 q 3.07,-0.34 6.17,-0.24 c 1.9,0.05 3.28,0.57 4.42,2.2 7.5,10.74 13.36,23.21 18.79,35.06 q 12.91,28.18 24.55,57.46 z"],"hands":["M 848.29,759.36 c -5.06,1.08 -7.66,-1.55 -5.81,-6.56 6.01,-16.27 11.17,-30.37 18.43,-44.8 q 1.12,-2.22 3.5,-1.5 l 0.45,0.14 a 3.88,3.87 16.7 0 1 2.59,4.81 c -4.79,16.16 -11.42,31.25 -18.02,46.96 a 1.59,1.57 -84.6 0 1 -1.14,0.95 z","M 847.54,670.63 q 10.11,-7.1 20.43,-14.71 c 1.82,-1.34 3.93,-1.24 5.61,0.25 q 1.28,1.14 0.18,2.44 -14.63,17.34 -36.12,26.57 -2.85,1.23 -6.59,0.27 -0.66,-0.17 -1.22,-0.56 -2.78,-1.93 0.1,-3.71 c 5.74,-3.54 11.89,-6.53 17.61,-10.55 z","M 857.95,703.24 c -4.4,13.3 -9.63,25.8 -16.79,37.33 q -1.72,2.78 -4.23,4.64 a 1.09,1.09 0 0 1 -1.74,-0.77 c -1.48,-16.04 8.92,-33.06 16.88,-46.35 q 0.57,-0.95 1.66,-0.8 c 2.95,0.39 5.23,2.88 4.22,5.95 z","M 875.79,722.55 c -4.07,11.58 -8.41,22.82 -15.01,33 q -1.32,2.03 -3.6,3.48 -0.5,0.32 -0.97,-0.05 c -2.61,-2.08 -1.53,-6.69 -0.45,-9.36 q 5.27,-13.01 10.45,-25.43 1.81,-4.36 4.29,-8.03 0.62,-0.92 1.74,-0.88 c 4.7,0.15 4.82,3.66 3.55,7.27 z","M 887.56,727.64 q -3.99,9.72 -9.96,19.13 -0.8,1.27 -2.1,1.97 a 0.74,0.74 0 0 1 -1.08,-0.76 q 1.91,-12.47 8.14,-23.5 2.02,-3.58 4.82,-5.9 a 0.94,0.94 0 0 1 1.47,0.36 c 1.15,2.7 -0.24,6.15 -1.29,8.7 z","M 902.05,654.63 c 1.72,20.81 -0.74,43.2 -13.83,59.63 -1.5,1.87 -3.8,1.35 -5.78,0.55 q -7.06,-2.82 -10.22,-9.71 c -0.79,-1.73 -2.34,-3.24 -3.92,-4.25 q -5.99,-3.87 -10.35,-8.32 a 2.19,2.18 28.4 0 1 -0.59,-1.97 q 1.69,-8.62 7.46,-16.29 7.41,-9.85 18.48,-23.61 0.37,-0.46 0.96,-0.45 8.59,0.19 16.75,3.06 a 1.58,1.57 -82.5 0 1 1.04,1.36 z","M 1390.47,703.5 c -7.03,-15.23 -8.6,-32.38 -6.98,-49.44 a 0.84,0.84 0 0 1 0.55,-0.71 q 8.24,-2.9 16.94,-3.13 a 1.84,1.82 -19.6 0 1 1.51,0.71 q 7.66,9.84 15.58,19.76 7.56,9.46 9.92,18.85 c 0.44,1.72 -0.22,3.09 -1.51,4.23 q -4.73,4.18 -10.02,7.65 -2.13,1.39 -3.17,3.63 c -2.09,4.49 -5.23,7.65 -10.01,9.66 q -2.32,0.97 -4.45,0.69 -0.49,-0.06 -0.83,-0.42 -4.41,-4.73 -7.53,-11.48 z","M 1434.6,668.37 q 8.2,5.82 20.84,12.66 3.02,1.63 0.3,3.74 -0.49,0.38 -1.08,0.56 -3.68,1.1 -6.72,-0.17 -21.61,-9.06 -36.36,-26.82 -0.91,-1.09 0.16,-2.02 c 2.56,-2.23 4.17,-1.59 6.69,0.28 q 8.2,6.11 16.17,11.77 z","M 1440.18,733.51 c -5.02,-9.9 -10.12,-20.82 -13.01,-31.69 q -0.15,-0.58 0.1,-1.13 1.52,-3.24 4.84,-3.48 0.7,-0.05 1.06,0.55 c 8.34,13.8 18.29,30.28 17.05,46.84 a 0.97,0.97 0 0 1 -1.49,0.74 c -3.56,-2.27 -6.64,-8.06 -8.55,-11.83 z","M 1431.61,747.81 q -8.05,-18.9 -13.4,-35.42 -0.77,-2.34 0.9,-4.93 0.26,-0.41 0.73,-0.64 3.35,-1.63 4.67,0.91 3.49,6.76 6.36,13.86 6.23,15.39 12.52,32.24 c 1.04,2.81 0.09,4.43 -2.57,5.47 q -3.87,1.52 -5.42,-2.33 -1.86,-4.6 -3.79,-9.16 z","M 1409.03,720.33 c -1.15,-3.85 4.48,-7.35 6.5,-3.44 1.02,1.99 2.25,3.91 3.11,5.95 q 5.89,13.98 11.33,27.6 1.3,3.26 0.57,7.15 a 1.77,1.77 0 0 1 -2.76,1.12 c -3.33,-2.36 -6.22,-7.81 -8.08,-11.63 -4.21,-8.63 -7.92,-17.55 -10.67,-26.75 z","M 1407.92,746.8 c -4.19,-6.47 -7.65,-13.37 -10.63,-20.61 q -1.4,-3.4 -0.83,-7.06 a 0.95,0.94 -66.3 0 1 1.52,-0.6 q 2.67,2.14 4.37,5.02 6.61,11.16 8.73,24.5 a 0.6,0.6 0 0 1 -0.81,0.65 q -1.51,-0.6 -2.35,-1.9 z"],"gluteal":["M 1031.34,630.56 q 8.17,-17.96 22.15,-29.52 0.57,-0.47 1.35,-0.78 c 0.63,-0.25 1.17,-0.54 1.88,-0.51 14.27,0.79 25.72,4.26 35.26,15.37 q 6.45,7.51 12.43,13.9 a 0.36,0.36 0 0 1 -0.21,0.6 c -34.24,5.14 -63.6,20.7 -83.41,49.12 q -0.77,1.1 -0.69,-0.24 1.54,-26.6 11.24,-47.94 z","M 1092.12,758.09 q -11.32,3.91 -20.99,7.71 c -12.16,4.78 -21.24,13.16 -25.53,25.74 a 0.48,0.48 0 0 1 -0.84,0.14 c -13.74,-17.9 -25.37,-38.01 -28.48,-60.45 -4.82,-34.78 16.06,-62.1 45.13,-78.08 q 32.39,-17.79 71.37,-20.24 0.77,-0.05 0.81,0.72 0.34,5.98 0.51,12.21 0.73,27.38 0.54,74.62 0,0.87 -0.42,1.68 -13.36,26.01 -42.1,35.95 z","M 1186.16,755.14 q -22.34,-9.6 -34.37,-32.01 -0.93,-1.73 -0.95,-3.5 -0.44,-43.95 0.95,-86.05 a 0.58,0.58 0 0 1 0.61,-0.56 q 41.96,2.14 76.79,23.16 c 13.08,7.9 25.57,19.74 32.87,33.53 18.71,35.37 0.74,73.49 -21.32,101.95 a 0.51,0.51 0 0 1 -0.88,-0.15 c -5.18,-15.06 -16.82,-23.21 -31.43,-28.03 q -12.38,-4.09 -22.27,-8.34 z","M 1264.84,679.01 c -19.47,-28.27 -49.51,-44.62 -83.31,-49.28 a 0.48,0.48 0 0 1 -0.29,-0.79 q 6.39,-7.08 11.97,-13.48 c 9.56,-10.98 20.54,-14.92 34.76,-15.73 q 2.05,-0.11 3.56,1.07 c 22.85,17.9 32.44,49.93 33.85,78.03 q 0.06,1.04 -0.54,0.18 z"],"adductors":["M 1105.13,759.58 c 5.8,-4.09 12.22,-8.33 18.77,-11.59 a 0.54,0.54 0 0 1 0.76,0.34 q 6.8,24.08 7.01,48.83 0.14,15.6 -0.3,31.35 -0.18,6.57 -1.58,13.23 -3.79,18 -7.08,34.37 -5.52,27.39 -7.25,53.63 -0.01,0.2 -0.21,0.19 h -0.01 q -0.21,0 -0.21,-0.21 0.06,-11.05 -1.13,-21.98 -3.47,-31.95 -10.99,-67.96 c -3.17,-15.15 -5.96,-29.39 -7.82,-44.53 q -1.41,-11.59 -0.64,-23.56 c 0.24,-3.74 7.85,-10.11 10.68,-12.11 z","M 1103.25,880.79 q 0.13,-2.03 0.52,-4.03 0.12,-0.59 0.23,0 6.54,34.5 9.4,71 1.16,14.9 0.83,30.46 c -0.35,16.42 -2.06,31.59 -8.52,45.43 q -0.65,1.38 -0.93,-0.12 -1.07,-5.81 -1.74,-12.63 c -4.13,-42 -2.61,-84.7 0.21,-130.11 z","M 1170.31,929.79 q -0.01,0.14 -0.14,0.14 h -0.01 q -0.15,0 -0.16,-0.15 c -1.65,-27.23 -6.7,-52.91 -12.71,-80.29 q -1.04,-4.77 -2.03,-9.9 -0.97,-5.04 -1.11,-10.04 -0.71,-25 0,-41.29 0.88,-20.1 6.78,-40.2 a 0.39,0.39 0 0 1 0.58,-0.23 c 9.66,5.72 22.47,11.93 28.7,21.66 q 0.95,1.49 1.03,4.47 c 0.23,9.46 -0.26,19.48 -1.78,29.2 q -3.09,19.91 -8.67,45.97 -4.33,20.25 -8.36,50.7 c -1.32,9.97 -1.83,19.78 -2.12,29.96 z","M 1182.66,888.38 c 3.02,46.17 3.96,90.2 -1.62,134.34 q -0.38,3.02 -1.62,0.24 -5.13,-11.5 -6.75,-24.8 -2.53,-20.86 -1.07,-43.33 2.55,-39.34 9.73,-77.33 0.48,-2.54 0.64,0.04 0.36,5.65 0.69,10.84 z"],"hamstring":["M 1016.46,760.39 c 9.44,12.24 16.13,25.63 21.41,40.04 q 0.82,2.23 0.84,4.98 0.07,11.27 -2.12,20.02 -2.75,11.03 -6.86,22.65 -0.52,1.46 -0.85,-0.05 -5.74,-25.82 -9.75,-52.59 -2.71,-18.1 -3.52,-34.73 -0.08,-1.52 0.85,-0.32 z","M 1070.52,797.23 c -11.68,27.55 -15.75,60.62 -14.27,91.04 q 0.39,8.01 2.12,18.82 4.13,25.86 6.66,45.29 c 2.03,15.61 1.65,31.91 -2.1,47.3 q -0.46,1.88 -0.63,-0.05 -1.63,-18.54 -5.82,-37.03 c -4.65,-20.57 -11.75,-43.58 -16.62,-63.37 -3.73,-15.15 -6.46,-30.31 -6.22,-45.8 q 0.49,-31.41 19.87,-55.13 c 2.88,-3.51 6.39,-5.98 9.88,-8.87 q 4.53,-3.74 10.3,-2.59 a 1.34,1.33 19.9 0 1 0.91,1.94 q -2.27,4.18 -4.08,8.45 z","M 1098.11,859.08 c 1.35,28.16 0.76,58.11 -0.79,88.31 q -0.29,5.81 -1.41,12.09 -3.22,18.13 0.59,38.78 0.25,1.36 -0.6,0.27 c -20.01,-25.52 -30.66,-57.27 -32.98,-89.64 -3.21,-44.66 6.94,-89.32 20.75,-132.24 q 0.55,-1.71 1.12,0 4.19,12.73 6.41,24.46 5.53,29.26 6.91,57.97 z","M 1219.83,958.26 c 1.6,-16.19 4.52,-34.12 7.27,-51.04 q 1.66,-10.21 2.07,-18.85 1.54,-32.19 -5.11,-62.59 -4.38,-20.02 -13.16,-37.05 -0.74,-1.43 0.83,-1.82 c 6.74,-1.68 10.82,2.92 15.54,6.72 q 2.63,2.11 4.95,4.97 22.46,27.73 19.33,65.93 c -1.28,15.6 -4.64,30.53 -8.67,45.57 q -4.34,16.19 -8.51,30.94 -8.04,28.43 -11.39,59.02 -0.17,1.55 -0.51,0.03 -4.7,-20.89 -2.64,-41.83 z","M 1222.33,911.18 c -2.52,31.89 -13.09,61.94 -32.73,87.27 q -0.72,0.94 -0.52,-0.23 2.27,-12.72 1.81,-27.27 -0.2,-6.27 -1.31,-11.44 -1.06,-4.94 -1.37,-9.68 -2.26,-34.73 -1.33,-78.46 0.82,-38.23 7.92,-73.18 2.24,-11.02 6.07,-21.84 0.39,-1.11 0.77,0.01 c 14.36,43.28 24.25,89.74 20.69,134.82 z","M 1252.18,789.16 c 4.38,-10.33 10.1,-20.26 17.11,-29.06 q 0.66,-0.83 0.64,0.22 -0.05,2.47 -0.26,5.11 c -2.25,28.2 -7.17,55.27 -13.07,82.76 q -0.28,1.33 -0.76,0.06 -5.28,-13.81 -7.95,-27.73 c -1.27,-6.66 -2.21,-15.94 0.54,-22.48 q 1.91,-4.56 3.75,-8.88 z"],"calves":["M 1058.29,1085.75 c 6.08,-36.26 10.83,-64.98 13.27,-97.84 a 0.64,0.63 12.9 0 1 0.87,-0.54 c 4.34,1.73 9.74,5.17 11.34,9.62 q 0.48,1.32 0.33,3.57 c -2.18,33.02 -2.33,66.33 -2.21,98.92 q 0.04,10.61 0.89,19.22 2.51,25.4 2.71,52.08 c 0.09,12.28 -0.31,25.64 -3.38,37.51 q -0.44,1.7 -1.2,3.04 a 1.46,1.45 41.5 0 1 -2.43,0.15 c -11.56,-15.48 -22.57,-30.58 -27.04,-49.16 -1.94,-8.07 -1.22,-16.06 -0.32,-24.08 q 3.25,-29.05 7.17,-52.49 z","M 1065.65,1205.72 q 0.18,-0.49 0.65,-0.28 0.57,0.24 0.99,0.74 c 7.66,9.08 12.41,22.27 15.49,34.01 q 4.92,18.73 7.73,38.56 5.06,35.68 6.15,72.03 0.14,4.75 0.25,9.3 0.09,3.29 -3.11,2.5 -0.29,-0.07 -0.59,-0.13 -3.27,-0.66 -3.31,-4 c -0.46,-33.25 -5.05,-66.1 -13.91,-98.69 q -4.29,-15.78 -9.2,-30.12 c -2.89,-8.45 -4,-15.96 -1.14,-23.92 z","M 1092.9,1005.49 c 6.21,14.55 10.89,30.05 15.1,45.29 q 10.42,37.71 15.89,75.17 c 2.5,17.09 4.13,34.52 2.57,51.57 -0.69,7.55 -2.44,16.36 -7.25,22.3 a 0.72,0.71 31.3 0 1 -0.84,0.2 q -15.39,-6.63 -22.38,-22.48 -0.37,-0.84 -0.47,-1.77 -7.84,-73.34 -8.63,-146.47 -0.15,-13.23 1,-26.05 0.18,-2.03 0.73,-4.04 a 0.43,0.43 0 0 1 0.78,-0.13 q 2.25,3.5 3.5,6.41 z","M 1105.01,1296.15 c 0.31,-3.79 0.81,-7.66 0.78,-11.4 -0.13,-20.92 -0.61,-43.07 2,-63.38 0.83,-6.47 2.37,-14.24 6.84,-19.26 a 0.48,0.48 0 0 1 0.83,0.26 q 2,15.5 0.91,32.56 -1.2,18.89 -3.49,38.19 -1.15,9.79 -1.38,19.57 -0.5,21.82 -2.41,44.66 -0.8,9.48 -2.65,18.21 a 0.62,0.61 -66.5 0 1 -0.96,0.38 q -3.82,-2.71 -4.14,-6.62 -0.59,-7.27 0.39,-17.04 1.85,-18.46 3.28,-36.13 z","M 1195.51,999.93 q 1.11,-2 1.54,0.25 0.83,4.43 1.06,9.07 0.79,16.08 0.37,32.68 -1.79,71.08 -8.41,133.14 c -0.54,5.01 -5.87,11.84 -9.39,15.76 -3.68,4.08 -8.74,6.74 -13.52,9.33 q -0.36,0.2 -0.63,-0.11 c -4.85,-5.52 -6.81,-14.78 -7.44,-21.9 -1.74,-19.58 0.51,-41.13 3.73,-60.68 q 6.55,-39.63 18.22,-79.21 3.88,-13.17 8.74,-26 2.41,-6.37 5.73,-12.33 z","M 1170.98,1202.22 q 2.43,2.66 3.69,6.26 c 3.13,8.93 4.01,18.89 4.48,28.32 q 1.05,21.18 0.46,40.21 -0.29,9.19 0.45,16.73 1.84,18.75 3.59,37.51 0.69,7.41 0.77,15.52 0.06,5.8 -4.1,9 a 0.89,0.89 0 0 1 -1.42,-0.54 q -2.23,-11.91 -3.17,-25.71 -1.35,-19.53 -1.75,-36.62 -0.22,-9.41 -1.32,-18.68 -2.7,-22.94 -3.76,-42.69 -0.78,-14.6 1.04,-28.98 a 0.6,0.6 0 0 1 1.04,-0.33 z","M 1209.54,1220.37 q 3.46,-8.19 9.41,-14.95 a 0.5,0.49 56.8 0 1 0.84,0.18 q 1.93,5.91 1.63,12.13 -0.21,4.19 -2.73,11.81 -8.63,26.04 -13.9,49.21 -8.52,37.45 -9.27,80.13 -0.04,2.72 -2.68,3.4 -0.94,0.24 -1.91,0.38 -2.41,0.33 -2.37,-2.1 0.65,-35.68 4.84,-70.31 c 2.84,-23.48 7.15,-48.63 16.14,-69.88 z","M 1234.23,1161.52 c -4.22,19.14 -15.78,34.23 -26.98,49.71 a 1.72,1.72 0 0 1 -3.01,-0.42 q -1.93,-5.29 -2.63,-11.11 -1.51,-12.55 -1.6,-22.65 -0.27,-28.3 2.59,-57.1 0.96,-9.64 1.02,-20.11 0.27,-52.48 -2.22,-101.41 c -0.04,-0.76 0.35,-1.89 0.76,-2.54 q 3.68,-5.85 11.13,-8.53 0.53,-0.19 0.58,0.37 2.93,37.23 10.25,79.5 c 4.59,26.56 9.04,54.75 11.1,81.03 q 0.51,6.47 -0.99,13.26 z"],"feet":["M 1079.17,1372.43 q 2.14,-5.13 4.33,-10.15 0.64,-1.46 0.77,0.13 0.19,2.38 0.04,5.19 -0.48,8.92 -1.17,17.73 c -0.55,6.98 -0.51,14.62 0.97,21.25 q 0.81,3.6 3.17,7.55 2.42,4.04 6.98,2.53 2.09,-0.69 2.69,-2.94 c 5.05,-18.81 8.53,-32.57 10.08,-47.69 q 0.17,-1.71 0.65,-0.06 c 4.88,16.71 7.77,34.11 9.71,51.52 a 2.81,2.81 0 0 1 -0.55,2.02 c -5.24,7.01 -14.76,8.75 -23.07,8.71 -8.31,-0.03 -16.89,-1.11 -24.67,-3.97 -3.23,-1.19 -5.27,-5.26 -4.38,-8.25 4.42,-14.8 8.65,-29.67 14.45,-43.57 z","M 1206.8,1373.7 q 8.72,22.21 13.81,42.33 0.94,3.7 -1.71,6.53 -1.44,1.54 -5.28,2.63 -14.71,4.18 -29.01,2.49 -9.46,-1.11 -14.96,-6.81 -1.68,-1.75 -1.46,-3.83 2.75,-26.35 9.42,-50.74 0.68,-2.5 0.89,0.09 0.63,7.86 2.59,16.87 2.96,13.59 7.32,30.23 0.79,2.98 3.86,3.47 3.52,0.56 5.1,-1.58 c 2.84,-3.86 4.42,-8.89 4.83,-13.69 0.96,-11.15 -0.35,-22.32 -1,-33 q -0.2,-3.25 0.17,-6.56 0.09,-0.79 0.42,-0.07 2.74,5.83 5.01,11.64 z"],"ankles":["M1079.7 1373.3L1075.5 1384.4L1070.9 1398.2L1082.2 1398.2L1082.1 1389.2L1083.3 1370.6L1083.6 1364.1Z","M1114 1398.2L1111.1 1382.7L1107.6 1368.5L1105.4 1382.4L1101.8 1398.2Z","M1177.9 1368.4L1174.3 1383.5L1171.5 1398.3L1183.7 1398.3L1179.7 1380.5Z","M1214.7 1398.3L1208.3 1379.9L1205 1371.2L1202 1364.4L1202 1368.3L1203.2 1388L1203.2 1398.3Z"]},"vb":{"front":[0,0,650,1450],"back":[823,0,650,1450]}};
+function muscleSVG(view,p,s){
+  const d=MM[view], vb=MM.vb[view];
+  const fill=k=>p.includes(k)?'var(--accent)':s.includes(k)?'color-mix(in srgb,var(--accent) 38%,var(--body))':'var(--body)';
+  const out=Object.keys(d).map(k=>`<path d="${d[k].join(' ')}" style="fill:${fill(k)}"><title>${SLUG_CN[k]||''}</title></path>`).join('');
+  return `<svg viewBox="${vb.join(' ')}" role="img" aria-label="${view==='front'?'正面':'背面'}发力肌群">${out}</svg>`;
+}
+
+/* ---------------- small views ---------------- */
+function ratioRow(name,c,tg){
+  const lo=1.0,hi=1.6,pc=v=>Math.max(0,Math.min(100,(v-lo)/(hi-lo)*100)); const d=tg-c, ok=Math.abs(d)<0.04;
+  return `<div class="ratio"><span class="small muted">${name}</span>
+    <div class="track"><span class="fill" style="width:${pc(c)}%"></span><span class="dot" style="left:${pc(c)}%"></span><span class="tgt" style="left:${pc(tg)}%"></span></div>
+    <span class="mono small">${f2(c)}<span class="muted"> / ${f2(tg)}</span></span></div>`;
+}
+function weekStrip(plan,sel,act){
+  const today=todayISO();
+  return `<div class="week" role="group" aria-label="本周">${weekDates().map(d=>{ const k=SCHED[d.getDay()], di=iso(d);
+    let cls=k?'train':'rest', inner=k?DAYNAME[k][0]:'·';
+    if(k){ const p=dayProgress(di,k,plan); if(p.total&&p.n===p.total){ cls='done'; inner=I.check; } }
+    return `<button type="button" class="${cls} ${di===sel?'sel':''}" ${act?`data-act="${act}" data-arg="${di}"`:'disabled'} aria-label="周${DOW[d.getDay()]}${k?' '+DAYNAME[k]:' 休息'}"><span>${DOW[d.getDay()]}</span><span class="dd">${inner}</span>${di===today?'<span class="today-mark"></span>':'<span style="height:4px"></span>'}</button>`; }).join('')}</div>`;
+}
+function nextTrainDay(){ const ds=weekDates(), t=todayISO(); const td=ds.find(d=>iso(d)===t&&SCHED[d.getDay()]); if(td) return iso(td); const n=ds.find(d=>iso(d)>t&&SCHED[d.getDay()]); return n?iso(n):t; }
+const imgSrc=(e,n)=>`ex/${EX[e].img}_${n}.jpg`;
+// 本地没有图片时（如 GitHub Pages）退回 jsDelivr 上的 free-exercise-db 原图
+document.addEventListener('error',ev=>{ const im=ev.target; if(!(im instanceof HTMLImageElement)||im.dataset.fb) return; const m=(im.getAttribute('src')||'').match(/^ex\/(.+)_(\d)\.jpg$/); if(!m) return; im.dataset.fb='1'; im.src=`https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises/${m[1]}/${m[2]}.jpg`; },true);
 
 /* ---------------- pages ---------------- */
 const P={
-  home:{root:1,title:'我的身材',render(){
-    const r=analyze();
-    if(!r) return `<div class="card" style="text-align:center;display:flex;flex-direction:column;gap:12px"><p class="big">先测一下你现在的身材</p><p class="muted small">上传一张正面全身照，30 秒得到你和目标的差距。</p><button class="btn" data-go="measure" type="button">开始测量</button></div>`;
-    const plan=weekPlan(r), dates=weekDates(), today=todayISO();
-    const strip=dates.map(d=>{const k=SCHED[d.getDay()], di=iso(d);
-      let cls='rest', inner='·';
-      if(k){ const p=dayProgress(di,k,plan); cls=(p.total&&p.n===p.total)?'done':'train'; inner=cls==='done'?I.check:plan[k].name[0]; }
-      return `<div class="d"><span>${DOW[d.getDay()]}</span><span class="dot ${cls} ${di===today?'today':''}">${inner}</span></div>`;}).join('');
-    const tk=SCHED[new Date().getDay()];
-    let todayLine, btn;
-    if(tk){ const p=dayProgress(today,tk,plan); todayLine=`<p><b>今天 · ${plan[tk].name}</b><span class="muted small">　${plan[tk].items.length} 个动作 · 约 ${plan[tk].min} 分钟${p.n?` · 已完成 ${p.n}`:''}</span></p>`; btn=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn" type="button" data-go="day" data-arg="${today}">开始今天训练</button><button class="btn ghost" type="button" data-go="plan">本周计划</button></div>`; }
-    else { const nd=dates.find(d=>d>new Date()&&SCHED[d.getDay()]); todayLine=`<p><b>今天休息</b><span class="muted small">　${nd?'下次：周'+DOW[nd.getDay()]+' · '+plan[SCHED[nd.getDay()]].name:'下周一继续'}</span></p>`; btn=`<button class="btn" type="button" data-go="plan">查看训练计划</button>`; }
+  home:{root:1,title:()=>{const d=new Date(); return `${d.getMonth()+1}月${d.getDate()}日 · 周${DOW[d.getDay()]}`;},aside:()=>isSample()?'样例数据':'',render(){
+    const r=analyze(), m=r.m, c=m.cm, t=r.t;
+    const plan=weekPlan(r), today=todayISO(), tk=SCHED[new Date().getDay()];
+    const gS=r.gS, gH=r.gH;
+    const met=(k,label,val,sub,cls='')=>`<button class="metric" type="button" data-act="focus" data-arg="${k}" aria-pressed="${T.hFocus===k}"><span class="k">${label}${m.est.includes(k)?'<span class="est">估</span>':''}</span><span class="num">${val}<small>cm</small></span><span class="d ${cls}">${sub}</span></button>`;
+    let todayBlock;
+    if(tk){ const p=dayProgress(today,tk,plan); todayBlock=`<div class="between"><div><p class="eyebrow">今天</p><p class="h2">${plan[tk].name} · ${plan[tk].items.length} 个动作</p><p class="small muted">约 ${plan[tk].min} 分钟${p.n?` · 已完成 ${p.n}/${p.total}`:''}</p></div></div>
+      <button class="btn block" type="button" data-tab="train">开始今天的训练</button>`; }
+    else { const nd=weekDates().find(d=>d>new Date()&&SCHED[d.getDay()]); todayBlock=`<div><p class="eyebrow">今天休息</p><p class="h2">${nd?'下次 · 周'+DOW[nd.getDay()]+' '+plan[SCHED[nd.getDay()]].name:'下周一继续'}</p></div><button class="btn ghost block" type="button" data-tab="train">看训练计划</button>`; }
     return `
-    <section class="card">
-      <p class="label">现在 vs 目标：${r.t.name}</p>
-      <p class="big" style="margin-top:4px">${r.head}</p>
-      <div class="bodyfig">${figure(r.m,r.t)}</div>
-      <div class="legend"><span><i></i>现在</span><span><i class="dash"></i>目标</span></div>
-      <div style="margin-top:10px">${gapRow('肩腰比',r.m.swr,r.t.swr)}${gapRow('臀腰比',r.m.hwr,r.t.hwr)}</div>
-    </section>
-    <section class="card" style="display:flex;flex-direction:column;gap:14px">
-      <div style="display:flex;justify-content:space-between;align-items:baseline"><p class="label">本周训练</p><span class="muted small">练 3 天 · 休 4 天</span></div>
-      <div class="week">${strip}</div>
-      ${todayLine}
-      ${btn}
-    </section>`;
+    <section class="hero" id="hero" aria-label="3D 身材模型，可拖动旋转"><div class="legend"><span><i></i>现在</span><span><i class="d"></i>${esc(t.name)}</span></div><span class="hint">拖动旋转</span></section>
+    <div class="stack" style="gap:4px;margin-top:-10px">
+      <p class="h1">${r.head}</p>
+      <div class="row2"><span class="small muted">目标：${esc(t.name)}</span><button class="link" type="button" data-go="target">更换${I.chev}</button></div>
+    </div>
+    <div class="stack" style="gap:12px">
+      <div class="metrics">
+        ${met('shoulder','肩宽',f1(c.shoulder),r.dS>=0.04?'+'+f1(gS):'达标',r.dS>=0.04?'warm':'acc')}
+        ${met('waist','腰围',Math.round(c.waist),'腰臀 '+f2(m.whr),'muted')}
+        ${met('hip','臀围',Math.round(c.hip),r.dH>=0.04?'臀宽 +'+f1(gH):'达标',r.dH>=0.04?'warm':'acc')}
+        ${met('thigh','腿围',Math.round(c.thigh),m.legR?'腿长 '+Math.round(m.legR*100)+'%':'','muted')}
+      </div>
+      ${ratioRow('肩腰比',m.swr,t.swr)}${ratioRow('臀腰比',m.hwr,t.hwr)}
+      ${isSample()?`<p class="small muted">这是演示用的样例身材。<button class="link" type="button" data-go="measure">测量我的${I.chev}</button></p>`:`<p class="xs muted">${m.est.length?'没有侧面照，围度按常见体型估算。':'围度由正面宽度和侧面厚度按椭圆估算。'}<button class="link xs" type="button" data-go="measure">更新测量${I.chev}</button></p>`}
+    </div>
+    <section class="today">${todayBlock}</section>`;
+  },after(){
+    const r=analyze(), el=$('hero'); if(!el) return;
+    const t=r.t;
+    mount3D(el,r.m,t,host=>{
+      const mk=(k,html,ok)=>{ const s=document.createElement('span'); s.className='tag'+(ok?' ok':''); s.innerHTML=html; host.appendChild(s); return s; };
+      return {
+        shoulder:mk('shoulder',r.dS>=0.04?`肩 <b>+${f1(r.gS)}</b>`:'肩 <b>✓</b>',r.dS<0.04),
+        waist:mk('waist',`腰 ${Math.round(r.m.cm.waist)}`,true),
+        hip:mk('hip',r.dH>=0.04?`臀 <b>+${f1(r.gH)}</b>`:'臀 <b>✓</b>',r.dH<0.04)
+      };
+    });
   }},
-  plan:{title:'本周训练计划',render(){
-    const r=analyze(); if(!r) return '';
-    const plan=weekPlan(r), today=todayISO();
+  plan:{title:'本周计划',render(){
+    const r=analyze(), plan=weekPlan(r), today=todayISO();
     const focusTxt=r.focus.length?r.focus.map(id=>MUSCLES[id].name).join('、'):'整体保持';
     const rows=weekDates().map(d=>{const k=SCHED[d.getDay()], di=iso(d), isT=di===today;
-      const dayCell=`<span class="day"><b>周${DOW[d.getDay()]}</b><span>${d.getMonth()+1}/${d.getDate()}</span></span>`;
-      if(!k) return `<button class="row" type="button" disabled>${dayCell}<span><span class="t muted" style="font-weight:400">休息${isT?'<span class="tag today">今天</span>':''}</span></span><span></span></button>`;
+      const day=`<span class="idx">周${DOW[d.getDay()]}</span>`;
+      if(!k) return `<button class="li" type="button" disabled>${day}<span class="muted">休息${isT?'<span class="badge">今天</span>':''}</span><span></span></button>`;
       const p=dayProgress(di,k,plan);
       const names=[...new Set(plan[k].items.filter(i=>!i.stretch).slice(0,3).map(i=>MUSCLES[i.mu].name))].join('、');
-      return `<button class="row" type="button" data-go="day" data-arg="${di}">${dayCell}<span style="min-width:0"><span class="t">${plan[k].name}${isT?'<span class="tag today">今天</span>':''}${p.total&&p.n===p.total?'<span class="tag">已完成</span>':''}</span><span class="s">${names} · ${plan[k].items.length} 个动作 · ${plan[k].min} 分钟</span>${p.n&&p.n<p.total?`<div class="prog" style="margin-top:6px"><i style="width:${p.n/p.total*100}%"></i></div>`:''}</span><span class="r">${I.chev}</span></button>`;}).join('');
-    return `<section class="card" style="display:flex;flex-direction:column;gap:6px">
-      <p class="label">本周重点</p><p class="big">${focusTxt}</p>
-      <p class="muted small">按「${r.t.name}」和你现在的差距安排，每周约 ${Object.values(r.sets).reduce((a,b)=>a+b,0)} 组。</p>
-    </section>
-    <div class="rows">${rows}</div>`;
+      return `<button class="li" type="button" data-act="openDay" data-arg="${di}">${day}<span style="min-width:0"><span class="t">${plan[k].name}${isT?'<span class="badge">今天</span>':''}${p.total&&p.n===p.total?'<span class="badge acc">已完成</span>':''}</span><span class="s">${names} · ${plan[k].min} 分钟</span></span><span class="r">${p.n?p.n+'/'+p.total:''}${I.chev}</span></button>`;}).join('');
+    return `<div class="stack" style="gap:6px"><p class="eyebrow">本周重点</p><p class="h1">${focusTxt}</p>
+      <p class="small muted">按「${esc(r.t.name)}」和你现在的差距安排，每周约 ${Object.values(r.sets).reduce((a,b)=>a+b,0)} 组，练三天。</p></div>
+      <div class="list">${rows}</div>`;
   }},
-  day:{title:a=>{const d=new Date(a+'T00:00'); return `周${DOW[d.getDay()]} · ${{1:'上肢',3:'下肢',5:'重点强化'}[d.getDay()]||'训练'}`;},render(a){
-    const r=analyze(); const d=new Date(a+'T00:00'); const k=SCHED[d.getDay()]; const plan=weekPlan(r); const day=plan[k];
-    const p=dayProgress(a,k,plan);
-    const rows=day.items.map((it,i)=>{const e=exOf(k,it), done=!!S.done[a+':'+e];
-      const sub=it.stretch?'拉伸 · 练完做':`${MUSCLES[it.mu].name} · ${LVNAME[it.lv]}`;
-      return `<button class="row" type="button" data-act="openEx" data-arg="${a}|${k}|${i}"><span class="num ${done?'done':''}">${done?I.check:i+1}</span><span style="min-width:0"><span class="t">${EX[e].name}</span><span class="s">${sub}</span></span><span class="r mono">${it.stretch?'':it.sets+' 组'}${I.chev}</span></button>`;}).join('');
-    return `<section class="card" style="display:flex;flex-direction:column;gap:10px">
-      <p class="label">${d.getMonth()+1}月${d.getDate()}日 · 约 ${day.min} 分钟</p>
-      <p class="big">完成 ${p.n} / ${p.total}</p>
-      <div class="prog"><i style="width:${p.total?p.n/p.total*100:0}%"></i></div>
-      <p class="muted small">点动作看做法，也可以从动作库换成同部位的其他动作。</p>
-      <button class="btn ghost" type="button" data-act="startCoach" data-arg="${k}">${I.coach}AI 教练跟练</button>
-    </section>
-    <div class="rows">${rows}</div>`;
+  train:{root:1,title:'训练',render(){
+    const r=analyze(), plan=weekPlan(r);
+    const sel=T.selDay||nextTrainDay(); const d=new Date(sel+'T00:00'); const tk=SCHED[d.getDay()];
+    const k=tk||T.coachKey||'A', day=plan[k], p=dayProgress(sel,k,plan), isToday=sel===todayISO();
+    const rows=day.items.map((it,i)=>{ const e=exOf(k,it), done=!!S.done[sel+':'+e], n=notesOf(e).length;
+      return `<button class="li" type="button" data-go="ex" data-arg="${e}|${sel}|${k}|${i}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span style="min-width:0"><span class="t">${EX[e].name}${n?'<span class="badge">备注</span>':''}</span><span class="s">${it.stretch?'拉伸 · 练完做':it.sets+' 组 × '+EX[e].reps}</span></span><span class="r">${done?`<span class="acc">${I.check}</span>`:''}${I.chev}</span></button>`; }).join('');
+    return `${weekStrip(plan,sel,'selDay')}
+    <div class="stack" style="gap:6px">
+      <p class="eyebrow">${isToday?'今天':'周'+DOW[d.getDay()]} · ${tk?day.name:'休息日'}</p>
+      ${tk?`<p class="h1">${day.items.length} 个动作 · 约 ${day.min} 分钟</p>`:`<p class="h1">今天休息</p><p class="small muted">想练的话，选一组：</p><div class="seg" role="group" aria-label="选择训练">${['A','B','C'].map(x=>`<button type="button" data-act="coachKey" data-arg="${x}" aria-pressed="${k===x}">${DAYNAME[x]}</button>`).join('')}</div>`}
+      ${p.n?`<p class="small muted">已完成 ${p.n} / ${p.total}</p>`:''}
+    </div>
+    <button class="btn block" type="button" data-act="startCoach" data-arg="${k}">${I.coach}跟练 · 摄像头自动计数</button>
+    <div class="list">${rows}</div>
+    <div class="between"><button class="link" type="button" data-go="library">动作库${I.chev}</button><button class="link" type="button" data-go="plan">本周计划${I.chev}</button></div>
+    <div class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">跟练语音</p>
+      ${sw('voice','语音提醒','动作纠正、你的备注、休息和下一个动作')}${sw('countVoice','语音报数','每完成一次报一个数')}</div>`;
   }},
-  coach:{root:1,title:'AI 教练',render(){
-    const r=analyze();
-    if(!r) return `<div class="card" style="text-align:center;display:flex;flex-direction:column;gap:12px"><p class="big">先测一下你的身材</p><p class="muted small">有了身材数据，教练才知道今天该练什么。</p><button class="btn" data-go="measure" type="button">开始测量</button></div>`;
-    const plan=weekPlan(r), tk=SCHED[new Date().getDay()], k=tk||T.coachKey||'A', q=buildQueue(k);
-    const sw=(key,t,d)=>`<button class="opt" type="button" role="switch" aria-checked="${S[key]}" data-act="toggle" data-arg="${key}"><span></span><span><b>${t}</b><br><span class="muted small">${d}</span></span><span class="switch"></span></button>`;
-    const tip=(n,t,d)=>`<div class="row" style="cursor:default"><span class="num">${n}</span><span><span class="t">${t}</span><span class="s">${d}</span></span><span></span></div>`;
-    return `<section class="card coach-hero">
-      <p class="label">${tk?'今天的训练':'今天休息 · 想练的话选一天'}</p>
-      <p class="big">${plan[k].name} · ${q.length} 个动作 · 约 ${plan[k].min} 分钟</p>
-      ${tk?'':`<div class="seg" role="group" aria-label="选择训练日">${[['A','上肢'],['B','下肢'],['C','重点强化']].map(([x,l])=>`<button type="button" data-act="coachKey" data-arg="${x}" aria-pressed="${k===x}">${l}</button>`).join('')}</div>`}
-      <p class="small muted">AI 看着你练：自动数次数、实时纠正动作、语音提醒休息和下一个动作。</p>
-      <button class="btn" type="button" data-act="startCoach" data-arg="${k}">开始跟练</button>
-    </section>
-    <p class="label" style="margin:4px 4px -8px">开始前</p>
-    <div class="rows">${tip(1,'手机竖放在地上或桌上','靠墙或用水杯挡住，别让它倒')}${tip(2,'退后 2–3 米','头到脚都在画面里，识别最准')}${tip(3,'光线充足','衣服颜色和背景别太接近')}</div>
-    <p class="label" style="margin:4px 4px -8px">语音</p>
-    <div class="rows">${sw('voice','语音提醒','动作纠正、休息、下一个动作')}${sw('countVoice','语音报数','每完成一次报一个数')}</div>
-    <p class="label" style="margin:4px 4px -8px">这次的动作</p>
-    <div class="rows">${q.map((x,i)=>`<div class="row" style="cursor:default"><span class="num">${i+1}</span><span style="min-width:0"><span class="t">${EX[x.e].name}<span class="mtag ${x.trk==='hold'?'t':''}">${MODE_LABEL(x.trk)}</span></span><span class="s">${x.sets} 组 · ${x.tg.hold?x.tg.secs+' 秒':x.tg.reps+' 次'}</span></span><span></span></div>`).join('')}</div>
-    <p class="muted small" style="text-align:center">画面只在你的手机上实时分析，不录制、不上传。</p>`;
+  library:{title:'动作库',render(){
+    return Object.keys(MUSCLES).map(mu=>`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">${MUSCLES[mu].name} · ${MUSCLES[mu].area}</p><div class="list">${MUSCLES[mu].ex.map(e=>`<button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span><span class="t">${EX[e].name}${notesOf(e).length?'<span class="badge">备注</span>':''}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div></section>`).join('')
+      +`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">拉伸</p><div class="list">${['chest_stretch','hipflex_stretch'].map(e=>`<button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span><span class="t">${EX[e].name}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div></section>`;
   }},
-  session:{title:'跟练',immersive:true,render(){ return SESSION_HTML(); },after:a=>startSession(a)},
+  ex:{title:a=>EX[a.split('|')[0]].name,render(a){
+    const [e,date,k,i]=a.split('|'); const ex=EX[e]; const ctx=!!date;
+    let it=null, done=false; if(ctx){ const plan=weekPlan(analyze()); it=plan[k].items[+i]; done=!!S.done[date+':'+e]; }
+    const alts=it&&it.mu?MUSCLES[it.mu].ex:[];
+    const ns=notesOf(e);
+    const hasBack=[...ex.p,...ex.s].some(x=>MM.back[x]), hasFront=[...ex.p,...ex.s].some(x=>MM.front[x]);
+    const views=[hasFront&&'front',hasBack&&'back'].filter(Boolean);
+    return `<div class="media" id="media"><img src="${imgSrc(e,0)}" alt="${ex.name}起始姿势" id="m0"><img src="${imgSrc(e,1)}" alt="${ex.name}发力姿势" id="m1" style="opacity:0">
+        <div class="ph"><button type="button" data-act="frame" data-arg="0" aria-pressed="true">起始</button><button type="button" data-act="frame" data-arg="1" aria-pressed="false">发力</button></div><span class="credit">free-exercise-db</span></div>
+      <div class="stack" style="gap:4px">
+        <p class="eyebrow">${ex.p.map(x=>SLUG_CN[x]).join(' · ')}</p>
+        <p class="h1">${ex.name}</p>
+        <p class="mono small muted">${it&&!it.stretch?it.sets+' 组 × ':''}${ex.reps}</p>
+      </div>
+      ${ns.length?`<section class="stack" aria-label="我的备注">${ns.map((n,j)=>`<div class="note"><p>${esc(n.txt)}<small>${n.t}</small></p><button type="button" data-act="delNote" data-arg="${e}|${j}" aria-label="删除这条备注">${I.trash}</button></div>`).join('')}</section>`:''}
+      <section class="stack" style="gap:10px"><div class="muscles" style="grid-template-columns:repeat(${views.length},1fr)">${views.map(v=>muscleSVG(v,ex.p,ex.s)).join('')}</div>
+        <div class="mkey"><span><i style="background:var(--accent)"></i>主要发力 ${ex.p.map(x=>SLUG_CN[x]).join('、')}</span>${ex.s.length?`<span><i style="background:color-mix(in srgb,var(--accent) 38%,var(--body))"></i>辅助 ${ex.s.map(x=>SLUG_CN[x]).join('、')}</span>`:''}</div></section>
+      <section class="stack" style="gap:12px"><p class="eyebrow">动作规范</p><ol class="how">${ex.steps.map(s=>`<li><span>${s}</span></li>`).join('')}</ol></section>
+      <section><div class="callout"><span class="k">要点</span><span>${ex.cue}</span></div><div class="callout avoid" style="border-bottom:1px solid var(--line)"><span class="k">避免</span><span>${ex.avoid}</span></div></section>
+      <section class="stack" style="gap:10px"><p class="eyebrow">记一条给下次的自己</p>
+        <div class="chips">${['容易耸肩','腰会塌','膝盖内扣','借力甩起来','重量可以加','重量太重'].map(c=>`<button class="chip2" type="button" data-act="noteChip" data-arg="${c}">${c}</button>`).join('')}</div>
+        <div class="composer"><textarea id="noteIn" rows="1" placeholder="比如：下拉时肩膀先往下沉再拉" aria-label="备注内容"></textarea><button class="btn" type="button" data-act="addNote" data-arg="${e}" style="min-height:40px;padding:0 16px">记下</button></div>
+        <p class="xs muted">跟练到这个动作时，教练会先读一遍你的备注。</p></section>
+      ${alts.length>1?`<section class="stack" style="gap:10px"><p class="eyebrow">同部位可替换</p><div class="chips">${alts.map(x=>`<button class="chip2" type="button" data-act="swapEx" data-arg="${k}|${it.mu}|${x}|${date}|${i}" aria-pressed="${x===e}">${EX[x].name}</button>`).join('')}</div></section>`:''}
+      ${ctx?`<button class="btn block ${done?'ghost':''}" type="button" data-act="toggleDone" data-arg="${date}|${e}">${done?I.check+' 已完成':'完成这个动作'}</button>`:''}`;
+  },after(){ startFrames(); },leave(){ stopFrames(); }},
   me:{root:1,title:'我的',render(){
-    const r=analyze(), t=target();
-    const src=S.mode==='photo'?'我的照片':SAMPLES[S.mode].label+'（演示数据）';
-    return `<section class="card" style="display:flex;flex-direction:column;gap:4px">
-      <p class="label">我的身材数据</p>
-      <p class="big">${r?`肩腰比 ${f2(r.m.swr)} · 臀腰比 ${f2(r.m.hwr)}`:'还没有测量'}</p>
-      <p class="muted small">来源：${src}</p>
-    </section>
-    <p class="label" style="margin:4px 4px -8px">设置</p>
-    <div class="rows">
-      <button class="row" type="button" data-go="target"><span></span><span><span class="t">目标身材</span><span class="s">${t.name} · 肩腰 ${f2(t.swr)} · 臀腰 ${f2(t.hwr)}</span></span><span class="r">${I.chev}</span></button>
-      <button class="row" type="button" data-go="measure"><span></span><span><span class="t">更新身材数据</span><span class="s">拍照测量、体态</span></span><span class="r">${I.chev}</span></button>
-      <button class="row" type="button" data-go="about"><span></span><span><span class="t">关于</span><span class="s">怎么算的、隐私</span></span><span class="r">${I.chev}</span></button>
-    </div>`;
+    const r=analyze(), t=target(), m=r.m;
+    return `<div class="stack" style="gap:6px">
+      <p class="eyebrow">${isSample()?'样例数据':'我的身材'}</p>
+      <p class="h1"><span class="num" style="font-size:36px">${f2(m.swr)}</span> <span class="small muted">肩腰比</span>　<span class="num" style="font-size:36px">${f2(m.hwr)}</span> <span class="small muted">臀腰比</span></p>
+      <p class="small muted">${m.h?`身高 ${m.h} cm · `:''}腰围 ${Math.round(m.cm.waist)} · 臀围 ${Math.round(m.cm.hip)} · 腿围 ${Math.round(m.cm.thigh)} cm</p>
+    </div>
+    <div class="list">
+      <button class="li" type="button" data-go="measure"><span></span><span><span class="t">测量身材</span><span class="s">身高 + 正面照 + 侧面照</span></span><span class="r">${I.chev}</span></button>
+      <button class="li" type="button" data-go="target"><span></span><span><span class="t">目标身材</span><span class="s">${esc(t.name)} · 肩腰 ${f2(t.swr)} · 臀腰 ${f2(t.hwr)}</span></span><span class="r">${I.chev}</span></button>
+      <button class="li" type="button" data-go="posture"><span></span><span><span class="t">体态</span><span class="s">${[S.rounded&&'圆肩',S.apt&&'骨盆前倾'].filter(Boolean).join('、')||'无'}</span></span><span class="r">${I.chev}</span></button>
+      <button class="li" type="button" data-go="about"><span></span><span><span class="t">关于</span><span class="s">怎么算的、隐私、素材来源</span></span><span class="r">${I.chev}</span></button>
+    </div>
+    <div class="stack" style="gap:6px"><p class="eyebrow">数据来源</p><div><div class="seg" role="group" aria-label="数据来源">${[['photo','我的测量'],['a','样例 A'],['b','样例 B']].map(([k,l])=>`<button type="button" data-act="mode" data-arg="${k}" aria-pressed="${S.mode===k}">${l}</button>`).join('')}</div></div></div>`;
   }},
   target:{title:'目标身材',render(){
-    const m=cur();
-    return `<p class="muted small" style="padding:0 4px">比较的是比例，不是体重。选好后，首页的虚线和训练计划会一起更新。</p>
-    <div class="rows" role="radiogroup" aria-label="目标身材">${TARGETS.map(t=>`<button class="opt" type="button" role="radio" aria-checked="${S.target===t.id}" data-act="setTarget" data-arg="${t.id}">${mini(t)}<span style="min-width:0"><b>${t.name}</b><br><span class="muted small">${t.note}</span><br><span class="mono small muted">肩腰 ${f2(t.swr)} · 臀腰 ${f2(t.hwr)}</span></span><span class="radio">${S.target===t.id?I.check:''}</span></button>`).join('')}</div>`;
+    return `<p class="small muted">比较的是比例，不是体重。选好后，首页的虚线和训练计划会一起更新。</p>
+    <div role="radiogroup" aria-label="目标身材" style="border-top:1px solid var(--line)">${TARGETS.map(t=>`<button class="opt" type="button" role="radio" aria-checked="${S.target===t.id}" data-act="setTarget" data-arg="${t.id}"><span class="acc">${mini(t)}</span><span style="min-width:0"><b style="font-weight:600">${t.name}</b><br><span class="muted small">${t.note}</span><br><span class="mono xs muted">肩腰 ${f2(t.swr)} · 臀腰 ${f2(t.hwr)}</span></span><span class="radio">${S.target===t.id?I.check:''}</span></button>`).join('')}</div>`;
   }},
-  measure:{title:'更新身材数据',render(){
-    const sw=(key,t,s)=>`<button class="opt" type="button" role="switch" aria-checked="${S[key]}" data-act="toggle" data-arg="${key}"><span></span><span><b>${t}</b><br><span class="muted small">${s}</span></span><span class="switch"></span></button>`;
-    return `<div class="seg" role="group" aria-label="数据来源">${[['photo','我的照片'],['a','样例 A'],['b','样例 B']].map(([k,l])=>`<button type="button" data-act="mode" data-arg="${k}" aria-pressed="${S.mode===k}">${l}</button>`).join('')}</div>
-    ${S.mode==='photo'?`
-      <label class="drop" id="drop" ${T.photoURL?'hidden':''}><input type="file" id="file" accept="image/*"><b>上传正面全身照</b><span class="muted small">穿贴身衣服，站直，全身入镜。照片不会离开你的设备。</span></label>
-      <div id="photoArea" ${T.photoURL?'':'hidden'}><div class="stage" id="stage"><img id="photo" alt="你的照片" ${T.photoURL?`src="${T.photoURL}"`:''}><svg id="lines" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div><p class="ptip">每个点对准身体轮廓的最外侧。腰取最细处，臀取最宽处。</p></div>
-      <p class="status" id="pstatus">${S.photoM&&!T.photoURL?`当前：肩腰比 ${f2(S.photoM.swr)} · 臀腰比 ${f2(S.photoM.hwr)}`:''}</p>
-      <div id="pbtns" style="display:flex;flex-direction:column;gap:10px" ${T.photoURL?'':'hidden'}>
-        <button class="btn ghost" type="button" data-act="auto">自动识别关键点</button>
-        <button class="btn" type="button" data-act="usePhoto">保存这组数据</button>
-      </div>`
-    :`<div class="card"><p class="muted small">${SAMPLES[S.mode].label}：肩腰比 ${f2(SAMPLES[S.mode].m.swr)} · 臀腰比 ${f2(SAMPLES[S.mode].m.hwr)}。用于演示，换成「我的照片」可以测你自己。</p></div>`}
-    <p class="label" style="margin:4px 4px -8px">体态（照片看不出来，手动勾选）</p>
-    <div class="rows">${sw('rounded','圆肩','肩膀前扣、含胸；自然站立时手背朝前')}${sw('apt','骨盆前倾','靠墙站，腰后能塞进一个拳头')}</div>`;
-  },after:setupPhoto},
+  posture:{title:'体态',render(){
+    return `<p class="small muted">照片看不出来，手动勾选。会加入纠正动作和拉伸。</p><div style="border-top:1px solid var(--line)">${sw('rounded','圆肩','肩膀前扣、含胸；自然站立时手背朝前')}${sw('apt','骨盆前倾','靠墙站，腰后能塞进一个拳头')}</div>`;
+  }},
   about:{title:'关于',render(){
-    return `<section class="card" style="display:flex;flex-direction:column;gap:12px;font-size:14px">
-      <p><b>怎么算的</b><br>肩腰比 = 肩宽 ÷ 腰宽，臀腰比 = 臀宽 ÷ 腰宽。和目标差得越多，对应肌群的训练量越多；圆肩、骨盆前倾会加入纠正动作。</p>
-      <p><b>隐私</b><br>照片只在你的浏览器里处理，数据只保存在这台设备上。</p>
-      <p><b>说明</b><br>2D 照片只能算相对比例，目标比例为演示设定值。训练建议不替代专业教练或医疗意见。</p>
+    return `<section class="stack" style="gap:16px;font-size:14.5px">
+      <div><p class="eyebrow">怎么算的</p><p>正面照量宽度，侧面照量厚度，用身高把像素换算成厘米。围度按椭圆估算：周长 ≈ π[3(a+b) − √((3a+b)(a+3b))]，a、b 是半宽和半厚。肩腰比、臀腰比用正面宽度计算。</p></div>
+      <div><p class="eyebrow">准确度</p><p>2D 照片估算的围度会有 ±3–5 cm 的误差，适合看比例和变化趋势，不能代替软尺。3D 模型按这些数生成，是示意。</p></div>
+      <div><p class="eyebrow">隐私</p><p>照片只保存在这台设备的浏览器里，识别也在本机完成，不上传。</p></div>
+      <div><p class="eyebrow">说明</p><p>目标比例是演示设定值。训练建议不替代专业教练或医疗意见。</p></div>
+      <p class="credits">动作照片：<a href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noopener">free-exercise-db</a>（Unlicense，公共领域）<br>肌群图：<a href="https://github.com/melihcolpan/MuscleMap" target="_blank" rel="noopener">MuscleMap</a> © Melih Colpan（MIT License）<br>姿态识别：MediaPipe Pose Landmarker（Apache 2.0）</p>
     </section>`;
-  }}
+  }},
+  session:{title:'跟练',immersive:true,render(){ return SESSION_HTML(); },after:a=>startSession(a)}
 };
+function sw(key,t,s){ return `<button class="opt" type="button" role="switch" aria-checked="${S[key]}" data-act="toggle" data-arg="${key}"><span></span><span><b style="font-weight:500">${t}</b><br><span class="muted small">${s}</span></span><span class="switch"></span></button>`; }
+
+/* exercise frames: 起始 / 发力 两张图交替 */
+let FR={t:0,i:0,auto:true};
+function showFrame(i){ FR.i=i; const a=$('m0'),b=$('m1'); if(!a||!b) return; b.style.opacity=i?1:0; document.querySelectorAll('#media .ph button').forEach((x,j)=>x.setAttribute('aria-pressed',String(j===i))); }
+function startFrames(){ stopFrames(); FR.auto=!matchMedia('(prefers-reduced-motion: reduce)').matches; if(FR.auto) FR.t=setInterval(()=>showFrame(FR.i?0:1),1500); }
+function stopFrames(){ clearInterval(FR.t); FR.t=0; }
 
 /* ---------------- router ---------------- */
 let stack=[{p:'home'}];
+let curPage=null;
 function render(dir){
   const c=stack[stack.length-1], pg=P[c.p];
+  if(curPage&&curPage!==pg&&curPage.leave) curPage.leave();
   if(c.p!=='session') stopSession();
-  if(c.p==='measure'||c.p==='coach'||c.p==='session') setTimeout(()=>mpLoad().catch(()=>{}),300); // 提前在后台下载模型
+  if(c.p!=='home') unmount3D();
+  if(c.p==='measure'||c.p==='session') setTimeout(()=>mpLoad().catch(()=>{}),300);
   $('app').classList.toggle('immersive',!!pg.immersive);
   const title=typeof pg.title==='function'?pg.title(c.a):pg.title;
   const root=stack.length===1;
   $('top').className='top'+(root?' root':'');
-  $('top').innerHTML=root?`<h1>${title}</h1>`:`<button class="iconbtn" type="button" data-back="1" aria-label="返回">${I.back}</button><h1>${title}</h1><span></span>`;
+  const aside=pg.aside?pg.aside():'';
+  $('top').innerHTML=root?`<h1>${title}</h1><span class="aside">${aside}</span>`:`<button class="iconbtn" type="button" data-back="1" aria-label="返回">${I.back}</button><h1>${title}</h1><span></span>`;
   const v=$('view'); v.className='view'+(dir?' '+dir:''); v.innerHTML=pg.render(c.a);
   if(dir) v.scrollTop=0;
-  $('tabs').innerHTML=[['home','首页',I.home],['coach','教练',I.coach],['me','我的',I.me]].map(([id,l,ic])=>`<button type="button" data-tab="${id}" ${stack[0].p===id?'aria-current="page"':''}>${ic}<span>${l}</span></button>`).join('');
+  $('tabs').innerHTML=[['home','身材',I.body],['train','训练',I.train],['me','我的',I.me]].map(([id,l,ic])=>`<button type="button" data-tab="${id}" ${stack[0].p===id?'aria-current="page"':''}>${ic}<span>${l}</span></button>`).join('');
+  curPage=pg;
   if(pg.after) pg.after(c.a);
 }
 const go=(p,a)=>{stack.push({p,a});render('fwd');};
 const back=()=>{if(stack.length>1){stack.pop();render('back');}};
 const tab=id=>{stack=[{p:id}];render('fwd');};
 const refresh=()=>{const y=$('view').scrollTop; render(); $('view').scrollTop=y;};
-function toast(msg){document.querySelectorAll('.toast').forEach(n=>n.remove()); const t=document.createElement('div'); t.className='toast'; t.setAttribute('role','status'); t.textContent=msg; $('app').appendChild(t); setTimeout(()=>t.remove(),1700);}
+function toast(msg){document.querySelectorAll('.toast').forEach(n=>n.remove()); const t=document.createElement('div'); t.className='toast'; t.setAttribute('role','status'); t.textContent=msg; $('app').appendChild(t); setTimeout(()=>t.remove(),1800);}
 
-/* exercise sheet */
-function openEx(arg){
-  const [date,k,i]=arg.split('|'); const plan=weekPlan(analyze()); const it=plan[k].items[+i];
-  const sc=document.createElement('div'); sc.className='scrim'; sc.innerHTML='<div class="sheet" role="dialog" aria-modal="true" aria-label="动作详情"></div>';
-  const draw=()=>{
-    const e=exOf(k,it), ex=EX[e], done=!!S.done[date+':'+e];
-    const alts=it.mu?MUSCLES[it.mu].ex:[];
-    sc.querySelector('.sheet').innerHTML=`<div class="grab"></div>
-      <div><p class="label">${it.mu?MUSCLES[it.mu].name+' · '+MUSCLES[it.mu].area:'拉伸'}</p><p class="big">${ex.name}</p><p class="mono small muted">${it.stretch?ex.reps:it.sets+' 组 × '+ex.reps}</p></div>
-      <ol class="steps">${ex.steps.map(s=>`<li><span>${s}</span></li>`).join('')}</ol>
-      <div class="tip"><b>要点</b>　${ex.cue}</div>
-      <div class="tip warn"><b>避免</b>　${ex.avoid}</div>
-      ${alts.length>1?`<div><p class="label" style="margin-bottom:8px">动作库 · 同部位可替换</p><div class="alts">${alts.map(x=>`<button class="alt" type="button" data-alt="${x}" aria-pressed="${x===e}">${EX[x].name}</button>`).join('')}</div></div>`:''}
-      <button class="btn ${done?'ghost':''}" type="button" data-done="1">${done?I.check+' 已完成':'完成这个动作'}</button>`;
-  };
-  sc.addEventListener('click',ev=>{
-    if(ev.target===sc){ sc.remove(); refresh(); return; }
-    const a=ev.target.closest('[data-alt]'); if(a){ S.swap[k+':'+it.mu]=a.dataset.alt; save(); draw(); return; }
-    if(ev.target.closest('[data-done]')){ const key=date+':'+exOf(k,it); const now=!S.done[key]; if(now) S.done[key]=1; else delete S.done[key]; save(); sc.remove(); refresh(); if(now) toast('完成：'+EX[exOf(k,it)].name); }
-  });
-  $('app').appendChild(sc); draw();
+/* ---------------- measurement ----------------
+   第 1 步身高；第 2 步正面照（头顶、脚底 + 肩/腰/臀/大腿四组宽度）；第 3 步侧面照（头顶、脚底 + 腰/臀/大腿厚度）。
+   像素 × 身高 ÷ 头顶到脚底的像素高度 = 厘米。 */
+const PTDEF={
+  front:{lbl:{top:'头顶',bot:'脚底',sl:'肩',sr:'肩',wl:'腰',wr:'腰',hl:'臀',hr:'臀',tl:'腿',tr:'腿'},pairs:[['sl','sr'],['wl','wr'],['hl','hr'],['tl','tr']],
+    def:()=>({top:[.5,.05],bot:[.5,.97],sl:[.32,.22],sr:[.68,.22],wl:[.41,.40],wr:[.59,.40],hl:[.36,.50],hr:[.64,.50],tl:[.37,.57],tr:[.49,.57]})},
+  side:{lbl:{top:'头顶',bot:'脚底',wf:'腰',wb:'腰',hf:'臀',hb:'臀',tf:'腿',tb:'腿'},pairs:[['wf','wb'],['hf','hb'],['tf','tb']],
+    def:()=>({top:[.5,.05],bot:[.5,.97],wf:[.44,.40],wb:[.58,.40],hf:[.42,.50],hb:[.60,.50],tf:[.43,.57],tb:[.57,.57]})}
+};
+function viewCalc(view){
+  const ph=T.ph[view]; if(!ph||!ph.pts||!ph.nw) return null;
+  const p=ph.pts, H=S.h; const hpx=(p.bot[1]-p.top[1])*ph.nh; if(!H||hpx<50) return null;
+  const k=H/hpx, w=(a,b)=>Math.abs(p[b][0]-p[a][0])*ph.nw*k, fy=y=>(p.bot[1]-y)/(p.bot[1]-p.top[1]);
+  if(view==='front') return {shoulderW:w('sl','sr'),waistW:w('wl','wr'),hipW:w('hl','hr'),thighW:w('tl','tr'),
+    waistF:fy((p.wl[1]+p.wr[1])/2),hipF:fy((p.hl[1]+p.hr[1])/2),legR:fy((p.hl[1]+p.hr[1])/2)};
+  return {waistD:w('wf','wb'),hipD:w('hf','hb'),thighD:w('tf','tb')};
+}
+function draftMeas(){
+  const f=viewCalc('front'); if(!f||f.waistW<5) return null;
+  const s=viewCalc('side')||{};
+  const raw={shoulderW:f.shoulderW,waistW:f.waistW,hipW:f.hipW,thighW:f.thighW,waistD:s.waistD,hipD:s.hipD,thighD:s.thighD};
+  const m=derive(raw,S.h,f.legR); m.waistF=f.waistF; m.hipF=f.hipF; m.raw=raw; return m;
+}
+function readoutHTML(m){
+  if(!m) return '<p class="small muted">放好正面照的点之后，这里会出现结果。</p>';
+  const e=k=>m.est.includes(k)?'<span class="est">估</span>':'';
+  const cell=(k,v,u='cm',x='')=>`<div><span class="k">${k}${x}</span><span class="num">${v}<small class="mono xs muted"> ${u}</small></span></div>`;
+  return `<div class="readout">${cell('肩宽',f1(m.cm.shoulder))}${cell('腰围',Math.round(m.cm.waist),'cm',e('waist'))}${cell('臀围',Math.round(m.cm.hip),'cm',e('hip'))}${cell('大腿围',Math.round(m.cm.thigh),'cm',e('thigh'))}${cell('腰臀比',f2(m.whr),'')}${cell('腿长比',Math.round(m.legR*100),'%')}${cell('肩腰比',f2(m.swr),'')}${cell('臀腰比',f2(m.hwr),'')}</div>
+    ${m.est.length?'<p class="xs muted">标「估」的没有侧面照，厚度按常见体型估算。</p>':''}`;
+}
+P.measure={title:'测量身材',render(){
+  const st=T.step, hasF=!!(T.ph.front&&T.ph.front.url), hasS=!!(T.ph.side&&T.ph.side.url);
+  const stepBtn=(k,n,l,done)=>`<button type="button" data-act="mstep" data-arg="${k}" ${st===k?'aria-current="step"':''} class="${done?'done':''}"><b>0${n}</b>${l}</button>`;
+  let body='';
+  if(st==='h'){
+    body=`<div class="stack" style="gap:8px"><p class="h2">你的身高</p><p class="small muted">用来把照片里的像素换算成厘米。</p>
+      <label class="field"><input id="hIn" type="number" inputmode="numeric" min="120" max="210" placeholder="165" value="${S.h||''}" aria-label="身高（厘米）"><span>cm</span></label></div>
+      <button class="btn block" type="button" data-act="hNext">下一步：正面照</button>`;
+  } else {
+    const view=st, ph=T.ph[view], has=view==='front'?hasF:hasS;
+    const guide=view==='front'?'正面站直，双脚与髋同宽，手臂离开身体一点，穿贴身衣服，头到脚都在画面里。':'侧身站直，手臂自然下垂或抱在胸前，头到脚都在画面里。';
+    body=`<div class="stack" style="gap:8px"><p class="h2">${view==='front'?'正面照':'侧面照'}${view==='side'?'<span class="badge acc">推荐</span>':''}</p><p class="small muted">${guide}</p></div>
+      <label class="drop" id="drop" ${has?'hidden':''}><input type="file" id="file" accept="image/*">${view==='front'?I.poseFront:I.poseSide}<b>选择照片</b><span class="xs muted">照片只保存在这台设备上</span></label>
+      <div id="photoArea" ${has?'':'hidden'} class="stack" style="gap:8px"><div class="stage" id="stage"><img id="photo" alt="${view==='front'?'正面照':'侧面照'}" ${has?`src="${ph.url}"`:''}><svg class="ov" id="lines" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div>
+        <p class="xs muted">${view==='front'?'头顶、脚底两条线定比例；其余每组点对准身体轮廓最外侧。腰取最细处，臀取最宽处，腿量一条大腿最粗处。':'头顶、脚底定比例；每组点一前一后，对准身体轮廓。'}按住拖动，放大镜里对准。</p></div>
+      <p class="status" id="pstatus"></p>
+      <div id="pbtns" class="stack" style="gap:8px" ${has?'':'hidden'}>
+        <div class="row2"><button class="btn ghost" type="button" data-act="auto" style="flex:1">重新识别</button><button class="btn" type="button" data-act="${view==='front'?'toSide':'toSum'}" style="flex:1.4">${view==='front'?'下一步：侧面照':'看结果'}</button></div>
+        <button class="linkbtn" type="button" data-act="deletePhoto">删除这张照片</button>
+      </div>
+      ${view==='side'&&!hasS?'<button class="link" type="button" data-act="toSum">先跳过，厚度用估算'+I.chev+'</button>':''}`;
+  }
+  const m=draftMeas();
+  return `<div class="steps">${stepBtn('h',1,'身高',!!S.h)}${stepBtn('front',2,'正面',hasF)}${stepBtn('side',3,'侧面',hasS)}</div>
+    ${body}
+    <section class="stack" style="gap:14px" id="sumSec"><p class="eyebrow">测量结果</p><div id="readout">${readoutHTML(m)}</div>
+      <button class="btn block acc" type="button" data-act="saveMeas" ${m?'':'disabled style="opacity:.4"'}>保存为我的身材数据</button></section>`;
+},after(){ setupPhoto(); }};
+
+function updateReadout(){ const el=$('readout'); if(el) el.innerHTML=readoutHTML(draftMeas()); const b=document.querySelector('[data-act="saveMeas"]'); if(b){ const ok=!!draftMeas(); b.disabled=!ok; b.style.opacity=ok?'':'.4'; } }
+function measure(){
+  const st=$('pstatus'); updateReadout(); savePhotoSoon(T.step);
+  if(!st) return;
+  const c=viewCalc(T.step); st.className='status';
+  if(!S.h){ st.className='status err'; st.textContent='先填身高'; return; }
+  if(!c){ st.textContent=''; return; }
+  st.textContent=T.step==='front'?`肩宽 ${f1(c.shoulderW)} · 腰宽 ${f1(c.waistW)} · 臀宽 ${f1(c.hipW)} · 腿宽 ${f1(c.thighW)} cm`:`腰厚 ${f1(c.waistD)} · 臀厚 ${f1(c.hipD)} · 腿厚 ${f1(c.thighD)} cm`;
+}
+function lines(){
+  const view=T.step, p=T.ph[view].pts, D=PTDEF[view];
+  const seg=(a,b)=>`<line x1="${p[a][0]*100}" y1="${p[a][1]*100}" x2="${p[b][0]*100}" y2="${p[b][1]*100}" stroke="white" vector-effect="non-scaling-stroke" style="stroke-width:1.5px"/>`;
+  const hl=k=>`<line x1="0" y1="${p[k][1]*100}" x2="100" y2="${p[k][1]*100}" stroke="white" stroke-dasharray="4 4" vector-effect="non-scaling-stroke" style="stroke-width:1px;opacity:.9"/>`;
+  $('lines').innerHTML=D.pairs.map(([a,b])=>seg(a,b)).join('')+hl('top')+hl('bot');
+}
+function loupe(st,k){
+  let lp=st.querySelector('.loupe'); if(!lp){ lp=document.createElement('div'); lp.className='loupe'; lp.innerHTML='<canvas></canvas>'; st.appendChild(lp); }
+  const P2=T.ph[T.step].pts, [x,y]=P2[k], left=x>.5;
+  lp.style.left=left?'10px':''; lp.style.right=left?'':'10px';
+  const img=$('photo'), cv=lp.firstChild, dpr=window.devicePixelRatio||1, S2=132, Z=3;
+  if(cv.width!==S2*dpr){ cv.width=cv.height=S2*dpr; }
+  const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
+  const r=st.getBoundingClientRect(), nat=img.naturalWidth/r.width, src=S2/Z*nat;
+  g.fillStyle='#000'; g.fillRect(0,0,S2,S2);
+  g.drawImage(img,x*img.naturalWidth-src/2,y*img.naturalHeight-src/2,src,src,0,0,S2,S2);
+  const pair=PTDEF[T.step].pairs.find(q=>q.includes(k));
+  g.strokeStyle='rgba(255,255,255,.85)'; g.lineWidth=1; g.beginPath();
+  if(pair){ const q=P2[pair[0]===k?pair[1]:pair[0]]; g.moveTo(S2/2,S2/2); g.lineTo(S2/2+(q[0]-x)*r.width*Z,S2/2+(q[1]-y)*r.height*Z); }
+  else { g.moveTo(0,S2/2); g.lineTo(S2,S2/2); }
+  g.stroke();
+  g.strokeStyle='#ff5a4e'; g.beginPath(); g.moveTo(S2/2-14,S2/2); g.lineTo(S2/2-3,S2/2); g.moveTo(S2/2+3,S2/2); g.lineTo(S2/2+14,S2/2); g.moveTo(S2/2,S2/2-14); g.lineTo(S2/2,S2/2-3); g.moveTo(S2/2,S2/2+3); g.lineTo(S2/2,S2/2+14); g.stroke();
+  g.fillStyle='#ff5a4e'; g.fillRect(S2/2-1,S2/2-1,2,2);
+}
+function pts(){
+  const view=T.step, st=$('stage'); if(!st) return; st.querySelectorAll('.pt,.loupe').forEach(n=>n.remove());
+  const P2=T.ph[view].pts, D=PTDEF[view];
+  const place=(d,k)=>{ d.style.left=P2[k][0]*100+'%'; d.style.top=P2[k][1]*100+'%'; };
+  for(const k in D.lbl){ if(!P2[k]) P2[k]=D.def()[k];
+    const d=document.createElement('div'); const isH=k==='top'||k==='bot'; d.className='pt'+(isH?' h':''); d.tabIndex=0; d.innerHTML=`<b>${D.lbl[k]}</b>`;
+    d.setAttribute('role','slider'); d.setAttribute('aria-label',D.lbl[k]+'，方向键微调');
+    place(d,k);
+    d.addEventListener('pointerdown',ev=>{ ev.preventDefault(); d.setPointerCapture(ev.pointerId); d.classList.add('on');
+      const r=st.getBoundingClientRect(), x0=ev.clientX, y0=ev.clientY, p0=P2[k].slice();
+      loupe(st,k);
+      const mv=e2=>{ const x=Math.min(1,Math.max(0,p0[0]+(e2.clientX-x0)/r.width)), y=Math.min(1,Math.max(0,p0[1]+(e2.clientY-y0)/r.height));
+        P2[k]=[x,y]; place(d,k); lines(); measure(); loupe(st,k); };
+      const up=()=>{ d.removeEventListener('pointermove',mv); d.classList.remove('on'); const lp=st.querySelector('.loupe'); if(lp) lp.remove(); };
+      d.addEventListener('pointermove',mv); d.addEventListener('pointerup',up,{once:true}); d.addEventListener('pointercancel',up,{once:true}); });
+    d.addEventListener('keydown',e=>{ const s=e.shiftKey?.01:.002, m={ArrowLeft:[-s,0],ArrowRight:[s,0],ArrowUp:[0,-s],ArrowDown:[0,s]}[e.key]; if(!m) return;
+      e.preventDefault(); P2[k]=[Math.min(1,Math.max(0,P2[k][0]+m[0])),Math.min(1,Math.max(0,P2[k][1]+m[1]))]; place(d,k); lines(); measure(); });
+    st.appendChild(d); }
+  lines(); measure();
 }
 
+/* 照片持久化：缩到 1280px 存进本机 IndexedDB（存不下时退回 localStorage），不上传 */
+const PHOTO_KEY='bodynav.photo';
+const pkey=v=>v==='front'?PHOTO_KEY:PHOTO_KEY+'.side';
+function idb(){ return new Promise((res,rej)=>{ try{ const r=indexedDB.open('bodynav',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }catch(e){ rej(e); } }); }
+async function kvSet(k,v){ const db=await idb(); return new Promise((res,rej)=>{ const tx=db.transaction('kv','readwrite'); tx.objectStore('kv').put(v,k); tx.oncomplete=res; tx.onerror=()=>rej(tx.error); }); }
+async function kvGet(k){ const db=await idb(); return new Promise((res,rej)=>{ const q=db.transaction('kv').objectStore('kv').get(k); q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error); }); }
+async function kvDel(k){ const db=await idb(); return new Promise(res=>{ const tx=db.transaction('kv','readwrite'); tx.objectStore('kv').delete(k); tx.oncomplete=res; tx.onerror=res; }); }
+const blobToURL=b=>new Promise(r=>{ const f=new FileReader(); f.onload=()=>r(f.result); f.readAsDataURL(b); });
+async function savePhoto(view){
+  const ph=T.ph[view]; if(!ph||!ph.blob) return;
+  const rec={blob:ph.blob,pts:ph.pts,t:Date.now()};
+  try{ await kvSet(pkey(view),rec); try{localStorage.removeItem(pkey(view));}catch(e){} return; }catch(e){}
+  try{ localStorage.setItem(pkey(view),JSON.stringify({url:await blobToURL(ph.blob),pts:ph.pts})); }catch(e){}
+}
+const saveTimers={}; const savePhotoSoon=v=>{ if(v!=='front'&&v!=='side') return; clearTimeout(saveTimers[v]); saveTimers[v]=setTimeout(()=>savePhoto(v),600); };
+const imgSize=url=>new Promise(r=>{ const im=new Image(); im.onload=()=>r([im.naturalWidth,im.naturalHeight]); im.onerror=()=>r([0,0]); im.src=url; });
+async function loadPhotos(){
+  for(const view of ['front','side']){
+    let rec=null;
+    try{ rec=await kvGet(pkey(view)); }catch(e){}
+    if(!rec){ try{ const j=JSON.parse(localStorage.getItem(pkey(view))||'null'); if(j){ rec={blob:await (await fetch(j.url)).blob(),pts:j.pts}; } }catch(e){} }
+    if(!rec||!rec.blob||T.ph[view]) continue;
+    const url=URL.createObjectURL(rec.blob), [nw,nh]=await imgSize(url);
+    T.ph[view]={blob:rec.blob,url,nw,nh,pts:Object.assign(PTDEF[view].def(),rec.pts||{})};
+  }
+  if(stack[stack.length-1].p==='measure') refresh();
+}
+function shrink(file){ return new Promise((res,rej)=>{ const u=URL.createObjectURL(file), im=new Image();
+  im.onload=()=>{ const k=Math.min(1,1280/Math.max(im.naturalWidth,im.naturalHeight)), c=document.createElement('canvas');
+    c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k); c.getContext('2d').drawImage(im,0,0,c.width,c.height); URL.revokeObjectURL(u);
+    c.toBlob(b=>b?res({b,w:c.width,h:c.height}):rej(new Error('encode')),'image/jpeg',.88); };
+  im.onerror=()=>{ URL.revokeObjectURL(u); rej(new Error('decode')); }; im.src=u; }); }
+async function deletePhoto(){ const v=T.step; try{ await kvDel(pkey(v)); }catch(e){} try{localStorage.removeItem(pkey(v));}catch(e){} const ph=T.ph[v]; if(ph&&ph.url) URL.revokeObjectURL(ph.url); T.ph[v]=null; refresh(); toast('照片已从这台设备删除'); }
+function setupPhoto(){
+  const f=$('file'); const view=T.step; if(view==='h'){ const i=$('hIn'); if(i) i.addEventListener('input',()=>{ const v=+i.value; if(v>=120&&v<=210){ S.h=v; save(); updateReadout(); } }); return; }
+  if(!f) return;
+  f.addEventListener('change',async e=>{ const file=e.target.files&&e.target.files[0]; if(!file) return;
+    let s; try{ s=await shrink(file); }catch(err){ const st=$('pstatus'); st.className='status err'; st.textContent='这张图片打不开，换一张 JPG 或 PNG'; return; }
+    const old=T.ph[view]; if(old&&old.url) URL.revokeObjectURL(old.url);
+    T.ph[view]={blob:s.b,url:URL.createObjectURL(s.b),nw:s.w,nh:s.h,pts:PTDEF[view].def()};
+    $('drop').hidden=true; $('photoArea').hidden=false; $('pbtns').hidden=false;
+    const img=$('photo'); img.onload=()=>{ pts(); savePhoto(view); autoDetect(); }; img.src=T.ph[view].url; });
+  if(T.ph[view]){ const img=$('photo'); if(img.complete&&img.naturalWidth) pts(); else img.onload=pts; }
+}
 
+/* 自动识别：骨骼点定高度，人体分割蒙版找轮廓边缘；蒙版被手臂粘连时退回比例估算 */
+let lmk=null;
+async function autoDetect(){
+  const view=T.step; if(view!=='front'&&view!=='side') return;
+  const st=$('pstatus'); st.className='status'; st.textContent=mpBase?'正在识别…':'正在加载识别模型，第一次大约 10–30 秒…';
+  let L,mask;
+  try{
+    if(!lmk){
+      const {v,fs,buf}=await mpLoad();
+      const mk=d=>v.PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetBuffer:buf,delegate:d},runningMode:'IMAGE',numPoses:1,outputSegmentationMasks:true});
+      try{ lmk=await mk('GPU'); }catch(e){ lmk=await mk('CPU'); }
+    }
+  }catch(err){ console.warn('[BodyNav] model',err); st.className='status err'; st.textContent='识别模型没加载出来（网络或浏览器限制），可以直接拖动圆点手动标注'; return; }
+  if(T.step!==view) return;
+  st.textContent='正在识别…';
+  try{
+    const img=$('photo'), k=Math.min(1,1024/Math.max(img.naturalWidth,img.naturalHeight));
+    const W=Math.round(img.naturalWidth*k), Hh=Math.round(img.naturalHeight*k);
+    const cv=document.createElement('canvas'); cv.width=W; cv.height=Hh; cv.getContext('2d').drawImage(img,0,0,W,Hh);
+    const r=lmk.detect(cv); L=(r.landmarks||[])[0];
+    const m=r.segmentationMasks&&r.segmentationMasks[0];
+    if(m){ mask={w:m.width,h:m.height,d:m.getAsFloat32Array().slice()}; try{m.close();}catch(e){} }
+  }catch(err){ console.warn('[BodyNav] detect',err); }
+  if(T.step!==view) return;
+  if(!L){ st.className='status err'; st.textContent='没识别到人体，换一张全身照，或手动拖动圆点'; return; }
+  const on=(x,y)=>{ if(!mask) return false; const c=Math.round(x*mask.w), rr=Math.round(y*mask.h); if(c<0||rr<0||c>=mask.w||rr>=mask.h) return false; return mask.d[rr*mask.w+c]>=.5; };
+  const edges=(y,cx)=>{ if(!mask||!on(cx,y)) return null; const row=Math.round(y*mask.h), o=row*mask.w; let l=Math.round(cx*mask.w), rr=l;
+    while(l>0&&mask.d[o+l-1]>=.5) l--; while(rr<mask.w-1&&mask.d[o+rr+1]>=.5) rr++; return [l/mask.w,(rr+1)/mask.w]; };
+  // 头顶：从鼻子上方往上找到蒙版最高处；脚底：脚跟/脚尖的最低点
+  let topY=Math.min(L[0].y,L[7].y,L[8].y)-.06;
+  if(mask){ const cx=L[0].x; for(let y=Math.max(0,L[0].y-.25);y<L[0].y;y+=1/mask.h){ if(on(cx,y)||on(cx-.02,y)||on(cx+.02,y)){ topY=y; break; } } }
+  let botY=Math.max(L[29].y,L[30].y,L[31].y,L[32].y)+.005;
+  const pick=(y0,y1,lo,hi,pickMin,cxf)=>{ let best=null; for(let i=0;i<=24;i++){ const y=y0+(y1-y0)*i/24, e=edges(y,cxf(y)); if(!e) continue; const w=e[1]-e[0]; if(w<lo||w>hi) continue; if(!best||(pickMin?w<best.w:w>best.w)) best={y,w,e}; } return best; };
+  const P2=T.ph[view].pts; P2.top=[.5,Math.max(0,topY)]; P2.bot=[.5,Math.min(1,botY)];
+  const est=[];
+  if(view==='front'){
+    const sh=[L[11],L[12]].sort((a,b)=>a.x-b.x), hp=[L[23],L[24]].sort((a,b)=>a.x-b.x);
+    const sj=sh[1].x-sh[0].x, hj=hp[1].x-hp[0].x, sy=(sh[0].y+sh[1].y)/2, hy=(hp[0].y+hp[1].y)/2;
+    const scx=(sh[0].x+sh[1].x)/2, hcx=(hp[0].x+hp[1].x)/2, tl=hy-sy;
+    const mid=y=>scx+(hcx-scx)*Math.min(1,Math.max(0,(y-sy)/(tl||1)));
+    const sB=pick(sy-tl*.02,sy+tl*.08,sj*1.02,sj*1.5,false,mid);
+    const wB=pick(sy+tl*.45,hy-tl*.05,hj*.85,hj*1.65,true,mid);
+    const hB=pick(hy-tl*.05,hy+tl*.28,hj*1.25,hj*2.15,false,mid);
+    const wy=wB?wB.y:sy+tl*.68;
+    Object.assign(P2,{sl:sB?[sB.e[0],sB.y]:[sh[0].x-sj*.12,sh[0].y],sr:sB?[sB.e[1],sB.y]:[sh[1].x+sj*.12,sh[1].y],
+      wl:wB?[wB.e[0],wy]:[hcx-hj*.62,wy],wr:wB?[wB.e[1],wy]:[hcx+hj*.62,wy],
+      hl:hB?[hB.e[0],hB.y]:[hp[0].x-hj*.38,hp[0].y],hr:hB?[hB.e[1],hB.y]:[hp[1].x+hj*.38,hp[1].y]});
+    if(!sB) est.push('肩'); if(!wB) est.push('腰'); if(!hB) est.push('臀');
+    // 大腿：画面左侧那条腿，髋到膝 20% 处
+    const hipJ=L[23].x<L[24].x?L[23]:L[24], knee=L[23].x<L[24].x?L[25]:L[26];
+    const ty=hipJ.y+(knee.y-hipJ.y)*.2, tcx=hipJ.x+(knee.x-hipJ.x)*.2;
+    const tE=edges(ty,tcx), tw=tE?tE[1]-tE[0]:0;
+    if(tE&&tw>hj*.45&&tw<hj*1.05){ P2.tl=[tE[0],ty]; P2.tr=[tE[1],ty]; } else { P2.tl=[tcx-hj*.31,ty]; P2.tr=[tcx+hj*.31,ty]; est.push('腿'); }
+  } else {
+    const sideIdx=(L[11].visibility??1)+(L[23].visibility??1)>=(L[12].visibility??1)+(L[24].visibility??1)?[11,23,25]:[12,24,26];
+    const s=L[sideIdx[0]], h=L[sideIdx[1]], kn=L[sideIdx[2]];
+    const fr=T.ph.front&&viewCalc('front');
+    const yAt=f=>P2.bot[1]-(P2.bot[1]-P2.top[1])*f;
+    const wy=fr?yAt(fr.waistF):s.y+(h.y-s.y)*.62, hy0=fr?yAt(fr.hipF):h.y, ty=h.y+(kn.y-h.y)*.25;
+    const cx=y=>{ if(y<=h.y){ const u=(y-s.y)/((h.y-s.y)||1); return s.x+(h.x-s.x)*u; } const u=(y-h.y)/((kn.y-h.y)||1); return h.x+(kn.x-h.x)*u; };
+    const tl=h.y-s.y;
+    const wB=pick(wy-tl*.04,wy+tl*.04,.02,.5,true,cx), hB=pick(hy0-tl*.06,hy0+tl*.10,.02,.6,false,cx), tB=pick(ty-tl*.03,ty+tl*.03,.02,.4,false,cx);
+    const fb=(B,y,w)=>B?[[B.e[0],B.y],[B.e[1],B.y]]:[[cx(y)-w/2,y],[cx(y)+w/2,y]];
+    [P2.wf,P2.wb]=fb(wB,wy,.08); [P2.hf,P2.hb]=fb(hB,hy0,.1); [P2.tf,P2.tb]=fb(tB,ty,.07);
+    if(!wB) est.push('腰'); if(!hB) est.push('臀'); if(!tB) est.push('腿');
+  }
+  pts(); savePhoto(view);
+  if(est.length) st.textContent+=`（${est.join('、')}没找到清晰轮廓，是估算位置，建议放大核对）`;
+}
+const MEAS_ACT={
+  mstep(a){ if(a!=='h'&&!S.h){ toast('先填身高'); return; } if(a==='side'&&!(T.ph.front&&T.ph.front.url)){ toast('先完成正面照'); return; } T.step=a; refresh(); },
+  hNext(){ const i=$('hIn'), v=+(i&&i.value); if(!(v>=120&&v<=210)){ toast('身高填 120–210 之间的数'); return; } S.h=v; save(); T.step='front'; render('fwd'); },
+  toSide(){ T.step='side'; render('fwd'); },
+  toSum(){ const s=$('sumSec'); if(s) s.scrollIntoView({behavior:'smooth',block:'start'}); },
+  saveMeas(){ const m=draftMeas(); if(!m){ toast('先放好正面照的点'); return; } S.meas=m; S.mode='photo'; save(); ['front','side'].forEach(savePhoto); toast('已保存'); T.hFocus=null; stack=[{p:'home'}]; render('back'); },
+  auto:autoDetect, deletePhoto
+};
 /* ---------------- AI coach ---------------- */
 /* MediaPipe：先用和页面一起发布的本地文件（预览页的安全策略、国内网络都拦 CDN 和谷歌存储），失败再走 CDN */
 const MP_LIB=[
@@ -632,7 +1129,7 @@ const SESSION_HTML=()=>`<div class="sess">
     <div class="ctrl"><button class="btn ghost" type="button" data-act="pauseCoach" id="cpause">暂停</button><button class="btn" type="button" data-act="plusOne" id="cplus">+1 次</button><button class="btn ghost" type="button" data-act="skipCoach">跳过</button></div>
   </div></div>`;
 function setStat(text,cls){ const s=$('cstat'); if(!s) return; s.className='chip'+(cls?' '+cls:''); s.innerHTML=`<i></i><span>${text}</span>`; }
-function setCue(text,bad){ if(!C) return; C.cue=text; C.cueBad=!!bad; if(bad) C.cueAt=Date.now(); const el=$('ccue'); if(el){ el.textContent=text; el.className='cue'+(bad?' bad':''); } }
+function setCue(text,bad){ if(!C) return; C.cue=text; C.cueBad=!!bad; if(bad) C.cueAt=Date.now(); const el=$('ccue'); if(el){ el.textContent=text; el.className='cue'+(bad?' bad':(String(text).startsWith('你的备注')?' mine':'')); } }
 function ui(){
   if(!C||!$('cname')) return;
   const cur=C.q[C.i], tg=cur.tg, nx=C.q[C.i+1];
@@ -652,7 +1149,7 @@ function ui(){
   $('cplus').textContent={prep:'直接开始',work:tg.hold?'完成这组':'+1 次',rest:'跳过休息'}[C.phase]||'+1 次';
   $('cpause').textContent=C.paused?'继续':'暂停';
   if(!C.cueBad||Date.now()-C.cueAt>2500){
-    const d={prep:'准备开始，站到画面中间',work:'要点：'+EX[cur.e].cue,rest:'喝口水，调整呼吸'}[C.phase];
+    const mine=notesOf(cur.e)[0]; const d={prep:mine?'你的备注：'+mine.txt:'准备开始，站到画面中间',work:mine&&C.set===1?'你的备注：'+mine.txt:'要点：'+EX[cur.e].cue,rest:'喝口水，调整呼吸'}[C.phase];
     if(d&&C.cue!==d) setCue(d,false);
   }
 }
@@ -662,7 +1159,8 @@ function startSession(k){
   C.timer=setInterval(tick,1000);
   ui();
   const first=C.q[0];
-  say(`跟练开始。第一个动作，${EX[first.e].name}，${first.sets} 组`,{urgent:true});
+  const mine=notesOf(first.e)[0];
+  say(`跟练开始。第一个动作，${EX[first.e].name}，${first.sets} 组。`+(mine?`你上次记了：${mine.txt}`:''),{urgent:true});
   try{ navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>{ if(C) C.wl=w; else w.release(); }).catch(()=>{}); }catch(e){}
   initCam();
 }
@@ -727,7 +1225,8 @@ function onPose(L){
     if(t.start==='lo'){ if(C.state==='start'&&m>=t.hi) C.state='peak'; else if(C.state==='peak'&&m<=t.lo){ C.state='start'; onRep(); if(!C||C.phase!=='work') return; } }
     else { if(C.state==='start'&&m<=t.lo) C.state='peak'; else if(C.state==='peak'&&m>=t.hi){ C.state='start'; onRep(); if(!C||C.phase!=='work') return; } }
   }
-  if(t.checks) for(const f of t.checks){ const msg=f(L,C.ctx,C.m); if(msg){ setCue(msg,true); say(msg,{key:msg,gap:8000}); break; } }
+  const checks=(t.checks||[]).concat(noteChecks(cur.e).filter(f=>!(t.checks||[]).includes(f)));
+  if(checks.length) for(const f of checks){ const msg=f(L,C.ctx,C.m); if(msg){ setCue(msg,true); say(msg,{key:msg,gap:8000}); break; } }
 }
 function onRep(){
   C.reps++; const tg=C.q[C.i].tg.reps;
@@ -740,7 +1239,8 @@ function onRep(){
 function beginWork(){
   const cur=C.q[C.i]; C.phase='work'; C.reps=0; C.state='start'; C.ema=null; C.prepShow=0;
   if(cur.tg.hold) C.holdLeft=cur.tg.secs;
-  setCue('要点：'+EX[cur.e].cue,false);
+  const mine=notesOf(cur.e)[0];
+  setCue(mine&&C.set===1?'你的备注：'+mine.txt:'要点：'+EX[cur.e].cue,false);
   say(cur.tg.hold?`开始，坚持 ${cur.tg.secs} 秒`:'开始',{urgent:true}); ui();
 }
 function markDone(e){ S.done[todayISO()+':'+e]=1; save(); }
@@ -757,7 +1257,7 @@ function endSet(){
 function nextAfterRest(){
   const cur=C.q[C.i];
   if(C.set<cur.sets){ C.set++; C.prep=3; }
-  else { C.i++; C.set=1; C.prep=4; const n=C.q[C.i]; say(`${EX[n.e].name}，${n.sets} 组，准备`,{urgent:true}); }
+  else { C.i++; C.set=1; C.prep=4; const n=C.q[C.i]; const mine=notesOf(n.e)[0]; say(`${EX[n.e].name}，${n.sets} 组，准备。`+(mine?`你上次记了：${mine.txt}`:''),{urgent:true}); }
   C.phase='prep'; C.prepShow=0; ui();
 }
 function tick(){
@@ -785,12 +1285,12 @@ function finish(){
   const fb=$('cfb'); fb.hidden=false; fb.innerHTML=`<span class="ok">${I.checkBig}</span><b>今天的训练完成了</b>`;
   $('cpanel').innerHTML=`<div class="pdots">${C.q.map(()=>'<i class="on"></i>').join('')}</div>
     <p class="big">完成 ${C.completed.size} 个动作 · ${C.setsDone} 组</p><p class="muted small">用时约 ${mins} 分钟，已记入本周计划。</p>
-    <button class="btn" type="button" data-tab="home">回到首页</button><button class="btn ghost" type="button" data-go="plan">看本周计划</button>`;
+    <button class="btn block" type="button" data-tab="home">回到首页</button><button class="btn ghost block" type="button" data-tab="train">看训练</button>`;
 }
 const COACH_ACT={
   startCoach(k){ try{ const u=new SpeechSynthesisUtterance(' '); u.volume=0; speechSynthesis.speak(u); }catch(e){} go('session',k); },
   coachKey(a){ T.coachKey=a; refresh(); },
-  endCoach(){ const n=C?C.completed.size:0; stopSession(); tab('coach'); if(n) toast(`已记录 ${n} 个完成的动作`); },
+  endCoach(){ const n=C?C.completed.size:0; stopSession(); tab('train'); if(n) toast(`已记录 ${n} 个完成的动作`); },
   voiceToggle(){ S.voice=!S.voice; save(); if(!S.voice){ try{speechSynthesis.cancel();}catch(e){} } const b=$('cvoice'); if(b) b.innerHTML=S.voice?I.vol:I.mute; },
   pauseCoach(){ if(!C||C.phase==='done') return; C.paused=!C.paused; say(C.paused?'已暂停':'继续',{urgent:true}); if(!C.manual&&C.stream) setStat(C.paused?'已暂停':'AI 识别中',C.paused?'warn':'live'); ui(); },
   plusOne(){ if(!C||C.paused) return; const cur=C.q[C.i];
@@ -799,130 +1299,40 @@ const COACH_ACT={
 };
 document.addEventListener('visibilitychange',()=>{ if(document.hidden&&C&&!C.paused&&C.phase!=='done'){ C.paused=true; try{speechSynthesis.cancel();}catch(e){} ui(); } });
 
+
+/* 备注里提到的问题，跟练时优先检查 */
+const NOTE_RULES=[[/耸肩/,()=>shrug],[/塌腰|腰塌|拱腰/,()=>bodyLine],[/内扣/,()=>valgus],[/后仰|仰/,()=>torso]];
+function noteChecks(e){ const txt=notesOf(e).map(n=>n.txt).join(' '); return NOTE_RULES.filter(([re])=>re.test(txt)).map(([,f])=>f()); }
+
 const ACT={
-  ...COACH_ACT,
-  openEx,
+  ...COACH_ACT, ...MEAS_ACT,
   setTarget(a){S.target=a;save();refresh();toast('目标已改为 '+target().name);},
   toggle(a){S[a]=!S[a];save();refresh();},
-  mode(a){S.mode=a; if(a!=='photo'){S.rounded=SAMPLES[a].rounded;S.apt=SAMPLES[a].apt;} save(); refresh();},
-  usePhoto(){ if(!T.photoM){toast('先放好 6 个点');return;} S.photoM=T.photoM; S.mode='photo'; save(); toast('已保存'); stack=[{p:'home'}]; render('back'); },
-  auto:autoDetect
+  mode(a){ if(a==='photo'&&!S.meas){ go('measure'); return; } S.mode=a; if(a!=='photo'){S.rounded=SAMPLES[a].rounded;S.apt=SAMPLES[a].apt;} save(); refresh(); },
+  focus(k){ T.hFocus=T.hFocus===k?null:k; document.querySelectorAll('.metric').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.arg===T.hFocus))); if(B3.r) B3.r.focus(T.hFocus); },
+  selDay(a){ T.selDay=a; refresh(); },
+  openDay(a){ T.selDay=a; tab('train'); },
+  frame(a){ stopFrames(); showFrame(+a); },
+  noteChip(a){ const i=$('noteIn'); if(!i) return; i.value=i.value?i.value.replace(/[，,\s]*$/,'')+'，'+a:a; i.focus(); },
+  addNote(e){ const i=$('noteIn'); const v=(i&&i.value||'').trim(); if(!v){ toast('先写点什么'); return; }
+    const d=new Date(); (S.notes[e]=S.notes[e]||[]).unshift({txt:v.slice(0,140),t:`${d.getMonth()+1}月${d.getDate()}日`}); save(); refresh(); toast('记下了，下次跟练会提醒你'); },
+  delNote(a){ const [e,j]=a.split('|'); const n=S.notes[e]; if(!n) return; n.splice(+j,1); if(!n.length) delete S.notes[e]; save(); refresh(); },
+  swapEx(a){ const [k,mu,x,date,i]=a.split('|'); S.swap[k+':'+mu]=x; save(); stack[stack.length-1].a=`${x}|${date}|${k}|${i}`; render(); },
+  toggleDone(a){ const [date,e]=a.split('|'); const key=date+':'+e; const now=!S.done[key]; if(now) S.done[key]=1; else delete S.done[key]; save(); if(now){ toast('完成：'+EX[e].name); back(); } else refresh(); }
 };
 document.addEventListener('click',e=>{
-  if(e.target.closest('.scrim')) return;
   const el=e.target.closest('[data-go],[data-tab],[data-act],[data-back]'); if(!el||el.disabled) return;
   if(el.dataset.back) back();
   else if(el.dataset.tab) tab(el.dataset.tab);
   else if(el.dataset.act) ACT[el.dataset.act]&&ACT[el.dataset.act](el.dataset.arg);
   else if(el.dataset.go) go(el.dataset.go,el.dataset.arg);
 });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ const s=document.querySelector('.scrim'); if(s){s.remove();refresh();} else back(); } });
-
-/* ---------------- photo ---------------- */
-const LBL={sl:'肩',sr:'肩',wl:'腰',wr:'腰',hl:'臀',hr:'臀'};
-const defPts=()=>({sl:[.32,.25],sr:[.68,.25],wl:[.41,.44],wr:[.59,.44],hl:[.36,.53],hr:[.64,.53]});
-function measure(){
-  const p=T.pts, w=(a,b)=>Math.abs(p[b][0]-p[a][0]); const s=w('sl','sr'),wa=w('wl','wr'),h=w('hl','hr');
-  T.photoM=(wa<.02||s<.02||h<.02)?null:{swr:s/wa,hwr:h/wa};
-  const st=$('pstatus'); if(!st) return;
-  st.className='status'+(T.photoM?'':' err');
-  st.textContent=T.photoM?`肩腰比 ${f2(T.photoM.swr)} · 臀腰比 ${f2(T.photoM.hwr)}　按住圆点拖动，放大镜里对准身体边缘`:'左右两点太近了，请拉开';
-}
-function lines(){ const p=T.pts; $('lines').innerHTML=[['sl','sr'],['wl','wr'],['hl','hr']].map(([a,b])=>`<line x1="${p[a][0]*100}" y1="${p[a][1]*100}" x2="${p[b][0]*100}" y2="${p[b][1]*100}" stroke="white" vector-effect="non-scaling-stroke" style="stroke-width:1.5px"/>`).join(''); }
-/* 拖动：按相对位移移动（手指不会挡住点），同时在角落显示 3 倍放大镜 */
-function loupe(st,k){
-  let lp=st.querySelector('.loupe'); if(!lp){ lp=document.createElement('div'); lp.className='loupe'; lp.innerHTML='<canvas></canvas>'; st.appendChild(lp); }
-  const [x,y]=T.pts[k], left=x>.5;
-  lp.style.left=left?'10px':''; lp.style.right=left?'':'10px';
-  const img=$('photo'), cv=lp.firstChild, dpr=window.devicePixelRatio||1, S=132, Z=3;
-  if(cv.width!==S*dpr){ cv.width=cv.height=S*dpr; }
-  const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
-  const r=st.getBoundingClientRect(), nat=img.naturalWidth/r.width, src=S/Z*nat;
-  g.fillStyle='#000'; g.fillRect(0,0,S,S);
-  g.drawImage(img,x*img.naturalWidth-src/2,y*img.naturalHeight-src/2,src,src,0,0,S,S);
-  // 同一行的另一个点也画出连线，方便对齐水平
-  const pair={sl:'sr',sr:'sl',wl:'wr',wr:'wl',hl:'hr',hr:'hl'}[k], q=T.pts[pair];
-  const qx=S/2+(q[0]-x)*r.width*Z, qy=S/2+(q[1]-y)*r.height*Z;
-  g.strokeStyle='rgba(255,255,255,.85)'; g.lineWidth=1; g.beginPath(); g.moveTo(S/2,S/2); g.lineTo(qx,qy); g.stroke();
-  g.strokeStyle='#ff5a4e'; g.beginPath(); g.moveTo(S/2-14,S/2); g.lineTo(S/2-3,S/2); g.moveTo(S/2+3,S/2); g.lineTo(S/2+14,S/2); g.moveTo(S/2,S/2-14); g.lineTo(S/2,S/2-3); g.moveTo(S/2,S/2+3); g.lineTo(S/2,S/2+14); g.stroke();
-  g.fillStyle='#ff5a4e'; g.fillRect(S/2-1,S/2-1,2,2);
-}
-function pts(){
-  const st=$('stage'); st.querySelectorAll('.pt,.loupe').forEach(n=>n.remove());
-  const place=(d,k)=>{ d.style.left=T.pts[k][0]*100+'%'; d.style.top=T.pts[k][1]*100+'%'; };
-  for(const k in T.pts){ const d=document.createElement('div'); d.className='pt'; d.tabIndex=0; d.innerHTML=`<b>${LBL[k]}</b>`;
-    d.setAttribute('role','slider'); d.setAttribute('aria-label',LBL[k]+(k.endsWith('l')?'（左）':'（右）')+'，方向键微调');
-    place(d,k);
-    d.addEventListener('pointerdown',ev=>{ ev.preventDefault(); d.setPointerCapture(ev.pointerId); d.classList.add('on');
-      const r=st.getBoundingClientRect(), x0=ev.clientX, y0=ev.clientY, p0=T.pts[k].slice();
-      loupe(st,k);
-      const mv=e2=>{ const x=Math.min(1,Math.max(0,p0[0]+(e2.clientX-x0)/r.width)), y=Math.min(1,Math.max(0,p0[1]+(e2.clientY-y0)/r.height));
-        T.pts[k]=[x,y]; place(d,k); lines(); measure(); loupe(st,k); };
-      const up=()=>{ d.removeEventListener('pointermove',mv); d.classList.remove('on'); const lp=st.querySelector('.loupe'); if(lp) lp.remove(); };
-      d.addEventListener('pointermove',mv); d.addEventListener('pointerup',up,{once:true}); d.addEventListener('pointercancel',up,{once:true}); });
-    d.addEventListener('keydown',e=>{ const s=e.shiftKey?.01:.002, m={ArrowLeft:[-s,0],ArrowRight:[s,0],ArrowUp:[0,-s],ArrowDown:[0,s]}[e.key]; if(!m) return;
-      e.preventDefault(); T.pts[k]=[Math.min(1,Math.max(0,T.pts[k][0]+m[0])),Math.min(1,Math.max(0,T.pts[k][1]+m[1]))]; place(d,k); lines(); measure(); });
-    st.appendChild(d); }
-  lines(); measure();
-}
-function setupPhoto(){
-  const f=$('file'); if(!f) return;
-  f.addEventListener('change',e=>{ const file=e.target.files&&e.target.files[0]; if(!file) return;
-    if(T.photoURL) URL.revokeObjectURL(T.photoURL); T.photoURL=URL.createObjectURL(file); T.pts=defPts();
-    $('drop').hidden=true; $('photoArea').hidden=false; $('pbtns').hidden=false;
-    const img=$('photo'); img.onload=()=>{ pts(); autoDetect(); }; img.onerror=()=>{ $('pstatus').className='status err'; $('pstatus').textContent='这张图片打不开，换一张 JPG 或 PNG'; }; img.src=T.photoURL; });
-  if(T.photoURL){ const img=$('photo'); if(img.complete) pts(); else img.onload=pts; }
-}
-let lmk=null;
-/* 照片识别：骨骼点定高度，人体分割蒙版找真实轮廓边缘；蒙版被手臂粘连时退回比例估算 */
-async function autoDetect(){
-  const st=$('pstatus'); st.className='status'; st.textContent=mpBase?'正在识别…':'正在加载识别模型，第一次大约 10–30 秒…';
-  let L,mask,W,H;
-  try{
-    if(!lmk){
-      const {v,fs,buf}=await mpLoad();
-      const mk=d=>v.PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetBuffer:buf,delegate:d},runningMode:'IMAGE',numPoses:1,outputSegmentationMasks:true});
-      try{ lmk=await mk('GPU'); }catch(e){ lmk=await mk('CPU'); }
-    }
-  }catch(err){ console.warn('[BodyNav] model',err); st.className='status err'; st.textContent='识别模型没加载出来（网络或浏览器限制），可以直接拖动圆点手动标注'; return; }
-  st.textContent='正在识别…';
-  try{
-    const img=$('photo'), k=Math.min(1,1024/Math.max(img.naturalWidth,img.naturalHeight));
-    W=Math.round(img.naturalWidth*k); H=Math.round(img.naturalHeight*k);
-    const cv=document.createElement('canvas'); cv.width=W; cv.height=H; cv.getContext('2d').drawImage(img,0,0,W,H);
-    const r=lmk.detect(cv); L=(r.landmarks||[])[0];
-    const m=r.segmentationMasks&&r.segmentationMasks[0];
-    if(m){ mask={w:m.width,h:m.height,d:m.getAsFloat32Array().slice()}; try{m.close();}catch(e){} }
-  }catch(err){ console.warn('[BodyNav] detect',err); }
-  if(!L){ st.className='status err'; st.textContent='没识别到人体，换一张全身正面照，或手动拖动圆点'; return; }
-  const sh=[L[11],L[12]].sort((a,b)=>a.x-b.x), hp=[L[23],L[24]].sort((a,b)=>a.x-b.x);
-  const sj=sh[1].x-sh[0].x, hj=hp[1].x-hp[0].x, sy=(sh[0].y+sh[1].y)/2, hy=(hp[0].y+hp[1].y)/2;
-  const scx=(sh[0].x+sh[1].x)/2, hcx=(hp[0].x+hp[1].x)/2, tl=hy-sy;
-  const mid=y=>scx+(hcx-scx)*Math.min(1,Math.max(0,(y-sy)/(tl||1)));
-  // 某一行从中线向两侧走到蒙版边缘，返回 [左, 右]（0-1 坐标）
-  const edges=y=>{ if(!mask) return null; const row=Math.round(y*mask.h); if(row<0||row>=mask.h) return null;
-    const c=Math.round(mid(y)*mask.w), o=row*mask.w; if(mask.d[o+c]<.5) return null;
-    let l=c, r=c; while(l>0&&mask.d[o+l-1]>=.5) l--; while(r<mask.w-1&&mask.d[o+r+1]>=.5) r++;
-    return [l/mask.w,(r+1)/mask.w]; };
-  const scan=(y0,y1,lo,hi,pick)=>{ let best=null; const n=24;
-    for(let i=0;i<=n;i++){ const y=y0+(y1-y0)*i/n, e=edges(y); if(!e) continue; const w=e[1]-e[0];
-      if(w<lo||w>hi) continue; if(!best||(pick==='min'?w<best.w:w>best.w)) best={y,w,e}; }
-    return best; };
-  const sB=scan(sy-tl*.02,sy+tl*.08,sj*1.02,sj*1.5,'max');
-  const wB=scan(sy+tl*.45,hy-tl*.05,hj*.85,hj*1.65,'min');
-  const hB=scan(hy-tl*.05,hy+tl*.28,hj*1.25,hj*2.15,'max');
-  const wy=wB?wB.y:sy+tl*.68;
-  T.pts={
-    sl:sB?[sB.e[0],sB.y]:[sh[0].x-sj*.12,sh[0].y], sr:sB?[sB.e[1],sB.y]:[sh[1].x+sj*.12,sh[1].y],
-    wl:wB?[wB.e[0],wy]:[hcx-hj*.62,wy], wr:wB?[wB.e[1],wy]:[hcx+hj*.62,wy],
-    hl:hB?[hB.e[0],hB.y]:[hp[0].x-hj*.38,hp[0].y], hr:hB?[hB.e[1],hB.y]:[hp[1].x+hj*.38,hp[1].y]
-  };
-  pts();
-  const est=[!sB&&'肩',!wB&&'腰',!hB&&'臀'].filter(Boolean);
-  if(est.length&&T.photoM){ st.textContent+=`（${est.join('、')}被手臂挡住，是估算值，建议放大核对）`; }
-}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') back(); });
+document.addEventListener('input',e=>{ if(e.target.id==='noteIn'){ const t=e.target; t.style.height='auto'; t.style.height=Math.min(120,t.scrollHeight)+'px'; } });
+document.addEventListener('visibilitychange',()=>{ if(B3.r){ if(document.hidden){ B3.r.st.auto=false; } } });
 
 render();
+loadPhotos();
 })();
 </script>
 </body>
