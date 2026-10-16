@@ -111,7 +111,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 
 /* fitting-card figure */
 .hero{display:flex;flex-direction:column;gap:6px;margin:0 -8px}
-.herobar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:0 8px}
+.herobar{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:0 8px}
+.herobar .h2{font-size:22px;line-height:1.25;margin-top:2px}
+.herobar>.link{flex:0 0 auto;white-space:nowrap}
+.hsum{margin-top:4px;display:flex;flex-wrap:wrap;align-items:center;gap:0 4px}
+.hsum .lg{display:inline-flex;gap:10px;margin-left:8px;font-size:11.5px;color:var(--muted)}
+.hsum .lg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:0}
 .seg.sm button{padding:5px 12px;font-size:12.5px}
 #figHost svg{display:block;width:100%;height:auto;max-height:64vh}
 #fig .m{fill:var(--body);transition:fill .35s ease}
@@ -140,11 +145,18 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .b3load{position:absolute;inset:auto 0 46% 0;text-align:center}
 .body3d canvas~.b3load,.body3d.flat .b3load{display:none}
 .tags3{position:absolute;inset:0;pointer-events:none}
-.tag3{position:absolute;right:6px;transform:translateY(-50%);pointer-events:auto;display:flex;align-items:baseline;gap:5px;border:0;background:color-mix(in srgb,var(--bg) 82%,transparent);padding:3px 6px;border-radius:6px;font-size:11.5px;color:var(--ink);cursor:pointer;transition:opacity .25s}
-.tag3 i{position:absolute;right:100%;top:50%;width:var(--lead,20px);border-top:1px dashed var(--st);opacity:.8}
-.tag3 i::before{content:"";position:absolute;left:-3px;top:-3.5px;width:6px;height:6px;border-radius:50%;background:var(--st)}
-.tag3 b{font-weight:500;color:var(--muted)}
-.tag3 em{font-style:normal;font-weight:500;color:var(--st)}
+.leads3{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.leads3 path{fill:none;stroke-width:1;stroke-dasharray:3 3;opacity:.85}
+.tag3{position:absolute;transform:translateY(-50%);pointer-events:auto;display:grid;grid-template-columns:2.2em 3.8em 3.5em;align-items:baseline;column-gap:3px;border:0;background:color-mix(in srgb,var(--bg) 72%,transparent);padding:3px 5px;border-radius:6px;font-size:11px;line-height:1.35;color:var(--ink);cursor:pointer;transition:opacity .25s;text-align:left;font-variant-numeric:tabular-nums}
+.tag3.nod{grid-template-columns:2.2em 3.8em}
+.tag3.nod em{display:none}
+.tag3.r{right:4px}
+.tag3.l{left:4px}
+.tag3 .n{color:var(--ink);font-weight:500}
+.tag3 b{font:500 11.5px var(--mono);color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+.tag3 b small{font-size:9px;color:var(--muted);margin-left:2px}
+.tag3 em{font:500 10.5px var(--mono);font-style:normal;color:var(--st);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag3 em.ok{font-family:var(--text)}
 .tag3.dim{opacity:.3}
 .mpanel{padding:4px 8px 0;display:flex;flex-direction:column;gap:8px}
 .mp-hint{font-size:12px;color:var(--muted);text-align:center;margin:0}
@@ -731,6 +743,10 @@ function figMetrics(r){
   }
   return out;
 }
+/* 首页标题下的一行总结：几项没达标（附图例的颜色说明） */
+function figSummary(r){ const FM=figMetrics(r), off=MKEYS.filter(k=>FM[k].cls==='under'||FM[k].cls==='over'), has=c=>off.some(k=>FM[k].cls===c);
+  if(!off.length) return `<b class="acc">各项都已达标</b>`;
+  return `<b>${off.length} 项未达标</b><span class="muted"> · ${off.map(k=>FIG_LINES[k].name).join('、')}</span><span class="lg">${has('under')?'<span><i style="background:var(--under)"></i>比目标小</span>':''}${has('over')?'<span><i style="background:var(--warm)"></i>比目标大</span>':''}</span>`; }
 function figureSVG(r,view){
   const M=figMetrics(r), ox=FIG_OX[view], d=MM[view];
   const owner={}; for(const k in FIG_LINES) FIG_LINES[k].groups.forEach(g=>owner[g]=k);
@@ -1063,30 +1079,36 @@ function build3D(el,r,M){
     const n=e-o, cvx=((x/n-X[j*3])*nrm[j*3]+(y/n-X[j*3+1])*nrm[j*3+1]+(z/n-X[j*3+2])*nrm[j*3+2])/(l/n||1);
     ao[j]=Math.max(0,cvx); }
   for(let i=0;i<4;i++) relax(ao,A,null,.6,1);
-  for(let j=0;j<nv;j++) ao[j]=1-Math.min(.32,ao[j]*1.6);
+  for(let j=0;j<nv;j++) ao[j]=1-Math.min(.2,ao[j]*1.1); // 凹处只轻微压暗，弱化解剖细节
   const rimC={value:new THREE.Color()};
-  const mat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.5,metalness:0});
+  const mat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.78,metalness:0});
   mat.onBeforeCompile=sh=>{
     sh.uniforms.rimC=rimC;
     sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nuniform vec3 rimC;')
-      .replace('#include <dithering_fragment>','float fres=pow(1.0-clamp(abs(dot(normalize(normal),normalize(vViewPosition))),0.0,1.0),2.2);\ngl_FragColor.rgb=mix(gl_FragColor.rgb,rimC,fres*0.42);\n#include <dithering_fragment>');
+      .replace('#include <dithering_fragment>','float fres=pow(1.0-clamp(abs(dot(normalize(normal),normalize(vViewPosition))),0.0,1.0),2.2);\ngl_FragColor.rgb=mix(gl_FragColor.rgb,rimC,fres*0.55);\n#include <dithering_fragment>');
   };
   const body=new THREE.Mesh(geo,mat); root.add(body);
-  // 脚下柔和的接触阴影
-  const shC=document.createElement('canvas'); shC.width=shC.height=128; { const g=shC.getContext('2d'), gr=g.createRadialGradient(64,64,0,64,64,64); gr.addColorStop(0,'rgba(0,0,0,.55)'); gr.addColorStop(.45,'rgba(0,0,0,.18)'); gr.addColorStop(1,'rgba(0,0,0,0)'); g.fillStyle=gr; g.fillRect(0,0,128,128); }
-  const shadow=new THREE.Mesh(new THREE.PlaneGeometry(.62,.42),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(shC),transparent:true,depthWrite:false,opacity:.5}));
-  shadow.rotation.x=-Math.PI/2; shadow.position.y=.002; scene.add(shadow);
+  // 脚下的接触阴影：一层紧贴脚底的深色 + 一层大范围的柔和晕开，模型不会像飘着
+  const blob=(a0,a1)=>{ const c=document.createElement('canvas'); c.width=c.height=128; const g=c.getContext('2d'), gr=g.createRadialGradient(64,64,0,64,64,64); gr.addColorStop(0,`rgba(0,0,0,${a0})`); gr.addColorStop(.5,`rgba(0,0,0,${a1})`); gr.addColorStop(1,'rgba(0,0,0,0)'); g.fillStyle=gr; g.fillRect(0,0,128,128); return new THREE.CanvasTexture(c); };
+  const shadow=new THREE.Group();
+  [[.78,.5,blob(.32,.1),.002],[.34,.2,blob(.75,.3),.003]].forEach(([w,d,map,y])=>{ const p=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshBasicMaterial({map,transparent:true,depthWrite:false})); p.rotation.x=-Math.PI/2; p.position.y=y; shadow.add(p); });
+  scene.add(shadow);
   // 每个肌群的质心（用来转身对准）
   const cen={}; for(let j=0;j<nv;j++){ const k=REGIONS[rid[j]]; if(!k) continue; const o=cen[k]||(cen[k]=[0,0,0,0]); o[0]+=X[j*3]; o[1]+=X[j*3+1]; o[2]+=X[j*3+2]; o[3]++; }
   const lin=h=>new THREE.Color(h).convertSRGBToLinear();
   function paint(){
     const bg=lin(cssv('--bg')), base=lin(cssv('--body')), acc=lin(cssv('--accent')), sel=T.muscle, lv=analyze().L, dark=bg.r+bg.g+bg.b<.3;
     const skin=dark?base.clone().lerp(lin('#ffffff'),.06):base.clone().lerp(lin('#ffffff'),.35);
-    rimC.value.copy(bg); shadow.material.opacity=dark?.8:.5;
-    const pal=REGIONS.map((k,i)=>{ if(!i) return skin; const mu=RINFO[k]&&RINFO[k].mu, hot=mu&&(lv[mu]==='focus'||lv[mu]==='boost');
-      return k===sel?skin.clone().lerp(acc,.8):hot?skin.clone().lerp(acc,sel?.25:.5):skin; });
-    for(let j=0;j<nv;j++){ const p=pal[rid[j]]||skin; col[j*3]=p.r; col[j*3+1]=p.g; col[j*3+2]=p.b; }
+    rimC.value.copy(bg); shadow.children.forEach((p,i)=>p.material.opacity=dark?.9:i?.55:.7);
+    // 只有点选的肌肉用主色标出；其余保持素模
+    for(let j=0;j<nv;j++){ const p=sel&&REGIONS[rid[j]]===sel?skin.clone().lerp(acc,.7):skin; col[j*3]=p.r; col[j*3+1]=p.g; col[j*3+2]=p.b; }
     for(let i=0;i<3;i++) relax(col,A,null,.5,3);   // 肌群边缘柔化成渐变
+    // 只给没达标的部位上色：以测量环为中心按上下距离渐隐（高斯），最浓处约 45%，达标的部位不上色
+    const off=MKEYS.filter(k=>rings[k]&&(FM[k].cls==='under'||FM[k].cls==='over'));
+    if(off.length){ const tc=off.map(k=>lin(cssColor(FM[k].color))), SIG={shoulder:.042,waist:.04,hip:.036,thigh:.045}, MASK={shoulder:PT.torso|PT.arms,waist:PT.torso,hip:PT.torso|PT.legL|PT.legR,thigh:PT.legL|PT.legR};
+      for(let j=0;j<nv;j++){ let bw=0,bi=-1; const y=X[j*3+1];
+        off.forEach((k,i)=>{ if(!((MASK[k]>>D.part[j])&1)) return; const dy=(y-rings[k].y)/(SIG[k]*H), w=Math.exp(-dy*dy)*(T.hFocus&&T.hFocus!==k?.18:.45); if(w>bw){ bw=w; bi=i; } });
+        if(bi>=0&&bw>.01){ const c=tc[bi]; col[j*3]+=(c.r-col[j*3])*bw; col[j*3+1]+=(c.g-col[j*3+1])*bw; col[j*3+2]+=(c.b-col[j*3+2])*bw; } } }
     for(let j=0;j<nv;j++){ col[j*3]*=ao[j]; col[j*3+1]*=ao[j]; col[j*3+2]*=ao[j]; }
     geo.attributes.color.needsUpdate=true; kick();
   }
@@ -1098,34 +1120,57 @@ function build3D(el,r,M){
     let cx=0,cz=0; h.forEach(p=>{cx+=p[0];cz+=p[1];}); cx/=h.length; cz/=h.length;
     const g=new THREE.Group(), color=lin(cssColor(FM[k].color));
     const mk=(sx,sz,dash)=>{ const pts=h.map(p=>new THREE.Vector3(cx+(p[0]-cx)*sx,y,cz+(p[1]-cz)*sz)); 
-      if(dash){ const geo2=new THREE.BufferGeometry().setFromPoints(pts.concat([pts[0]])); const ln=new THREE.Line(geo2,new THREE.LineDashedMaterial({color:lin(cssv('--accent')),dashSize:.012,gapSize:.01,transparent:true,opacity:.9})); ln.computeLineDistances(); return ln; }
+      if(dash){ const geo2=new THREE.BufferGeometry().setFromPoints(pts.concat([pts[0]])); const ln=new THREE.Line(geo2,new THREE.LineDashedMaterial({color,dashSize:.012,gapSize:.01,transparent:true,opacity:.9})); ln.computeLineDistances(); return ln; }
       const curve=new THREE.CatmullRomCurve3(pts,true,'centripetal'); return new THREE.Mesh(new THREE.TubeGeometry(curve,Math.max(64,pts.length*3),.0026/s,6,true),new THREE.MeshBasicMaterial({color,transparent:true})); };
+    const t=FM[k];
+    if(k==='shoulder'){ // 肩宽是宽度不是围度：画成身前一条带端点的尺寸线，目标用虚线
+      let x0=1e9,x1=-1e9,zf=-1e9; h.forEach(p=>{ x0=Math.min(x0,p[0]); x1=Math.max(x1,p[0]); zf=Math.max(zf,p[1]); }); zf+=.012*H;
+      const V=(x,yy)=>new THREE.Vector3(x,yy,zf), tm=new THREE.MeshBasicMaterial({color,transparent:true}), cap=.022*H;
+      const seg=(a,b)=>new THREE.Mesh(new THREE.TubeGeometry(new THREE.LineCurve3(a,b),1,.0026/s,6,false),tm);
+      g.add(seg(V(x0,y),V(x1,y)),seg(V(x0,y-cap),V(x0,y+cap)),seg(V(x1,y-cap),V(x1,y+cap)));
+      if(t.tgt&&Math.abs(t.d)>.5){ const hw=(x1-x0)/2*t.tgt/t.cur, mx=(x0+x1)/2, ln=new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(mx-hw,y-cap*.5),V(mx-hw,y),V(mx+hw,y),V(mx+hw,y-cap*.5)].map(v=>v.setZ(zf+.004*H))),new THREE.LineDashedMaterial({color,dashSize:.012,gapSize:.01,transparent:true})); ln.computeLineDistances(); g.add(ln); }
+      root.add(g); rings[k]={g,h,y,cx,cz,pts:[[x0,zf],[x1,zf]]}; continue; }
     const ring=mk(1.012,1.012,false); g.add(ring);
     const legs=[ring]; if(k==='thigh'){ const r2=ring.clone(); r2.material=ring.material; r2.scale.x=-1; g.add(r2); legs.push(r2); }
-    const t=FM[k]; if(t.tgt&&Math.abs(t.d)>1){ const q=k==='shoulder'?t.tgt/t.cur:t.tgt/t.cur; g.add(mk(1.012*q,k==='shoulder'?1.012:1.012*q,true)); }
-    root.add(g); rings[k]={g,h,y,cx,cz,meshes:legs};
+    if(t.tgt&&Math.abs(t.d)>1){ const q=t.tgt/t.cur; g.add(mk(1.012*q,1.012*q,true)); }
+    const pts=h.map(p=>[cx+(p[0]-cx)*1.012,cz+(p[1]-cz)*1.012]); if(k==='thigh') pts.push(...pts.map(p=>[-p[0],p[1]]));
+    root.add(g); rings[k]={g,h,y,cx,cz,pts,meshes:legs};
   }
   // 标签
-  const tags={}; const tagBox=document.createElement('div'); tagBox.className='tags3'; el.appendChild(tagBox);
-  for(const k in rings){ const t=FM[k], b=document.createElement('button'); b.type='button'; b.className='tag3'; b.dataset.act='focus'; b.dataset.arg=k; b.style.setProperty('--st',t.color);
-    b.innerHTML=`<i></i><span>${FIG_LINES[k].name}</span><b class="mono">${k==='shoulder'?f1(t.cur):Math.round(t.cur)}</b>${t.label?`<em class="mono">${t.label}</em>`:''}`; tagBox.appendChild(b); tags[k]=b; }
-  scene.add(new THREE.HemisphereLight(0xffffff,0x8a8f8c,.62));
-  const key=new THREE.DirectionalLight(0xfffaf4,.82); key.position.set(-1.4,2.4,2.6); scene.add(key);
-  const fill=new THREE.DirectionalLight(0xf2f6ff,.28); fill.position.set(2.2,.9,1.4); scene.add(fill);
-  const rim=new THREE.DirectionalLight(0xffffff,.55); rim.position.set(1.2,2,-2.8); scene.add(rim);
+  // 标签分到模型左右两侧（肩宽、臀围在右，腰围、腿围在左），三列对齐：名称 / 数值 cm / 差距
+  const tags={}, SIDE={shoulder:1,hip:1,waist:-1,thigh:-1}, tagBox=document.createElement('div'); tagBox.className='tags3'; el.appendChild(tagBox);
+  const leads=document.createElementNS('http://www.w3.org/2000/svg','svg'); leads.setAttribute('class','leads3'); leads.setAttribute('aria-hidden','true'); tagBox.appendChild(leads);
+  for(const k in rings){ const t=FM[k], b=document.createElement('button'), ad=t.d==null?'':f1(Math.abs(t.d));
+    b.type='button'; b.className='tag3 '+(SIDE[k]>0?'r':'l')+(t.cls==='na'?' nod':''); b.dataset.act='focus'; b.dataset.arg=k; b.style.setProperty('--st',t.color);
+    const gap=t.cls==='under'?`差 ${ad}`:t.cls==='over'?`多 ${ad}`:t.cls==='ok'?'达标':'';
+    b.setAttribute('aria-label',`${FIG_LINES[k].name} ${k==='shoulder'?f1(t.cur):Math.round(t.cur)} 厘米${gap?'，'+gap+(t.cls==='ok'?'':' 厘米'):''}`);
+    b.innerHTML=`<span class="n">${FIG_LINES[k].name}</span><b>${k==='shoulder'?f1(t.cur):Math.round(t.cur)}<small>cm</small></b><em class="${t.cls}">${gap}</em>`;
+    tagBox.appendChild(b); const pa=document.createElementNS('http://www.w3.org/2000/svg','path'), dot=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    pa.style.stroke=dot.style.fill=t.color; dot.setAttribute('r','3'); leads.append(pa,dot); tags[k]={b,pa,dot}; }
+  // 柔光：环境光为主、主光减弱，像影棚里的人台，不突出肌肉细节
+  scene.add(new THREE.HemisphereLight(0xffffff,0x9aa09d,.86));
+  const key=new THREE.DirectionalLight(0xfffaf4,.5); key.position.set(-1.4,2.4,2.6); scene.add(key);
+  const fill=new THREE.DirectionalLight(0xf2f6ff,.34); fill.position.set(2.2,.9,1.4); scene.add(fill);
+  const rim=new THREE.DirectionalLight(0xffffff,.6); rim.position.set(1.2,2,-2.8); scene.add(rim);
   const Hs=H*s, cy=Hs*.5;
   const st={rot:-.3,vel:0,goal:null,auto:!matchMedia('(prefers-reduced-motion: reduce)').matches&&!T.muscle,drag:false,moved:0,lx:0,ly:0,raf:0,alive:true,last:performance.now()};
   function size(){ const w=el.clientWidth,h=el.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); cam.aspect=w/h;
-    const dist=(Hs*.56)/Math.tan(cam.fov*Math.PI/360)*Math.max(1,.5/cam.aspect); cam.position.set(0,cy+dist*.08,dist); cam.lookAt(0,cy,0); cam.updateProjectionMatrix(); }
+    const dist=(Hs*.62)/Math.tan(cam.fov*Math.PI/360)*Math.max(1,.5/cam.aspect); cam.position.set(0,cy+dist*.08,dist); cam.lookAt(0,cy,0); cam.updateProjectionMatrix(); }
   const v=new THREE.Vector3();
   function placeTags(){
-    const W=el.clientWidth, Hh=el.clientHeight;
-    for(const k in tags){ const R=rings[k]; let bx=-1e9,by=0;
-      for(let i=0;i<R.h.length;i+=Math.max(1,R.h.length>>5)){ const p=R.h[i]; v.set(p[0],R.y,p[1]).applyMatrix4(root.matrixWorld).project(cam); if(v.x>bx){ bx=v.x; by=v.y; } }
-      const x=(bx*.5+.5)*W, y=(-by*.5+.5)*Hh, tg=tags[k];
-      tg.style.top=y+'px'; tg.style.setProperty('--lead',Math.max(8,W-tg.offsetWidth-6-x)+'px'); }
+    const W=el.clientWidth, Hh=el.clientHeight, L=[];
+    for(const k in tags){ const R=rings[k], sd=SIDE[k]; let bx=-1e9*sd,by=0;
+      // 引线从环上最靠近标签那一侧的点引出
+      for(let i=0;i<R.pts.length;i+=Math.max(1,R.pts.length>>6)){ const p=R.pts[i]; v.set(p[0],R.y,p[1]).applyMatrix4(root.matrixWorld).project(cam); if(v.x*sd>bx*sd){ bx=v.x; by=v.y; } }
+      L.push({k,sd,x:(bx*.5+.5)*W,y:(-by*.5+.5)*Hh}); }
+    for(const sd of [1,-1]){ const g=L.filter(o=>o.sd===sd).sort((a,b)=>a.y-b.y); g.forEach((o,i)=>{ o.ty=Math.max(o.y,i?g[i-1].ty+30:14); }); } // 同侧标签至少隔 30px
+    leads.setAttribute('viewBox',`0 0 ${W} ${Hh}`);
+    for(const o of L){ const t=tags[o.k], b=t.b, bw=b.offsetWidth, ex=o.sd>0?W-6-bw:6+bw;
+      b.style.top=o.ty+'px';
+      const mx=o.x+(ex-o.x)*.35; t.pa.setAttribute('d',`M${o.x.toFixed(1)},${o.y.toFixed(1)} L${mx.toFixed(1)},${o.y.toFixed(1)} L${(ex-o.sd*4).toFixed(1)},${o.ty.toFixed(1)}`);
+      t.dot.setAttribute('cx',o.x.toFixed(1)); t.dot.setAttribute('cy',o.y.toFixed(1)); }
   }
-  function focus(k){ for(const key in rings){ const on=!k||key===k; rings[key].g.traverse(o=>{ if(o.material){ o.material.opacity=on?1:.15; } }); tags[key]&&tags[key].classList.toggle('dim',!on); } kick(); }
+  function focus(k){ for(const key in rings){ const on=!k||key===k; rings[key].g.traverse(o=>{ if(o.material){ o.material.opacity=on?1:.15; } }); if(tags[key]){ tags[key].b.classList.toggle('dim',!on); tags[key].pa.style.opacity=tags[key].dot.style.opacity=on?'':'.25'; } } paint(); }
   const wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
   function frame(now){
     st.raf=0; if(!st.alive) return;
@@ -1154,10 +1199,11 @@ function build3D(el,r,M){
   cv.addEventListener('pointerdown',down); window.addEventListener('pointermove',move); window.addEventListener('pointerup',up); window.addEventListener('pointercancel',up);
   const ro=new ResizeObserver(()=>{ size(); kick(); }); ro.observe(el);
   const onVis=()=>{ if(document.hidden) st.auto=false; }; document.addEventListener('visibilitychange',onVis);
+  const mq=matchMedia('(prefers-color-scheme: dark)'), onScheme=()=>paint(); try{ mq.addEventListener('change',onScheme); }catch(e){} // 系统切换深浅色时重新上色
   size(); paint();
   B3.r={st,focus,paint,turnTo,
     face(k){ const o=cen[k]; if(!o) return; const x=o[0]/o[3], z=o[2]/o[3]; turnTo(Math.atan2(-x,z)); },
-    dispose(){ st.alive=false; cancelAnimationFrame(st.raf); ro.disconnect(); document.removeEventListener('visibilitychange',onVis);
+    dispose(){ st.alive=false; cancelAnimationFrame(st.raf); ro.disconnect(); document.removeEventListener('visibilitychange',onVis); try{ mq.removeEventListener('change',onScheme); }catch(e){}
       window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); window.removeEventListener('pointercancel',up);
       scene.traverse(o=>{ if(o.geometry) o.geometry.dispose(); if(o.material) o.material.dispose(); }); renderer.dispose(); cv.remove(); tagBox.remove(); }};
   if(T.hFocus) focus(T.hFocus);
@@ -1299,14 +1345,13 @@ const P={
     else { const nd=weekDates().map(iso).find(d=>d>today&&dayKey(d)); todayBlock=`<div><p class="eyebrow">今天休息</p><p class="h2">${nd?'下次 · 周'+DOW[new Date(nd+'T00:00').getDay()]+' '+plan[dayKey(nd)].name:'下周继续'}</p></div><button class="btn ghost block" type="button" data-tab="train">看训练计划</button>`; }
     return `
     <section class="hero" id="hero">
-      <div class="herobar"><span class="xs muted">目标 · ${esc(t.name)}</span></div>
+      <div class="herobar"><div style="min-width:0"><p class="eyebrow">目标身材</p><p class="h2">${esc(t.name)}</p>
+          <p class="small hsum">${figSummary(r)}</p></div><button class="link" type="button" data-go="target">更换${I.chev}</button></div>
       <div id="body3d" class="body3d"><p class="b3load xs muted">正在按你的尺寸生成模型…</p></div>
-      <div class="figkey"><span><i style="background:var(--under)"></i>比目标小</span><span><i style="background:var(--warm)"></i>比目标大</span><span><i style="background:var(--accent)"></i>达标</span></div>
       <div class="mpanel" id="mpanel" aria-live="polite">${musclePanel(T.muscle)}</div>
     </section>
     <div class="stack" style="gap:4px;margin-top:-10px">
       <p class="h1">${r.head}</p>
-      <div class="row2"><span class="small muted">目标：${esc(t.name)}</span><button class="link" type="button" data-go="target">更换${I.chev}</button></div>
       ${r.notes.map(n=>`<p class="xs muted">${n}</p>`).join('')}
     </div>
     <section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">体型建议 · 已加进本周计划</p>
