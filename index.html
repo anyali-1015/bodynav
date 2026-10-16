@@ -311,6 +311,59 @@ ol.how li::before{content:counter(s,decimal-leading-zero);font:500 12px/1.9 var(
 .ctrl .btn{min-height:48px;font-size:14.5px;padding:0 8px}
 .big{font-size:22px;font-weight:600;line-height:1.3}
 .label{font:500 11px var(--mono);letter-spacing:.06em;color:var(--muted)}
+/* 训练顺序：拖动排序 */
+.drow{display:grid;grid-template-columns:30px minmax(0,1fr) 36px;align-items:center;border-bottom:1px solid var(--line);background:var(--bg);position:relative}
+.drow.dragging{z-index:5;box-shadow:0 10px 28px rgba(0,0,0,.16);border-radius:12px;background:var(--surface);border-bottom-color:transparent;transition:none}
+.drow.settle{transition:transform .16s ease}
+.grip{display:grid;place-items:center;height:100%;min-height:56px;color:var(--faint);cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.grip svg{width:16px;height:16px}
+.dragging .grip{cursor:grabbing;color:var(--ink)}
+.dmain{display:grid;grid-template-columns:18px auto minmax(0,1fr) auto;gap:10px;align-items:center;border:0;background:none;text-align:left;padding:12px 0;cursor:pointer;min-width:0;color:inherit}
+.dmain .no{font-size:11px;color:var(--faint)}
+.dmain .t{display:block;font-weight:500}
+.dmain .s{display:block;font-size:13px;color:var(--muted);margin-top:1px}
+.dmain .ok svg{width:16px;height:16px}
+.drow.done .t{color:var(--muted)}
+.dx{border:0;background:none;color:var(--faint);width:36px;height:44px;display:grid;place-items:center;cursor:pointer}
+.dx svg{width:15px;height:15px}
+.eyebrow svg{width:12px;height:12px;vertical-align:-2px}
+.dtools{display:flex;flex-wrap:wrap;gap:8px}
+.dtools .chip2{display:inline-flex;align-items:center;gap:5px;padding:8px 14px}
+.dtools svg,.btn.ghost svg{width:15px;height:15px}
+.lrow{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:center;border-bottom:1px solid var(--line)}
+.lrow .li{border-bottom:0}
+.addb{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer;justify-self:end}
+.addb svg{width:16px;height:16px}
+.addb[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip2.wd{min-width:58px}
+/* 历史回顾 */
+.remind{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:var(--r);background:var(--warm-soft)}
+.remind.ok{background:var(--accent-soft)}
+.remind .row{display:flex;gap:8px;flex-wrap:wrap}
+.remind .btn{min-height:42px;padding:0 16px;font-size:14px}
+.filebtn{position:relative;overflow:hidden}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.hchart{width:100%;height:auto;display:block;overflow:visible}
+.hchart .ax{stroke:var(--line)}
+.hchart .ln{fill:none;stroke:var(--accent);stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.hchart .ar{fill:var(--accent);opacity:.08}
+.hchart .tg{stroke:var(--warm);stroke-dasharray:4 4;stroke-width:1.3}
+.hchart text{font:500 10px var(--mono);fill:var(--muted)}
+.hchart .pt{fill:var(--surface);stroke:var(--accent);stroke-width:2}
+.hdelta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.hdelta div{display:flex;flex-direction:column;gap:2px;padding:10px;border-radius:12px;background:var(--surface);box-shadow:0 0 0 1px var(--line)}
+.hdelta .k{font-size:11.5px;color:var(--muted)}
+.hdelta .v{font:600 16px var(--mono)}
+.hdelta .v.up{color:var(--accent)} .hdelta .v.bad{color:var(--warm)}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cmp figure{margin:0;display:flex;flex-direction:column;gap:4px}
+.cmp img,.cmp .ph0{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:12px;background:var(--line)}
+.cmp .ph0{display:grid;place-items:center;color:var(--faint);font-size:12px}
+.cmp figcaption{font:500 11px var(--mono);color:var(--muted);text-align:center}
+.hstrip{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.hstrip button{flex:0 0 auto;border:0;padding:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;font:500 10.5px var(--mono);color:var(--muted)}
+.hstrip img{width:52px;height:68px;object-fit:cover;border-radius:8px;background:var(--line);box-shadow:0 0 0 1px var(--line)}
+.hstrip button[aria-pressed="true"] img{box-shadow:0 0 0 2px var(--ink)}
 </style>
 </head>
 <body>
@@ -340,6 +393,9 @@ const I={
   checkBig:'<svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="#5cc2b4" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>',
   back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
   chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
+  grip:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  cam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
   trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg>',
   poseFront:'<svg class="pose" viewBox="0 0 64 120" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="12" r="8"/><path d="M20 28h24l4 34M20 28l-4 34M24 28l-2 40 4 46M40 28l2 40-4 46M32 70v44"/></svg>',
@@ -404,6 +460,11 @@ const EX={
   russian_twist:{name:'俄罗斯转体',reps:'10 次/侧',img:'Russian_Twist',p:['obliques'],s:['abs'],steps:['坐姿，上身后倾约 45°，脚可着地','双手合在胸前，向一侧转','回到中间再转向另一侧'],cue:'转的是胸口，不只是手',avoid:'弓背、速度太快'},
   superman:{name:'超人式',reps:'10–12 次',img:'Superman',p:['lowerBack'],s:['gluteal'],steps:['俯卧，手臂向前伸直','同时抬起手臂和腿','停 2 秒后慢慢放下'],cue:'往远处伸，而不是往高处抬',avoid:'仰头'},
   back_ext:{name:'山羊挺身',reps:'10–12 次',img:'Hyperextensions_Back_Extensions',p:['lowerBack'],s:['gluteal','hamstring'],steps:['髋部卡在垫子边缘，双手抱胸','背部平直地向下俯身','臀部发力，起到身体成直线'],cue:'起到平直就停',avoid:'顶端过度后仰'},
+  arm_circle:{name:'手臂绕环',reps:'30 秒',img:'Arm_Circles',warm:1,p:['deltoids'],s:['trapezius'],steps:['双脚与肩同宽，手臂向两侧平举','从小圈开始向前绕，慢慢加大','15 秒后换方向向后绕'],cue:'肩膀放松下沉',avoid:'耸肩、甩得太快'},
+  hip_circle:{name:'站姿髋绕环',reps:'30 秒',img:'Standing_Hip_Circles',warm:1,p:['gluteal'],s:['abs'],steps:['双手叉腰，双脚与肩同宽','髋部画大圈，上身尽量不动','15 秒后换方向'],cue:'圈画大一点、慢一点',avoid:'上身跟着晃'},
+  bw_squat:{name:'徒手深蹲',reps:'12 次',img:'Bodyweight_Squat',warm:1,p:['quadriceps','gluteal'],s:['hamstring'],steps:['双脚略宽于肩，双手向前伸','髋往后坐，蹲到舒服的深度','脚掌发力站起'],cue:'慢一点，把髋和膝唤醒',avoid:'膝盖内扣'},
+  inchworm:{name:'尺蠖爬',reps:'40 秒',img:'Inchworm',warm:1,p:['hamstring','abs'],s:['deltoids'],steps:['站姿俯身，双手尽量贴地','双手向前爬到俯撑','双脚小步走向双手，再站起'],cue:'腿尽量伸直，感受大腿后侧',avoid:'俯撑时塌腰'},
+  wgs:{name:'弓步转体拉伸',reps:'每侧 20 秒',img:'Worlds_Greatest_Stretch',warm:1,p:['quadriceps','gluteal'],s:['obliques','hamstring'],steps:['向前大步弓步，后腿伸直','同侧手撑地，另一只手向上打开转体','停 2 秒还原，做完换另一侧'],cue:'眼睛跟着上面的手走',avoid:'前膝内扣'},
   plie_squat:{name:'相扑深蹲',reps:'10–12 次',img:'Plie_Dumbbell_Squat',p:['adductors','quadriceps'],s:['gluteal'],steps:['双脚宽站，脚尖外转约 45°','双手持哑铃垂在中间','垂直下蹲，再用脚掌发力站起'],cue:'膝盖和脚尖同一方向',avoid:'膝盖内扣'}
 };
 const SLUG_CN={deltoids:'三角肌',trapezius:'斜方肌',upperBack:'背阔肌',rhomboids:'菱形肌',biceps:'肱二头肌',triceps:'肱三头肌',chest:'胸大肌',abs:'腹直肌',obliques:'腹斜肌',gluteal:'臀肌',hamstring:'腘绳肌',quadriceps:'股四头肌',adductors:'内收肌',calves:'小腿',lowerBack:'下背'};
@@ -440,12 +501,19 @@ const W={focus:3,boost:2,keep:1,less:.5};
 const LVNAME={focus:'重点',boost:'加强',keep:'保持',less:'少量'};
 const UPPER=['delt','lats','rear','pecs'], LOWER=['gmax','gmed','hams','quads'];
 const DOW=['日','一','二','三','四','五','六'];
-const SCHED={1:'A',3:'B',5:'C'}; // 周一 / 周三 / 周五
 const DAYNAME={A:'上肢',B:'下肢',C:'重点强化'};
+/* 训练日：用户在「我的」里选周几练，按选中的天依次轮换。2 天、4 天用上肢 / 下肢两分（重点并回这两天），3、5、6 天轮换 A 上肢 / B 下肢 / C 重点强化 */
+const DAY_PRESET={2:[2,5],3:[1,3,5],4:[1,2,4,5],5:[1,2,3,5,6],6:[1,2,3,4,5,6]};
+const trainDays=()=>(S.days&&S.days.length>=2?S.days:DAY_PRESET[3]).slice().sort((a,b)=>(a+6)%7-(b+6)%7);
+const twoSplit=()=>[2,4].includes(trainDays().length);
+const sched=()=>{ const o={}, n=twoSplit()?2:3; trainDays().forEach((w,i)=>o[w]='ABC'[i%n]); return o; };
+const daysTxt=()=>trainDays().map(w=>DOW[w]).join('、');
+/* 热身：每个训练日开头 3 个，约 3 分钟 */
+const WARM={A:['arm_circle','band_pull','inchworm'],B:['hip_circle','wgs','bw_squat'],C:['arm_circle','hip_circle','wgs']};
 
 /* ---------------- state ---------------- */
 const KEY='bodynav.v4';
-const S={mode:'a',sex:null,target:'square',tgt:null,af:{frame:'m',foci:['shoulder','hip','waist']},rounded:true,apt:false,meas:null,done:{},swap:{},notes:{},voice:true,countVoice:true,h:null};
+const S={days:[1,3,5],day:{},log:[],remind:14,mode:'a',sex:null,target:'square',tgt:null,af:{frame:'m',foci:['shoulder','hip','waist']},rounded:true,apt:false,meas:null,done:{},swap:{},notes:{},voice:true,countVoice:true,h:null};
 const T={ph:{front:null,side:null,ref:null},step:'front',mtab:S.meas&&S.meas.src==='scan'?'scan':'manual',man:null,coachKey:'A',draft:null,hFocus:null,selDay:null,muscle:null};
 try{
   const r=localStorage.getItem(KEY);
@@ -453,6 +521,8 @@ try{
   else{ const o=JSON.parse(localStorage.getItem('bodynav.v3')||'null'); if(o){ ['target','rounded','apt','done','swap','voice','countVoice'].forEach(k=>{ if(k in o) S[k]=o[k]; }); } }
 }catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
+/* 每天的自定义（顺序、加的动作、删掉的动作、要不要热身）只留最近 30 天 */
+(()=>{ const old=new Date(Date.now()-30*864e5).toISOString().slice(0,10); for(const d in S.day) if(d<old) delete S.day[d]; })();
 
 /* ---------------- body math ---------------- */
 // 椭圆周长（Ramanujan 近似），宽 w、厚 d
@@ -521,6 +591,9 @@ function cur(){
 }
 const isApp=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 const isSample=()=>!(S.mode==='photo'&&S.meas);
+/* 只存了四个围度的旧测量（试用版留下的）：按手动输入的方式补回宽度，避免出现 NaN */
+if(S.meas&&S.meas.cm&&S.meas.cm.waistW==null){ try{ const c=S.meas.cm, raw={shoulderW:c.shoulder,waistW:c.waist/ellipse(1,DK().waist),hipW:c.hip/ellipse(1,DK().hip),thighW:(c.thigh||c.hip*.56)/ellipse(1,DK().thigh)};
+  S.meas={...derive(raw,S.meas.h||S.h||null,null),est:[],raw,src:S.meas.src||'manual'}; }catch(e){ S.meas=null; S.mode=samplesOf(sx())[0]; } }
 
 /* ---------------- plan logic ---------------- */
 function analyze(){
@@ -571,14 +644,18 @@ function analyze(){
 function weekPlan(r){
   const D={A:{name:'上肢',items:[]},B:{name:'下肢',items:[]},C:{name:'重点强化',items:[]}};
   const order=Object.keys(r.L).sort((a,b)=>W[r.L[b]]-W[r.L[a]]);
+  const two=twoSplit(), rep={A:0,B:0,C:0}; Object.values(sched()).forEach(k=>rep[k]++);
   for(const id of order){
-    const lv=r.L[id], s=r.sets[id], g=UPPER.includes(id)?'A':LOWER.includes(id)?'B':'C';
-    if(g!=='C' && (lv==='focus'||lv==='boost') && s>=4){
+    const lv=r.L[id], s=r.sets[id], g=UPPER.includes(id)?'A':LOWER.includes(id)?'B':two?'B':'C';
+    if(!two && g!=='C' && (lv==='focus'||lv==='boost') && s>=4){
       const a=Math.ceil(s/2); D[g].items.push({mu:id,lv,sets:a}); D.C.items.push({mu:id,lv,sets:s-a,alt:1});
+    } else if(two && (lv==='focus'||lv==='boost') && s>=5 && MUSCLES[id].ex[1]){ // 两分时组数多的肌群拆成两个动作
+      const a=Math.ceil(s/2); D[g].items.push({mu:id,lv,sets:a},{mu:id,lv,sets:s-a,alt:1});
     } else D[g].items.push({mu:id,lv,sets:s});
   }
   if(S.rounded) D.A.items.push({mu:null,ex:'chest_stretch',lv:'keep',sets:1,stretch:1});
   if(S.apt) D.B.items.push({mu:null,ex:'hipflex_stretch',lv:'keep',sets:1,stretch:1});
+  for(const k in D) if(rep[k]>1) D[k].items.forEach(it=>{ if(!it.stretch) it.sets=Math.max(2,Math.round(it.sets/rep[k])); }); // 一周练两次的那天，每次分一半组数，周总量不变
   for(const k in D){ D[k].sets=D[k].items.reduce((a,it)=>a+(it.stretch?0:it.sets),0); D[k].min=Math.max(15,Math.round((D[k].sets*2.6+(D[k].items.some(i=>i.stretch)?3:0))/5)*5); }
   return D;
 }
@@ -589,7 +666,20 @@ function weekDates(){
 }
 const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const todayISO=()=>iso(new Date());
-function dayProgress(date,key,plan){ const its=plan[key].items; const n=its.filter(it=>S.done[date+':'+exOf(key,it)]).length; return {n,total:its.length}; }
+/* 某一天要做的动作：热身 + 计划 + 自己加的，按用户拖好的顺序；id 用来记顺序和删除 */
+const dayO=d=>S.day[d]||(S.day[d]={});
+const dayKey=d=>sched()[new Date(d+'T00:00').getDay()]||(S.day[d]||{}).k||null;
+const addSets=e=>EX[e].warm||/拉伸/.test(EX[e].name)?1:3;
+function dayItems(date,k,plan){
+  const o=S.day[date]||{}, L=[];
+  if(k){ if(o.wu!==false) WARM[k].forEach(e=>L.push({id:'w:'+e,e,sets:1,warm:1}));
+    plan[k].items.forEach(it=>L.push({...it,id:it.ex?'s:'+it.ex:it.mu+(it.alt?'*':''),e:exOf(k,it)})); }
+  (o.add||[]).forEach(e=>L.push({id:'x:'+e,e,sets:addSets(e),add:1,stretch:/拉伸/.test(EX[e].name)?1:0,warm:EX[e].warm}));
+  const del=new Set(o.del||[]), ord=o.order||[];
+  return L.filter(it=>!del.has(it.id)).map((it,i)=>{ const j=ord.indexOf(it.id); return [it,j>=0?j:it.warm&&!it.add?i-1e3:1e3+i]; }).sort((a,b)=>a[1]-b[1]).map(x=>x[0]);
+}
+const dayMin=its=>Math.max(10,Math.round(its.reduce((a,it)=>a+(it.warm?1:it.stretch?1.5:it.sets*2.6),0)/5)*5);
+function dayProgress(date,key,plan){ const its=dayItems(date,key,plan); const n=its.filter(it=>S.done[date+':'+it.e]).length; return {n,total:its.length}; }
 const notesOf=e=>S.notes[e]||[];
 
 /* ---------------- 2D fallback figure ---------------- */
@@ -1074,27 +1164,121 @@ function ratioRow(name,c,tg){
 }
 function weekStrip(plan,sel,act){
   const today=todayISO();
-  return `<div class="week" role="group" aria-label="本周">${weekDates().map(d=>{ const k=SCHED[d.getDay()], di=iso(d);
-    let cls=k?'train':'rest', inner=k?DAYNAME[k][0]:'·';
-    if(k){ const p=dayProgress(di,k,plan); if(p.total&&p.n===p.total){ cls='done'; inner=I.check; } }
-    return `<button type="button" class="${cls} ${di===sel?'sel':''}" ${act?`data-act="${act}" data-arg="${di}"`:'disabled'} aria-label="周${DOW[d.getDay()]}${k?' '+DAYNAME[k]:' 休息'}"><span>${DOW[d.getDay()]}</span><span class="dd">${inner}</span>${di===today?'<span class="today-mark"></span>':'<span style="height:4px"></span>'}</button>`; }).join('')}</div>`;
+  return `<div class="week" role="group" aria-label="本周">${weekDates().map(d=>{ const di=iso(d), k=dayKey(di), p=dayProgress(di,k,plan), on=p.total>0;
+    let cls=on?'train':'rest', inner=k?DAYNAME[k][0]:on?'+':'·';
+    if(on&&p.n===p.total){ cls='done'; inner=I.check; }
+    return `<button type="button" class="${cls} ${di===sel?'sel':''}" ${act?`data-act="${act}" data-arg="${di}"`:'disabled'} aria-label="周${DOW[d.getDay()]}${k?' '+DAYNAME[k]:on?' 自选':' 休息'}"><span>${DOW[d.getDay()]}</span><span class="dd">${inner}</span>${di===today?'<span class="today-mark"></span>':'<span style="height:4px"></span>'}</button>`; }).join('')}</div>`;
 }
-function nextTrainDay(){ const ds=weekDates(), t=todayISO(); const td=ds.find(d=>iso(d)===t&&SCHED[d.getDay()]); if(td) return iso(td); const n=ds.find(d=>iso(d)>t&&SCHED[d.getDay()]); return n?iso(n):t; }
+function nextTrainDay(){ const ds=weekDates().map(iso), t=todayISO(); if(dayKey(t)) return t; return ds.find(d=>d>t&&dayKey(d))||t; }
 const imgSrc=(e,n)=>`ex/${EX[e].img}_${n}.jpg`;
 // 本地没有图片时（如 GitHub Pages）退回 jsDelivr 上的 free-exercise-db 原图
 document.addEventListener('error',ev=>{ const im=ev.target; if(!(im instanceof HTMLImageElement)||im.dataset.fb) return; const m=(im.getAttribute('src')||'').match(/^ex\/(.+)_(\d)\.jpg$/); if(!m) return; im.dataset.fb='1'; im.src=`https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises/${m[1]}/${m[2]}.jpg`; },true);
+
+/* ---------------- 历史回顾 ----------------
+   每次保存测量记一笔（同一天覆盖），可以附一张全身照（存在本机 IndexedDB，不上传）。
+   提醒按 S.remind 天数：到期后首页和「历史回顾」提示拍照。样例数据下给一段示意曲线。 */
+const hkey=d=>'bodynav.hist.'+d;
+const HURL={};
+const dayDiff=(a,b)=>Math.round((new Date(b+'T00:00')-new Date(a+'T00:00'))/864e5);
+const md=d=>{ const [,m,x]=d.split('-'); return `${+m}/${+x}`; };
+function logMeas(m){ const c=m.cm, d=todayISO(), old=S.log.find(x=>x.d===d)||{};
+  S.log=S.log.filter(x=>x.d!==d).concat({...old,d,cm:cm1({shoulder:c.shoulder,waist:c.waist,hip:c.hip,thigh:c.thigh}),swr:+f2(m.swr),hwr:+f2(m.hwr)}).sort((a,b)=>a.d<b.d?-1:1); }
+if(S.meas&&!S.log.length) logMeas(S.meas);
+function demoLog(){ const m=cur(), c=m.cm, M=sx()==='m', t0=new Date();
+  return [63,42,21,0].map((ago,i)=>{ const t=(3-i)/3, d=new Date(t0); d.setDate(d.getDate()-ago);
+    const cm={shoulder:c.shoulder-1.4*t,waist:c.waist+2.6*t,hip:c.hip-(M?1.5:3.2)*t,thigh:c.thigh-.6*t};
+    return {d:iso(d),cm:cm1(cm),swr:+f2(m.swr*cm.shoulder/c.shoulder*c.waist/cm.waist),hwr:+f2(m.hwr*cm.hip/c.hip*c.waist/cm.waist)}; }); }
+const histData=()=>S.log.length?{log:S.log,demo:false}:isSample()?{log:demoLog(),demo:true}:{log:[],demo:false};
+const lastLog=()=>S.log.length?S.log[S.log.length-1].d:null;
+const histDue=()=>{ const l=lastLog(); return l?dayDiff(l,todayISO())>=S.remind:false; };
+const remindLine=()=>histDue()?`<button class="linkbtn" type="button" data-act="openHist" style="align-self:center">距上次记录 ${dayDiff(lastLog(),todayISO())} 天 · 拍张全身照看看变化</button>`:'';
+const HM=[['shoulder','肩宽',1],['waist','腰围',-1],['hip','臀围',1],['thigh','腿围',0],['swr','肩腰比',1]];
+function histChart(pts,tg,dec){
+  const W=330,H=150,l=34,r=12,t=14,b=24, dv=pts.map(p=>p.v), sp=Math.max(Math.max(...dv)-Math.min(...dv),dec?.05:1);
+  const far=tg!=null&&(tg>Math.max(...dv)+2*sp?1:tg<Math.min(...dv)-2*sp?-1:0), vs=dv.concat(tg!=null&&!far?[tg]:[]); // 目标太远就不画线，只在边上标出，免得曲线被压平
+  let lo=Math.min(...vs), hi=Math.max(...vs); const pad=(hi-lo||1)*.18; lo-=pad; hi+=pad;
+  const t0=pts[0].d, span=Math.max(1,dayDiff(t0,pts[pts.length-1].d));
+  const X=d=>l+(W-l-r)*(pts.length>1?dayDiff(t0,d)/span:.5), Y=v=>t+(H-t-b)*(1-(v-lo)/(hi-lo));
+  const fm=v=>dec?v.toFixed(2):f1(v), line=pts.map((p,i)=>`${i?'L':'M'}${X(p.d).toFixed(1)},${Y(p.v).toFixed(1)}`).join('');
+  return `<svg class="hchart" viewBox="0 0 ${W} ${H}" role="img" aria-label="变化曲线：从 ${fm(pts[0].v)} 到 ${fm(pts[pts.length-1].v)}">
+    ${[lo+pad,hi-pad].map(v=>`<line class="ax" x1="${l}" x2="${W-r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${l-6}" y="${Y(v)+3}" text-anchor="end">${fm(v)}</text>`).join('')}
+    ${far?`<text x="${W-r}" y="${far>0?t-2:H-b-4}" text-anchor="end" style="fill:var(--warm)">目标 ${fm(tg)} ${far>0?'↑':'↓'}</text>`:''}
+    ${tg!=null&&!far?`<line class="tg" x1="${l}" x2="${W-r}" y1="${Y(tg)}" y2="${Y(tg)}"/><text x="${W-r}" y="${Y(tg)-5}" text-anchor="end" style="fill:var(--warm)">目标 ${fm(tg)}</text>`:''}
+    ${pts.length>1?`<path class="ar" d="${line}L${X(pts[pts.length-1].d)},${H-b}L${X(t0)},${H-b}Z"/>`:''}<path class="ln" d="${line}"/>
+    ${pts.map(p=>`<circle class="pt" cx="${X(p.d)}" cy="${Y(p.v)}" r="3.5"/>`).join('')}
+    <text x="${X(t0)}" y="${H-6}" text-anchor="${pts.length>1?'start':'middle'}">${md(t0)}</text>${pts.length>1?`<text x="${W-r}" y="${H-6}" text-anchor="end">${md(pts[pts.length-1].d)}</text>`:''}
+  </svg>`;
+}
+function histHTML(){
+  const {log,demo}=histData(), r=analyze(), FM=figMetrics(r), last=lastLog(), n=last?dayDiff(last,todayISO()):null;
+  const up=`<label class="btn ${histDue()||!last?'':'ghost'} filebtn">${I.cam}拍照记录<input type="file" accept="image/*" data-hup="1" aria-label="上传今天的全身照"></label>`;
+  const remind=`<div class="remind ${last&&!histDue()?'ok':''}">
+      <p class="h2" style="font-size:17px">${!last?'开始记录你的变化':histDue()?`距上次记录已经 ${n} 天`:n===0?'今天已记录':`${n} 天前记录过`}</p>
+      <p class="small muted">${!last?'每隔一段时间拍一张同样姿势的全身照、测一次尺寸，就能看到身材一点点在变。':histDue()?'拍一张全身照、重新测一次尺寸，看看这段时间的变化。':`下次提醒：${md(iso(new Date(new Date(last+'T00:00').getTime()+S.remind*864e5)))}。同样的光线、姿势和距离，对比最准。`}</p>
+      <div class="row">${up}<button class="btn ghost" type="button" data-go="measure">重新测量</button></div></div>`;
+  const freq=`<div class="between"><span class="small muted">提醒间隔</span><div class="seg sm" role="group" aria-label="提醒间隔">${[[7,'每周'],[14,'两周'],[28,'每月']].map(([v,l])=>`<button type="button" data-act="setRemind" data-arg="${v}" aria-pressed="${S.remind===v}">${l}</button>`).join('')}</div></div>`;
+  const ms=log.filter(x=>x.cm);
+  if(!ms.length&&!log.length) return remind+freq+`<p class="small muted">还没有记录。保存一次测量，或者先拍一张全身照，这里就会出现你的第一个记录点。</p>`;
+  const k=T.hm||'shoulder', [,kn,dir]=HM.find(h=>h[0]===k), dec=k==='swr';
+  const pts=ms.map(x=>({d:x.d,v:k==='swr'?x.swr:x.cm[k]})), tg=k==='swr'?r.t.swr:FM[k]&&FM[k].tgt;
+  const first=ms[0], lastM=ms[ms.length-1];
+  const delta=HM.slice(0,4).map(([kk,nn,dd])=>{ const v=lastM.cm[kk]-first.cm[kk], good=dd===0?'':v*dd>0.05?'up':v*dd<-0.05?'bad':'';
+    return `<div><span class="k">${nn}</span><span class="v ${good}">${Math.abs(v)<.05?'±0':(v>0?'+':'−')+f1(Math.abs(v))}</span></div>`; }).join('');
+  const phs=log.filter(x=>x.ph), sel=(T.cmp&&T.cmp.filter(d=>phs.some(x=>x.d===d)).length===2)?T.cmp:phs.length>=2?[phs[0].d,phs[phs.length-1].d]:phs.map(x=>x.d);
+  const fig=d=>d?`<figure><img data-hph="${d}" alt="${md(d)} 的全身照"><figcaption>${d}</figcaption></figure>`:`<figure><div class="ph0">再拍一张就能对比</div><figcaption>下一次</figcaption></figure>`;
+  return `${demo?'<p class="xs muted" style="padding:10px 12px;border-radius:12px;background:var(--surface);box-shadow:0 0 0 1px var(--line)">这是用样例数据画的示意曲线。测量你自己的身材后，这里会换成你的真实记录。</p><button class="btn ghost block" type="button" data-go="measure">测量我的身材，开始记录</button>':''}
+    ${demo?'':remind+freq}
+    ${ms.length?`<section class="stack" style="gap:10px">
+      <div class="between"><p class="eyebrow">${ms.length>1?`${dayDiff(first.d,lastM.d)} 天的变化`:'第一次记录'}</p><span class="xs muted">${ms.length} 次测量</span></div>
+      ${ms.length>1?`<div class="hdelta">${delta}</div>`:''}
+      <div><div class="seg sm" role="group" aria-label="曲线指标" style="width:100%">${HM.map(([kk,nn])=>`<button type="button" data-act="histMetric" data-arg="${kk}" aria-pressed="${k===kk}">${nn}</button>`).join('')}</div></div>
+      ${histChart(pts,tg,dec)}
+      <p class="xs muted">${kn}${ms.length>1?`：${dec?pts[0].v.toFixed(2):f1(pts[0].v)} → ${dec?lastM.swr.toFixed(2):f1(pts[pts.length-1].v)}${dec?'':' cm'}${dir&&tg!=null?`，目标 ${dec?tg.toFixed(2):f1(tg)}`:''}`:' · 再测一次就能画出曲线'}</p>
+    </section>`:''}
+    ${phs.length?`<section class="stack" style="gap:10px"><p class="eyebrow">照片对比</p>
+      <div class="cmp">${fig(sel[0])}${fig(sel[1])}</div>
+      ${phs.length>2?`<div class="hstrip" role="group" aria-label="选两张对比">${phs.map(x=>`<button type="button" data-act="histPick" data-arg="${x.d}" aria-pressed="${sel.includes(x.d)}"><img data-hph="${x.d}" alt=""><span>${md(x.d)}</span></button>`).join('')}</div><p class="xs muted">点两张照片对比。</p>`:''}
+    </section>`:''}
+    ${demo?'':`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">全部记录</p><div class="list">${log.slice().reverse().map(x=>`<div class="li" style="cursor:default"><span class="idx mono">${md(x.d)}</span><span style="min-width:0"><span class="t">${x.cm?`肩 ${f1(x.cm.shoulder)} · 腰 ${Math.round(x.cm.waist)} · 臀 ${Math.round(x.cm.hip)}`:'只有照片'}${x.ph?'<span class="badge acc">照片</span>':''}</span><span class="s">${x.cm?`腿 ${Math.round(x.cm.thigh)} cm · 肩腰比 ${x.swr.toFixed(2)}`:x.d}</span></span><button class="dx" type="button" data-act="histDel" data-arg="${x.d}" aria-label="删除 ${x.d} 的记录">${I.trash}</button></div>`).join('')}</div>
+      <p class="xs muted" style="margin-top:8px">照片和数据只存在这台设备上，不会上传。</p></section>`}`;
+}
+async function histPhotos(){ for(const im of document.querySelectorAll('img[data-hph]')){ const d=im.dataset.hph;
+  if(!HURL[d]){ try{ const b=await kvGet(hkey(d)); if(b) HURL[d]=URL.createObjectURL(b); }catch(e){} }
+  if(HURL[d]) im.src=HURL[d]; } }
+async function histAddPhoto(file){
+  try{ const {b}=await shrink(file), d=todayISO(); await kvSet(hkey(d),b); if(HURL[d]){ URL.revokeObjectURL(HURL[d]); delete HURL[d]; }
+    const old=S.log.find(x=>x.d===d); if(old) old.ph=1; else { S.log.push(isSample()?{d,ph:1}:{d,ph:1,cm:cm1({shoulder:cur().cm.shoulder,waist:cur().cm.waist,hip:cur().cm.hip,thigh:cur().cm.thigh}),swr:+f2(cur().swr),hwr:+f2(cur().hwr)}); S.log.sort((a,c)=>a.d<c.d?-1:1); }
+    save(); T.meTab='hist'; refresh(); toast('已记录今天的照片'); }catch(e){ toast('这张照片读不出来，换一张试试'); }
+}
+document.addEventListener('change',e=>{ const t=e.target; if(t.dataset&&t.dataset.hup&&t.files&&t.files[0]) histAddPhoto(t.files[0]); });
+
+/* 拖动排序：按住左侧把手上下拖，经过相邻一行的中线就交换；松手后记下这一天的顺序 */
+let DRG=null;
+document.addEventListener('pointerdown',e=>{ const g=e.target.closest('.grip'), row=g&&g.closest('.drow'); if(!row) return;
+  e.preventDefault(); try{ g.setPointerCapture(e.pointerId); }catch(_){}
+  DRG={row,list:row.parentElement,y0:e.clientY,y:e.clientY,moved:false}; row.classList.add('dragging'); });
+function dragTo(y){ const {row,list}=DRG; let pv, nx, b;
+  while((pv=row.previousElementSibling)&&y<DRG.y0&&y<(b=pv.getBoundingClientRect()).top+b.height/2){ list.insertBefore(row,pv); DRG.y0-=b.height; DRG.moved=true; }
+  while((nx=row.nextElementSibling)&&y>DRG.y0&&y>(b=nx.getBoundingClientRect()).top+b.height/2){ list.insertBefore(nx,row); DRG.y0+=b.height; DRG.moved=true; }
+  row.style.transform=`translateY(${y-DRG.y0}px)`; }
+document.addEventListener('pointermove',e=>{ if(!DRG) return; e.preventDefault(); dragTo(e.clientY);
+  const v=$('view'), b=v.getBoundingClientRect(), sp=e.clientY<b.top+56?-10:e.clientY>b.bottom-56?10:0;
+  if(sp){ const s0=v.scrollTop; v.scrollTop+=sp; DRG.y0-=v.scrollTop-s0; dragTo(e.clientY); } },{passive:false});
+const dragEnd=()=>{ if(!DRG) return; const {row,list,moved}=DRG; DRG=null; row.classList.remove('dragging'); row.style.transform='';
+  if(!moved) return; dayO(list.dataset.date).order=[...list.querySelectorAll('.drow')].map(r=>r.dataset.id); save(); refresh(); toast('顺序已保存，整体跟练按这个顺序'); };
+document.addEventListener('pointerup',dragEnd); document.addEventListener('pointercancel',dragEnd);
 
 /* ---------------- pages ---------------- */
 const P={
   home:{root:1,title:'',aside:()=>isSample()?'样例数据':'',render(){
     const r=analyze(), m=r.m, c=m.cm, t=r.t;
-    const plan=weekPlan(r), today=todayISO(), tk=SCHED[new Date().getDay()];
+    const plan=weekPlan(r), today=todayISO(), tk=dayKey(today), tIt=dayItems(today,tk,plan);
     const FM=figMetrics(r), need=k=>FM[k].d!=null&&FM[k].d<-TOL[k]&&k!=='waist'?['+'+f1(-FM[k].d),'warm']:FM[k].d!=null&&k==='waist'&&FM[k].d>TOL[k]?['−'+f1(FM[k].d),'warm']:null;
     const met=(k,label,val,sub,cls='')=>`<button class="metric" type="button" data-act="focus" data-arg="${k}" aria-pressed="${T.hFocus===k}"><span class="k">${label}${m.est.includes(k)?'<span class="est">估</span>':''}</span><span class="num">${val}<small>cm</small></span><span class="d ${cls}">${sub}</span></button>`;
     let todayBlock;
-    if(tk){ const p=dayProgress(today,tk,plan); todayBlock=`<div class="between"><div><p class="eyebrow">今天</p><p class="h2">${plan[tk].name} · ${plan[tk].items.length} 个动作</p><p class="small muted">约 ${plan[tk].min} 分钟${p.n?` · 已完成 ${p.n}/${p.total}`:''}</p></div></div>
+    if(tIt.length){ const p=dayProgress(today,tk,plan); todayBlock=`<div class="between"><div><p class="eyebrow">今天</p><p class="h2">${tk?plan[tk].name:'自选训练'} · ${tIt.length} 个动作</p><p class="small muted">${tIt.some(i=>i.warm)?'含热身 · ':''}约 ${dayMin(tIt)} 分钟${p.n?` · 已完成 ${p.n}/${p.total}`:''}</p></div></div>
       <button class="btn block" type="button" data-tab="train">开始今天的训练</button>`; }
-    else { const nd=weekDates().find(d=>d>new Date()&&SCHED[d.getDay()]); todayBlock=`<div><p class="eyebrow">今天休息</p><p class="h2">${nd?'下次 · 周'+DOW[nd.getDay()]+' '+plan[SCHED[nd.getDay()]].name:'下周一继续'}</p></div><button class="btn ghost block" type="button" data-tab="train">看训练计划</button>`; }
+    else { const nd=weekDates().map(iso).find(d=>d>today&&dayKey(d)); todayBlock=`<div><p class="eyebrow">今天休息</p><p class="h2">${nd?'下次 · 周'+DOW[new Date(nd+'T00:00').getDay()]+' '+plan[dayKey(nd)].name:'下周继续'}</p></div><button class="btn ghost block" type="button" data-tab="train">看训练计划</button>`; }
     return `
     <section class="hero" id="hero">
       <div class="herobar"><span class="xs muted">目标 · ${esc(t.name)}</span></div>
@@ -1121,59 +1305,81 @@ const P={
       ${ratioRow('肩腰比',m.swr,t.swr)}${ratioRow('臀腰比',m.hwr,t.hwr)}
       ${isSample()?`<p class="small muted">这是演示用的样例身材。<button class="link" type="button" data-go="measure">测量我的${I.chev}</button></p>`:`<p class="xs muted">${m.src==='manual'?(m.est.length?'尺寸为你手动输入，大腿围按臀围估算。':'尺寸为你手动输入。'):m.src==='scan'?'围度由正面照宽度按常见体型估算。':m.est.length?'没有侧面照，围度按常见体型估算。':'围度由正面宽度和侧面厚度按椭圆估算。'}<button class="link xs" type="button" data-go="measure">更新测量${I.chev}</button></p>`}
     </div>
-    <section class="today">${todayBlock}</section>`;
+    <section class="today">${todayBlock}${remindLine()}</section>`;
   },after(){ mountBody($('body3d'),analyze()); },leave(){ unmount3D(); }},
   plan:{title:'本周计划',render(){
     const r=analyze(), plan=weekPlan(r), today=todayISO();
     const focusTxt=r.focus.length?r.focus.map(id=>MUSCLES[id].name).join('、'):'整体保持';
-    const rows=weekDates().map(d=>{const k=SCHED[d.getDay()], di=iso(d), isT=di===today;
+    const rows=weekDates().map(d=>{const di=iso(d), k=dayKey(di), its=dayItems(di,k,plan), isT=di===today;
       const day=`<span class="idx">周${DOW[d.getDay()]}</span>`;
-      if(!k) return `<button class="li" type="button" disabled>${day}<span class="muted">休息${isT?'<span class="badge">今天</span>':''}</span><span></span></button>`;
+      if(!its.length) return `<button class="li" type="button" data-act="openDay" data-arg="${di}">${day}<span class="muted">休息${isT?'<span class="badge">今天</span>':''}</span><span class="r">${I.chev}</span></button>`;
       const p=dayProgress(di,k,plan);
-      const names=[...new Set(plan[k].items.filter(i=>!i.stretch).slice(0,3).map(i=>MUSCLES[i.mu].name))].join('、');
-      return `<button class="li" type="button" data-act="openDay" data-arg="${di}">${day}<span style="min-width:0"><span class="t">${plan[k].name}${isT?'<span class="badge">今天</span>':''}${p.total&&p.n===p.total?'<span class="badge acc">已完成</span>':''}</span><span class="s">${names} · ${plan[k].min} 分钟</span></span><span class="r">${p.n?p.n+'/'+p.total:''}${I.chev}</span></button>`;}).join('');
+      const names=[...new Set(its.filter(i=>!i.stretch&&!i.warm).slice(0,3).map(i=>i.mu?MUSCLES[i.mu].name:EX[i.e].name))].join('、');
+      return `<button class="li" type="button" data-act="openDay" data-arg="${di}">${day}<span style="min-width:0"><span class="t">${k?plan[k].name:'自选'}${isT?'<span class="badge">今天</span>':''}${p.total&&p.n===p.total?'<span class="badge acc">已完成</span>':''}</span><span class="s">${names} · ${dayMin(its)} 分钟</span></span><span class="r">${p.n?p.n+'/'+p.total:''}${I.chev}</span></button>`;}).join('');
     return `<div class="stack" style="gap:6px"><p class="eyebrow">本周重点</p><p class="h1">${focusTxt}</p>
-      <p class="small muted">按「${esc(r.t.name)}」和你现在的差距安排，每周约 ${Object.values(r.sets).reduce((a,b)=>a+b,0)} 组，练三天。</p></div>
+      <p class="small muted">按「${esc(r.t.name)}」和你现在的差距安排，每周约 ${Object.values(r.sets).reduce((a,b)=>a+b,0)} 组，练 ${trainDays().length} 天（周${daysTxt()}）。</p>
+      <button class="link" type="button" data-go="days">调整训练日${I.chev}</button></div>
       <div class="list">${rows}</div>`;
   }},
   train:{root:1,title:'训练',render(){
     const r=analyze(), plan=weekPlan(r);
-    const sel=T.selDay||nextTrainDay(); const d=new Date(sel+'T00:00'); const tk=SCHED[d.getDay()];
-    const k=tk||T.coachKey||'A', day=plan[k], p=dayProgress(sel,k,plan), isToday=sel===todayISO();
-    const when=isToday?'今天':'周'+DOW[d.getDay()];
+    const sel=T.selDay||nextTrainDay(), d=new Date(sel+'T00:00'), base=sched()[d.getDay()], k=dayKey(sel), o=S.day[sel]||{};
+    const its=dayItems(sel,k,plan), p=dayProgress(sel,k,plan), isToday=sel===todayISO();
+    const when=isToday?'今天':'周'+DOW[d.getDay()], dl=isToday?'今天':'周'+DOW[d.getDay()];
     // 这一天主练哪些肌群：按等级（重点 > 加强 > 保持）和组数排，取前三个不重复的
-    const main=[...new Set(day.items.filter(it=>it.mu).sort((x,y)=>W[y.lv]-W[x.lv]||y.sets-x.sets).map(it=>MUSCLES[it.mu].name))].slice(0,3);
+    const main=k?[...new Set(plan[k].items.filter(it=>it.mu).sort((x,y)=>W[y.lv]-W[x.lv]||y.sets-x.sets).map(it=>MUSCLES[it.mu].name))].slice(0,3):[];
     const why=r.reached?'':String(r.head).replace(/<[^>]+>/g,'');
-    const rows=day.items.map((it,i)=>{ const e=exOf(k,it), done=!!S.done[sel+':'+e], n=notesOf(e).length;
-      const tag=it.stretch?'':it.lv==='focus'?'<span class="badge">重点</span>':it.lv==='boost'?'<span class="badge acc">加强</span>':'';
-      return `<button class="li" type="button" data-go="ex" data-arg="${e}|${sel}|${k}|${i}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span style="min-width:0"><span class="t">${EX[e].name}${tag}${n?'<span class="badge">备注</span>':''}</span><span class="s">${it.stretch?'拉伸 · 练完做':it.sets+' 组 × '+EX[e].reps}${it.mu?' · '+MUSCLES[it.mu].name:''}</span></span><span class="r">${done?`<span class="acc">${I.check}</span>`:''}${I.chev}</span></button>`; }).join('');
+    const nW=its.filter(i=>i.warm&&!i.add).length;
+    const rows=its.map((it,i)=>{ const e=it.e, done=!!S.done[sel+':'+e], n=notesOf(e).length;
+      const tag=it.warm?'<span class="badge acc">热身</span>':it.add?'<span class="badge acc">自选</span>':it.stretch?'':it.lv==='focus'?'<span class="badge">重点</span>':it.lv==='boost'?'<span class="badge acc">加强</span>':'';
+      const sub=it.warm?'热身 · '+EX[e].reps:it.stretch?'拉伸 · '+EX[e].reps:it.sets+' 组 × '+EX[e].reps;
+      return `<div class="drow${done?' done':''}" data-id="${esc(it.id)}"><span class="grip" aria-hidden="true">${I.grip}</span><button class="dmain" type="button" data-go="ex" data-arg="${e}|${sel}|${k||''}|${esc(it.id)}"><span class="no mono">${i+1}</span><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span style="min-width:0"><span class="t">${EX[e].name}${tag}${n?'<span class="badge">备注</span>':''}</span><span class="s">${sub}${it.mu?' · '+MUSCLES[it.mu].name:''}</span></span>${done?`<span class="acc ok">${I.check}</span>`:''}</button><button class="dx" type="button" data-act="dayDel" data-arg="${sel}|${esc(it.id)}" aria-label="从${dl}的训练移除 ${EX[e].name}">${I.x}</button></div>`; }).join('');
+    const edited=!!(o.order||o.add&&o.add.length||o.del&&o.del.length||o.wu===false||(!base&&o.k));
     return `${weekStrip(plan,sel,'selDay')}
     <div class="stack" style="gap:6px">
-      <p class="eyebrow">${when} · ${tk?day.name+'日':'休息日'}</p>
-      ${tk?`<p class="h1">主练${main.join('、')}</p>
-        <p class="small muted">${day.items.length} 个动作 · 约 ${day.min} 分钟${p.n?` · 已完成 ${p.n}/${p.total}`:''}${why?` · 为了：${why}`:''}</p>`
-      :`<p class="h1">今天休息</p><p class="small muted">想练的话，选一组：</p><div class="seg" role="group" aria-label="选择训练">${['A','B','C'].map(x=>`<button type="button" data-act="coachKey" data-arg="${x}" aria-pressed="${k===x}">${DAYNAME[x]}</button>`).join('')}</div>
-        <p class="small muted">主练${main.join('、')} · ${day.items.length} 个动作 · 约 ${day.min} 分钟</p>`}
+      <p class="eyebrow">${when} · ${base?plan[base].name+'日':'休息日'}</p>
+      ${k?`<p class="h1">主练${main.join('、')}</p>`:`<p class="h1">${its.length?'自选训练':when+'休息'}</p>`}
+      ${its.length?`<p class="small muted">${its.length} 个动作 · 约 ${dayMin(its)} 分钟${p.n?` · 已完成 ${p.n}/${p.total}`:''}${k&&why?` · 为了：${why}`:''}</p>`:''}
+      ${base?'':`<p class="small muted">想练的话，选一组，或者从动作库挑几个：</p><div><div class="seg" role="group" aria-label="选择训练">${(twoSplit()?['A','B']:['A','B','C']).map(x=>`<button type="button" data-act="dayK" data-arg="${sel}|${x}" aria-pressed="${k===x}">${DAYNAME[x]}</button>`).join('')}</div></div>`}
     </div>
-    <section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">动作明细 · 点进去看要领，也可以单独跟练</p><div class="list">${rows}</div></section>
-    <div class="stack" style="gap:6px">
-      <button class="btn block" type="button" data-act="startCoach" data-arg="${k}">${I.coach}整体跟练 · 按顺序做完</button>
+    ${its.length?`<section class="stack" style="gap:0"><div class="between" style="margin-bottom:4px"><p class="eyebrow">动作顺序 · 按住 ${I.grip} 拖动调整</p>${edited?`<button class="linkbtn" type="button" data-act="dayReset" data-arg="${sel}">恢复推荐</button>`:''}</div>
+      <div class="list dlist" data-date="${sel}">${rows}</div></section>`:''}
+    <div class="dtools">
+      <button class="chip2" type="button" data-go="library" data-arg="${sel}">${I.plus}从动作库添加</button>
+      ${k?`<button class="chip2" type="button" data-act="dayWarm" data-arg="${sel}" aria-pressed="${o.wu!==false}">${o.wu===false?'加上热身':'热身 · '+nW+' 个'}</button>`:''}
+    </div>
+    ${its.length?`<div class="stack" style="gap:6px">
+      <button class="btn block" type="button" data-act="startCoach" data-arg="day:${sel}">${I.coach}整体跟练 · 按这个顺序做完</button>
       <p class="xs muted" style="text-align:center">摄像头自动计数、纠正体态，组间休息自动计时</p>
-    </div>
-    <div class="between"><button class="link" type="button" data-go="library">动作库 · 自选动作跟练${I.chev}</button><button class="link" type="button" data-go="plan">本周计划${I.chev}</button></div>
+    </div>`:''}
+    <div class="between"><button class="link" type="button" data-go="days">训练日 · 周${daysTxt()}${I.chev}</button><button class="link" type="button" data-go="plan">本周计划${I.chev}</button></div>
     <div class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">跟练语音</p>
       ${sw('voice','语音提醒','动作纠正、你的备注、休息和下一个动作')}${sw('countVoice','语音报数','每完成一次报一个数')}
       <button class="btn ghost block" type="button" data-act="voiceTest" style="margin-top:12px">试听语音</button>
       <p class="xs muted" style="margin-top:8px">听不到的话：iPhone 先关掉侧边的静音键、调大媒体音量，再点一次「试听语音」。</p></div>`;
   }},
-  library:{title:'动作库',render(){
-    return `<p class="small muted">点进任意动作，可以单独开摄像头跟练：自动计数、提醒体态、组间计时。</p>`+Object.keys(MUSCLES).map(mu=>`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">${MUSCLES[mu].name} · ${MUSCLES[mu].area}</p><div class="list">${MUSCLES[mu].ex.map(e=>`<button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span><span class="t">${EX[e].name}${notesOf(e).length?'<span class="badge">备注</span>':''}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div></section>`).join('')
-      +[['手臂',['db_curl','hammer_curl','pushdown','bench_dip']],['腰腹 · 下背',['side_plank','russian_twist','superman','back_ext']],['大腿内侧 · 小腿',['plie_squat','calf_raise','seated_calf']]].map(([n,l])=>`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">${n}</p><div class="list">${l.map(e=>`<button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span><span class="t">${EX[e].name}${notesOf(e).length?'<span class="badge">备注</span>':''}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div></section>`).join('')
-      +`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">拉伸</p><div class="list">${['chest_stretch','hipflex_stretch'].map(e=>`<button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span><span class="t">${EX[e].name}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div></section>`;
+  days:{title:'训练日',render(){
+    const plan=weekPlan(analyze()), n=trainDays().length, sc=sched();
+    return `<div class="stack" style="gap:6px"><p class="eyebrow">一周练几次</p><div><div class="seg" role="group" aria-label="每周训练次数">${[2,3,4,5,6].map(x=>`<button type="button" data-act="setFreq" data-arg="${x}" aria-pressed="${n===x}">${x} 次</button>`).join('')}</div></div></div>
+    <div class="stack" style="gap:8px"><p class="eyebrow">周几练</p><div class="chips">${[1,2,3,4,5,6,0].map(w=>`<button class="chip2 wd" type="button" data-act="toggleDay" data-arg="${w}" aria-pressed="${trainDays().includes(w)}">周${DOW[w]}</button>`).join('')}</div>
+      <p class="xs muted">点选具体哪几天，次数会跟着变。至少 2 天，最多 6 天（留一天休息）。</p></div>
+    <section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">自动排好的一周</p><div class="list">${[1,2,3,4,5,6,0].map(w=>{ const k=sc[w];
+      return `<div class="li" style="cursor:default"><span class="idx">周${DOW[w]}</span><span style="min-width:0">${k?`<span class="t">${plan[k].name}</span><span class="s">${[...new Set(plan[k].items.filter(i=>i.mu).map(i=>MUSCLES[i.mu].name))].slice(0,4).join('、')} · 约 ${dayMin(dayItems('0000-00-00',k,plan))} 分钟</span>`:'<span class="muted">休息</span>'}</span><span></span></div>`; }).join('')}</div></section>
+    <p class="xs muted">${twoSplit()?`上肢 / 下肢两分${n>2?'，各练两次':''}，重点肌群并进这两类里。`:'按你选的天依次轮换上肢 / 下肢 / 重点强化。'}${n>3?'同一类练两次时，每次分一半组数，一周总量不变。':''}</p>`;
+  }},
+  library:{title:'动作库',render(a){
+    const d=a||T.selDay||nextTrainDay(), dl=d===todayISO()?'今天':'周'+DOW[new Date(d+'T00:00').getDay()];
+    const has=new Set(dayItems(d,dayKey(d),weekPlan(analyze())).map(it=>it.e));
+    const row=e=>`<div class="lrow"><button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span><span class="t">${EX[e].name}${notesOf(e).length?'<span class="badge">备注</span>':''}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button><button class="addb" type="button" data-act="dayAdd" data-arg="${d}|${e}" aria-pressed="${has.has(e)}" aria-label="${has.has(e)?'已在':'加入'}${dl}的训练：${EX[e].name}">${has.has(e)?I.check:I.plus}</button></div>`;
+    const sec=(n,l)=>`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">${n}</p><div class="list">${l.map(row).join('')}</div></section>`;
+    return `<p class="small muted">点 <b>+</b> 加进${dl}的训练（排在最后，可以再拖动调整）；点动作看要领，也能单独跟练。</p>`
+      +sec('热身',['arm_circle','hip_circle','band_pull','inchworm','wgs','bw_squat'])
+      +Object.keys(MUSCLES).map(mu=>sec(`${MUSCLES[mu].name} · ${MUSCLES[mu].area}`,MUSCLES[mu].ex)).join('')
+      +[['手臂',['db_curl','hammer_curl','pushdown','bench_dip']],['腰腹 · 下背',['side_plank','russian_twist','superman','back_ext']],['大腿内侧 · 小腿',['plie_squat','calf_raise','seated_calf']],['拉伸',['chest_stretch','hipflex_stretch']]].map(([n,l])=>sec(n,l)).join('');
   }},
   ex:{title:a=>EX[a.split('|')[0]].name,render(a){
     const [e,date,k,i]=a.split('|'); const ex=EX[e]; const ctx=!!date;
-    let it=null, done=false; if(ctx){ const plan=weekPlan(analyze()); it=plan[k].items[+i]; done=!!S.done[date+':'+e]; }
+    let it=null, done=false; if(ctx){ const plan=weekPlan(analyze()); it=dayItems(date,k||null,plan).find(x=>x.id===i)||null; done=!!S.done[date+':'+e]; }
     const alts=it&&it.mu?MUSCLES[it.mu].ex:[];
     const ns=notesOf(e);
     const hasBack=[...ex.p,...ex.s].some(x=>MM.back[x]), hasFront=[...ex.p,...ex.s].some(x=>MM.front[x]);
@@ -1183,11 +1389,13 @@ const P={
       <div class="stack" style="gap:4px">
         <p class="eyebrow">${ex.p.map(x=>SLUG_CN[x]).join(' · ')}</p>
         <p class="h1">${ex.name}</p>
-        <p class="mono small muted">${it&&!it.stretch?it.sets+' 组 × ':''}${ex.reps}</p>
+        <p class="mono small muted">${it&&!it.stretch&&!it.warm?it.sets+' 组 × ':''}${ex.reps}</p>
       </div>
-      ${(()=>{ const n=it&&!it.stretch?it.sets:exSets(e), tr=isTracked(e), ck=checksOf(e);
+      ${(()=>{ const n=it?it.sets:addSets(e), tr=isTracked(e), ck=checksOf(e);
         return `<div class="stack" style="gap:6px"><button class="btn block" type="button" data-act="startCoach" data-arg="ex:${e}:${n}">${I.coach}单独跟练这个动作 · ${n} 组</button>
-          <p class="xs muted">${tr?`摄像头自动计数${ck.length?'，提醒'+ck.join('、'):''}；`:'计时跟练；'}语音提醒开始、组间休息和下一组。</p></div>`; })()}
+          <p class="xs muted">${tr?`摄像头自动计数${ck.length?'，提醒'+ck.join('、'):''}；`:'计时跟练；'}语音提醒开始、组间休息和下一组。</p>
+          ${ctx?'':(()=>{ const d=T.selDay||nextTrainDay(), dl=d===todayISO()?'今天':'周'+DOW[new Date(d+'T00:00').getDay()], inn=dayItems(d,dayKey(d),weekPlan(analyze())).some(x=>x.e===e);
+            return `<button class="btn ghost block" type="button" data-act="dayAdd" data-arg="${d}|${e}" ${inn?'disabled':''}>${inn?I.check+' 已在'+dl+'的训练里':I.plus+' 加入'+dl+'的训练'}</button>`; })()}</div>`; })()}
       ${ns.length?`<section class="stack" aria-label="我的备注">${ns.map((n,j)=>`<div class="note"><p>${esc(n.txt)}<small>${n.t}</small></p><button type="button" data-act="delNote" data-arg="${e}|${j}" aria-label="删除这条备注">${I.trash}</button></div>`).join('')}</section>`:''}
       <section class="stack" style="gap:10px"><div class="muscles" style="grid-template-columns:repeat(${views.length},1fr)">${views.map(v=>muscleSVG(v,ex.p,ex.s)).join('')}</div>
         <div class="mkey"><span><i style="background:var(--accent)"></i>主要发力 ${ex.p.map(x=>SLUG_CN[x]).join('、')}</span>${ex.s.length?`<span><i style="background:color-mix(in srgb,var(--accent) 38%,var(--body))"></i>辅助 ${ex.s.map(x=>SLUG_CN[x]).join('、')}</span>`:''}</div></section>
@@ -1201,8 +1409,10 @@ const P={
       ${ctx?`<button class="btn block ${done?'ghost':''}" type="button" data-act="toggleDone" data-arg="${date}|${e}">${done?I.check+' 已完成':'完成这个动作'}</button>`:''}`;
   },after(){ startFrames(); },leave(){ stopFrames(); }},
   me:{root:1,title:'我的',render(){
-    const r=analyze(), t=target(), m=r.m;
-    return `<div class="stack" style="gap:6px">
+    const r=analyze(), t=target(), m=r.m, ht=T.meTab==='hist';
+    const seg=`<div class="seg" role="tablist" aria-label="我的" style="width:100%">${[['me','我的身材'],['hist','历史回顾']].map(([k,l])=>`<button type="button" role="tab" data-act="meTab" data-arg="${k}" aria-pressed="${(ht?'hist':'me')===k}" aria-selected="${(ht?'hist':'me')===k}">${l}${k==='hist'&&histDue()?' ·':''}</button>`).join('')}</div>`;
+    if(ht) return seg+histHTML();
+    return `${seg}<div class="stack" style="gap:6px">
       <p class="eyebrow">${isSample()?'样例数据':'我的身材'}</p>
       <p class="h1"><span class="num" style="font-size:36px">${f2(m.swr)}</span> <span class="small muted">肩腰比</span>　<span class="num" style="font-size:36px">${f2(m.hwr)}</span> <span class="small muted">臀腰比</span></p>
       <p class="small muted">${m.h?`身高 ${m.h} cm · `:''}腰围 ${Math.round(m.cm.waist)} · 臀围 ${Math.round(m.cm.hip)} · 腿围 ${Math.round(m.cm.thigh)} cm</p>
@@ -1210,6 +1420,7 @@ const P={
     <div class="list">
       <button class="li" type="button" data-go="measure"><span></span><span><span class="t">测量身材</span><span class="s">手动输入尺寸，或拍一张正面照扫描</span></span><span class="r">${I.chev}</span></button>
       <button class="li" type="button" data-go="target"><span></span><span><span class="t">目标身材</span><span class="s">${esc(t.name)} · 肩腰 ${f2(t.swr)} · 臀腰 ${f2(t.hwr)}</span></span><span class="r">${I.chev}</span></button>
+      <button class="li" type="button" data-go="days"><span></span><span><span class="t">训练日</span><span class="s">每周 ${trainDays().length} 次 · 周${daysTxt()}</span></span><span class="r">${I.chev}</span></button>
       <button class="li" type="button" data-go="posture"><span></span><span><span class="t">体态</span><span class="s">${[S.rounded&&'圆肩',S.apt&&'骨盆前倾'].filter(Boolean).join('、')||'无'}</span></span><span class="r">${I.chev}</span></button>
       ${isApp()?'':`<button class="li" type="button" data-go="install"><span></span><span><span class="t">安装到手机</span><span class="s">添加到主屏幕，像 App 一样全屏打开，离线也能用</span></span><span class="r">${I.chev}</span></button>`}
       <button class="li" type="button" data-go="about"><span></span><span><span class="t">关于</span><span class="s">怎么算的、隐私、素材来源</span></span><span class="r">${I.chev}</span></button>
@@ -1217,7 +1428,7 @@ const P={
     <div class="stack" style="gap:6px"><p class="eyebrow">性别</p><div><div class="seg" role="group" aria-label="性别">${[['f','女'],['m','男']].map(([k,l])=>`<button type="button" data-act="setSex" data-arg="${k}" aria-pressed="${sx()===k}">${l}</button>`).join('')}</div></div>
       <p class="xs muted">${S.sex?'切换后，目标模板、样例和训练计划会换成对应的版本。':'还没选过，默认按女性。去「测量身材」时会先让你选。'}</p></div>
     <div class="stack" style="gap:6px"><p class="eyebrow">数据来源</p><div><div class="seg" role="group" aria-label="数据来源">${[['photo','我的测量'],...samplesOf(sx()).map(k=>[k,SAMPLES[k].label])].map(([k,l])=>`<button type="button" data-act="mode" data-arg="${k}" aria-pressed="${S.mode===k}">${l}</button>`).join('')}</div></div></div>`;
-  }},
+  },after(){ if(T.meTab==='hist') histPhotos(); }},
   target:{title:'目标身材',render(){
     const r=analyze(), m=r.m, t=r.t, cap=capOf(m.h||163,S.af.frame), FM=figMetrics(r);
     const tc={}; DIMS.forEach(([k])=>tc[k]=FM[k].tgt);
@@ -1654,7 +1865,7 @@ async function autoDetect(){
 }
 const MEAS_ACT={
   mtab(a){ if(T.mtab===a) return; T.mtab=a; if(a==='manual') T.man=null; refresh(); },
-  saveMeas(){ const m=draftMeas(); if(!m){ toast(T.mtab==='scan'?'先填身高、放好照片上的点':'先填好身高、肩宽、腰围、臀围'); return; } m.sex=sx(); S.meas=m; if(S.mode!=='photo'&&!S.postureSet){ S.rounded=false; S.apt=false; } S.mode='photo'; /* 样例的体态不带进自己的数据 */ save(); if(m.src==='scan') savePhoto('front'); toast('已保存'); T.hFocus=null; T.man=null; stack=[{p:'home'}]; render('back'); },
+  saveMeas(){ const m=draftMeas(); if(!m){ toast(T.mtab==='scan'?'先填身高、放好照片上的点':'先填好身高、肩宽、腰围、臀围'); return; } m.sex=sx(); S.meas=m; logMeas(m); if(m.src==='scan'&&T.ph.front&&T.ph.front.blob){ const d=todayISO(); S.log.find(x=>x.d===d).ph=1; kvSet(hkey(d),T.ph.front.blob).catch(()=>{}); if(HURL[d]){ URL.revokeObjectURL(HURL[d]); delete HURL[d]; } } if(S.mode!=='photo'&&!S.postureSet){ S.rounded=false; S.apt=false; } S.mode='photo'; /* 样例的体态不带进自己的数据 */ save(); if(m.src==='scan') savePhoto('front'); toast('已保存'); T.hFocus=null; T.man=null; stack=[{p:'home'}]; render('back'); },
   auto:autoDetect, deletePhoto
 };
 /* ---------------- AI coach ---------------- */
@@ -1688,7 +1899,7 @@ async function mkLandmarker(mode){
   mpLog('create');
   try{ return await mk('GPU'); }catch(e){ mpLog('gpu fail '+(e&&e.message)); return await mk('CPU'); }
 }
-const TRK_OF={lat_raise:'abd',cable_lat:'abd',band_lat:'abd',reverse_fly:'abd',pulldown:'elbow',db_row:'elbow',face_pull:'elbow',band_pull:'spread',pushup:'push',goblet:'squat',split_squat:'split',rdl:'hinge',hip_thrust:'bridge',glute_bridge:'bridge',sl_bridge:'bridge',leg_curl:'curl',side_leg:'legabd',band_walk:'steps',plank:'plank',dead_bug:'hold',hipflex_stretch:'hold',chest_stretch:'hold',
+const TRK_OF={arm_circle:'hold',hip_circle:'hold',bw_squat:'squat',inchworm:'hold',wgs:'hold',lat_raise:'abd',cable_lat:'abd',band_lat:'abd',reverse_fly:'abd',pulldown:'elbow',db_row:'elbow',face_pull:'elbow',band_pull:'spread',pushup:'push',goblet:'squat',split_squat:'split',rdl:'hinge',hip_thrust:'bridge',glute_bridge:'bridge',sl_bridge:'bridge',leg_curl:'curl',side_leg:'legabd',band_walk:'steps',plank:'plank',dead_bug:'hold',hipflex_stretch:'hold',chest_stretch:'hold',
   db_curl:'armcurl',hammer_curl:'armcurl',pushdown:'ext',bench_dip:'dip',calf_raise:'calf',seated_calf:'calf',side_plank:'plank',russian_twist:'twist',superman:'lift',back_ext:'backext',plie_squat:'squat'};
 const MODE_LABEL=k=>({plank:'计时 · 体态检测',hold:'计时'}[k]||'自动计数');
 let AR=1;
@@ -1741,6 +1952,7 @@ function targetOf(e){
 const exSets=e=>{ const m=EX[e].reps.match(/(\d+)\s*×/); return m?+m[1]:3; };
 const isTracked=e=>!!TRK_OF[e]&&TRK_OF[e]!=='hold';
 function buildQueue(k){ if(k.startsWith('ex:')){ const [,e,n]=k.split(':'); return [{e,sets:+n||exSets(e),tg:targetOf(e),trk:TRK_OF[e]||'hold'}]; }
+  if(k.startsWith('day:')){ const d=k.slice(4); return dayItems(d,dayKey(d),weekPlan(analyze())).map(it=>({e:it.e,sets:it.stretch||it.warm?1:it.sets,tg:targetOf(it.e),trk:TRK_OF[it.e]||'hold'})); }
   const plan=weekPlan(analyze()); return plan[k].items.map(it=>{const e=exOf(k,it);return {e,sets:it.stretch?1:it.sets,tg:targetOf(e),trk:TRK_OF[e]||'hold'};}); }
 
 /* voice
@@ -1941,7 +2153,7 @@ function finish(){
     ${C.single?`<button class="btn block" type="button" data-act="endCoach">返回动作</button>`:`<button class="btn block" type="button" data-tab="home">回到首页</button><button class="btn ghost block" type="button" data-tab="train">看训练</button>`}`;
 }
 const COACH_ACT={
-  startCoach(k){ go('session',k); }, // 第一句播报在 startSession 里同步说出，借这次点击解锁 iOS 语音
+  startCoach(k){ if(!buildQueue(k).length){ toast('先加几个动作'); return; } go('session',k); }, // 第一句播报在 startSession 里同步说出，借这次点击解锁 iOS 语音
   coachKey(a){ T.coachKey=a; refresh(); },
   voiceTest(){
     if(!VO.ok){ toast('这个浏览器不支持语音播报'); return; }
@@ -1989,6 +2201,23 @@ const ACT={
   muscle(k){ T.muscle=k&&RINFO[k]?k:null; const p=$('mpanel'); if(p) p.innerHTML=musclePanel(T.muscle);
     if(B3.r){ B3.r.paint(); if(T.muscle) B3.r.face(T.muscle); } },
   selDay(a){ T.selDay=a; refresh(); },
+  dayDel(a){ const [d,id]=a.split('|'), o=dayO(d); if(id.startsWith('x:')) o.add=(o.add||[]).filter(e=>'x:'+e!==id); else (o.del=o.del||[]).push(id); save(); refresh(); },
+  dayWarm(d){ const o=dayO(d); if(o.wu===false) delete o.wu; else o.wu=false; save(); refresh(); toast(o.wu===false?'已去掉热身':'已加上热身'); },
+  dayReset(d){ delete S.day[d]; save(); refresh(); toast('已恢复推荐的动作和顺序'); },
+  dayK(a){ const [d,k]=a.split('|'), o=dayO(d); if(o.k===k) delete o.k; else o.k=k; save(); refresh(); },
+  dayAdd(a){ const [d,e]=a.split('|'), dl=d===todayISO()?'今天':'周'+DOW[new Date(d+'T00:00').getDay()];
+    if(dayItems(d,dayKey(d),weekPlan(analyze())).some(x=>x.e===e)){ toast(`已经在${dl}的训练里`); return; }
+    const o=dayO(d); (o.add=o.add||[]).push(e); T.selDay=d; save(); refresh(); toast(`已加入${dl}的训练`); },
+  setFreq(n){ S.days=DAY_PRESET[+n].slice(); T.selDay=null; save(); refresh(); toast(`每周 ${n} 次：周${daysTxt()}`); },
+  toggleDay(a){ const w=+a, d=new Set(trainDays());
+    if(d.has(w)){ if(d.size<=2){ toast('每周至少练 2 天'); return; } d.delete(w); } else { if(d.size>=6){ toast('留一天休息吧'); return; } d.add(w); }
+    S.days=[...d]; T.selDay=null; save(); refresh(); },
+  meTab(t){ T.meTab=t; refresh(); if(t==='hist') histPhotos(); },
+  openHist(){ T.meTab='hist'; tab('me'); },
+  setRemind(n){ S.remind=+n; save(); refresh(); },
+  histMetric(k){ T.hm=k; refresh(); histPhotos(); },
+  histPick(d){ const c=(T.cmp||[]).filter(x=>x!==d); T.cmp=c.concat(d).slice(-2).sort(); refresh(); histPhotos(); },
+  histDel(d){ S.log=S.log.filter(x=>x.d!==d); kvDel(hkey(d)); if(HURL[d]){ URL.revokeObjectURL(HURL[d]); delete HURL[d]; } save(); refresh(); histPhotos(); toast('已删除这条记录'); },
   openDay(a){ T.selDay=a; tab('train'); },
   frame(a){ stopFrames(); showFrame(+a); },
   noteChip(a){ const i=$('noteIn'); if(!i) return; i.value=i.value?i.value.replace(/[，,\s]*$/,'')+'，'+a:a; i.focus(); },
