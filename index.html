@@ -8,10 +8,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: one-column phone shell. Home = rotatable 3D body (solid = now, dashed = target), one thesis line, four numbers, today. Everything else is one tap deeper. */
+/* Layout: one-column phone shell. Home = tailor's fitting-card figure with tape lines, one thesis line, four numbers, today. Everything else is one tap deeper. */
 :root{
   --desk:#e9ebe9; --bg:#f6f7f5; --surface:#ffffff; --ink:#121514; --muted:#6c7370; --faint:#a4aba8; --line:#e5e8e6;
-  --accent:#0e6b62; --accent-soft:#e4f0ed; --warm:#b4531b; --warm-soft:#f8ebe2; --body:#dfe3e1; --invert:#ffffff;
+  --accent:#0e6b62; --accent-soft:#e4f0ed; --warm:#b4531b; --warm-soft:#f8ebe2; --body:#dfe3e1; --inert:#ebeeec; --under:#3a6cae; --invert:#ffffff;
   --num:"Instrument Serif","Songti SC",Georgia,serif;
   --text:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
@@ -19,10 +19,10 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --desk:#070908; --bg:#0d100f; --surface:#151918; --ink:#eef2f0; --muted:#97a19d; --faint:#5f6966; --line:#232927;
-  --accent:#5cc2b4; --accent-soft:#16302c; --warm:#ee9a5a; --warm-soft:#33241a; --body:#2a302e; --invert:#0d100f; color-scheme:dark}}
+  --accent:#5cc2b4; --accent-soft:#16302c; --warm:#ee9a5a; --warm-soft:#33241a; --body:#2a302e; --inert:#1f2524; --under:#7ea8e2; --invert:#0d100f; color-scheme:dark}}
 :root[data-theme="dark"]{
   --desk:#070908; --bg:#0d100f; --surface:#151918; --ink:#eef2f0; --muted:#97a19d; --faint:#5f6966; --line:#232927;
-  --accent:#5cc2b4; --accent-soft:#16302c; --warm:#ee9a5a; --warm-soft:#33241a; --body:#2a302e; --invert:#0d100f; color-scheme:dark}
+  --accent:#5cc2b4; --accent-soft:#16302c; --warm:#ee9a5a; --warm-soft:#33241a; --body:#2a302e; --inert:#1f2524; --under:#7ea8e2; --invert:#0d100f; color-scheme:dark}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
@@ -94,18 +94,28 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .idx svg{width:16px;height:16px}
 .thumb{width:52px;height:40px;border-radius:9px;object-fit:cover;background:var(--line);filter:grayscale(1) contrast(1.05)}
 
-/* 3D hero */
-.hero{position:relative;margin:0 -20px;height:min(54vh,430px);min-height:320px;touch-action:pan-y;cursor:grab;user-select:none}
-.hero canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
-.hero .tag{position:absolute;transform:translate(-50%,-50%);font:500 11px var(--mono);white-space:nowrap;pointer-events:none;color:var(--muted);transition:opacity .2s}
-.hero .tag b{color:var(--warm);font-weight:500}
-.hero .tag.ok b{color:var(--accent)}
-.hero .legend{position:absolute;left:20px;bottom:10px;display:flex;gap:14px;font-size:11.5px;color:var(--muted)}
-.hero .legend i{display:inline-block;width:16px;vertical-align:middle;margin-right:5px;border-top:1.5px solid var(--ink)}
-.hero .legend i.d{border-top:1.5px dashed var(--accent)}
-.hero .hint{position:absolute;right:20px;bottom:10px;font-size:11.5px;color:var(--faint)}
-.hero .fallback{position:absolute;inset:0;display:grid;place-items:center}
-.hero .fallback svg{height:92%;width:auto}
+/* fitting-card figure */
+.hero{display:flex;flex-direction:column;gap:6px;margin:0 -8px}
+.herobar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:0 8px}
+.seg.sm button{padding:5px 12px;font-size:12.5px}
+#figHost svg{display:block;width:100%;height:auto;max-height:64vh}
+#fig .m{fill:var(--body);transition:fill .35s ease}
+#fig .inert{fill:var(--inert)}
+#fig .m.hl{fill:color-mix(in srgb,var(--st) 26%,var(--body))}
+#fig .m.hl.focus{fill:color-mix(in srgb,var(--st) 55%,var(--body))}
+#fig .meas{transition:opacity .25s;cursor:pointer}
+#fig .meas line,#fig .meas path{stroke:var(--st);fill:none}
+#fig .meas .tape{stroke-width:2.4}
+#fig .meas .tick{stroke-width:1.4;opacity:.7}
+#fig .meas .lead{stroke-width:1.2;stroke-dasharray:3 5;opacity:.75}
+#fig .meas circle{fill:var(--st)}
+#fig .meas text{font-family:var(--text);font-size:40px;font-weight:500;fill:var(--ink)}
+#fig .meas .val{font-family:var(--mono);font-size:36px;fill:var(--muted)}
+#fig .meas .dl{font-family:var(--mono);font-size:36px;font-weight:500;fill:var(--st)}
+#fig.dim .meas:not(.focus){opacity:.28}
+#fig.dim .m.hl:not(.focus){fill:color-mix(in srgb,var(--st) 12%,var(--body))}
+.figkey{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);padding:0 8px}
+.figkey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0 12px}
 .metric{display:flex;flex-direction:column;gap:2px;border:0;background:none;text-align:left;padding:0 6px;cursor:pointer;border-left:1px solid var(--line)}
@@ -259,7 +269,6 @@ ol.how li::before{content:counter(s,decimal-leading-zero);font:500 12px/1.9 var(
   <main class="view" id="view"></main>
   <nav class="tabs" id="tabs" aria-label="主导航"></nav>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
 "use strict";
@@ -440,166 +449,65 @@ function figure2d(m,t){
 }
 const mini=t=>`<svg class="mini" viewBox="60 15 120 410" aria-hidden="true"><circle cx="120" cy="40" r="18" style="fill:none;stroke:currentColor" stroke-width="5" stroke-dasharray="10 8"/><path d="${bodyPath(120,34,t.swr,t.hwr)}" style="fill:none;stroke:currentColor" stroke-width="6" stroke-dasharray="14 10"/></svg>`;
 
-/* ---------------- 3D body (three.js) ----------------
-   参数化人体：每一层是一个超椭圆截面，宽/厚来自测量（cm）。
-   实线环 = 现在，虚线环 = 目标（腰宽不变，按目标比例放大肩/臀）。 */
-const B3={r:null};
-function css(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim()||'#888'; }
-function bodySpec(m,t){
-  const H=m.h||163, k=H/163, c=m.cm;
-  const sw=c.shoulder/2, ww=c.waistW/2, wd=c.waistD/2, hw=c.hipW/2, hd=c.hipD/2, tw=c.thighW/2, td=c.thighD/2;
-  const yW=(m.waistF||.615)*H, yH=(m.hipF||.51)*H;
-  const lerp=(a,b,u)=>a+(b-a)*u;
-  const torso=[
-    {y:.478*H,w:hw*.72,d:hd*.70,z:-hd*.02},
-    {y:.495*H,w:hw*.95,d:hd*.94,z:-hd*.06},
-    {y:yH,w:hw,d:hd,z:-hd*.08},
-    {y:lerp(yH,yW,.45),w:lerp(hw,ww,.62),d:lerp(hd,wd,.55),z:-hd*.03},
-    {y:yW,w:ww,d:wd,z:0},
-    {y:.695*H,w:ww*1.07,d:wd*1.10,z:wd*.04},
-    {y:.725*H,w:Math.max(ww*1.10,sw*.70),d:wd*1.30,z:wd*.12},
-    {y:.755*H,w:Math.max(ww*1.08,sw*.70),d:wd*1.16,z:wd*.04},
-    {y:.792*H,w:sw*.70,d:wd*.98,z:0},
-    {y:.815*H,w:sw*.50,d:wd*.80,z:0},
-    {y:.834*H,w:5.4*k,d:5.6*k,z:0},
-    {y:.868*H,w:4.9*k,d:5.1*k,z:.4*k}
-  ];
-  const armR=Math.max(3.8,c.shoulder*.12);
-  const ax=sw-armR*1.02;
-  const ab=y=>Math.max(0,.80*H-y)*.07; // 手臂略微外展，和躯干分开
-  const arm=s=>[
-    {y:.812*H,x:s*(ax-.8*k),w:armR*.9,d:armR*1.0,z:0},
-    {y:.79*H,x:s*ax,w:armR,d:armR*1.05,z:0},
-    {y:.70*H,x:s*(ax+ab(.70*H)),w:armR*.80,d:armR*.88,z:0},
-    {y:.625*H,x:s*(ax+ab(.625*H)),w:armR*.62,d:armR*.68,z:.4*k},
-    {y:.56*H,x:s*(ax+ab(.56*H)),w:armR*.66,d:armR*.62,z:1.0*k},
-    {y:.485*H,x:s*(ax+ab(.485*H)),w:armR*.46,d:armR*.40,z:1.4*k},
-    {y:.45*H,x:s*(ax+ab(.45*H)),w:armR*.52,d:armR*.30,z:1.6*k},
-    {y:.40*H,x:s*(ax+ab(.40*H)),w:armR*.36,d:armR*.22,z:1.6*k}
-  ];
-  const lx0=Math.max(tw*.92,hw-tw*1.04); // 大腿外缘和臀宽对齐
-  const leg=s=>[
-    {y:.53*H,x:s*lx0*.92,w:tw*1.02,d:td*1.05,z:-1.4*k},
-    {y:.49*H,x:s*lx0,w:tw*1.04,d:td*1.04,z:-.6*k},
-    {y:.455*H,x:s*lx0,w:tw,d:td,z:0},
-    {y:.40*H,x:s*lx0*.93,w:tw*.88,d:td*.90,z:.2*k},
-    {y:.33*H,x:s*lx0*.80,w:tw*.66,d:td*.70,z:.6*k},
-    {y:.285*H,x:s*lx0*.74,w:tw*.56,d:td*.62,z:.8*k},
-    {y:.205*H,x:s*lx0*.72,w:tw*.62,d:td*.72,z:-.6*k},
-    {y:.12*H,x:s*lx0*.70,w:tw*.40,d:td*.44,z:0},
-    {y:.05*H,x:s*lx0*.70,w:3.1*k,d:3.4*k,z:0},
-    {y:.03*H,x:s*lx0*.70,w:3.4*k,d:4.0*k,z:1.5*k}
-  ];
-  const tgtS=t?t.swr*c.waistW/2:sw, tgtH=t?t.hwr*c.waistW/2:hw;
-  return {H,k,torso,arms:[arm(-1),arm(1)],legs:[leg(-1),leg(1)],head:{y:.928*H,rx:7.3*k,ry:10.6*k,rz:9.3*k},
-    feet:[-1,1].map(s=>({x:s*lx0*.70,y:.018*H,len:23*k,w:4.4*k})),
-    rings:{
-      shoulder:{y:.79*H,w:sw,d:wd*1.30,tw:tgtS,td:wd*1.30},
-      waist:{y:yW,w:ww,d:wd,tw:ww,td:wd},
-      hip:{y:yH,w:hw,d:hd,tw:tgtH,td:hd*(tgtH/hw),z:-hd*.08},
-      thigh:{y:.44*H,w:tw,d:td,x:-lx0*.97,z:.1*k}
-    }};
-}
-function catmull(p0,p1,p2,p3,u){ const u2=u*u,u3=u2*u; return .5*((2*p1)+(-p0+p2)*u+(2*p0-5*p1+4*p2-p3)*u2+(-p0+3*p1-3*p2+p3)*u3); }
-function loftGeometry(secs,{n=44,sub=6,e=2.4,capTop=true,capBot=true}={}){
-  const THREE=window.THREE; const rings=[];
-  const K=['x','y','z','w','d'];
-  for(let i=0;i<secs.length-1;i++){
-    for(let s=0;s<sub;s++){
-      const u=s/sub, g=j=>secs[Math.max(0,Math.min(secs.length-1,j))];
-      const o={}; K.forEach(key=>{ o[key]=catmull(g(i-1)[key]||0,g(i)[key]||0,g(i+1)[key]||0,g(i+2)[key]||0,u); });
-      rings.push(o);
-    }
+/* ---------------- fitting-card figure ----------------
+   量体卡式人体图：MuscleMap 女性正/背面轮廓，相关肌群按状态着色，软尺线 + 刻度 + 引线标签。
+   线的位置是这张示意图上的固定位置（SVG 坐标），数值来自测量。 */
+const FIG_INERT=new Set(['head','hair','neck','hands','feet','knees','ankles']);
+const FIG_LINES={
+  shoulder:{name:'肩宽',groups:['deltoids','trapezius'],front:[318,172,469],back:[312,174,465]},
+  waist:{name:'腰围',groups:['obliques','abs','lowerBack'],front:[562,239,401],back:[560,240,399]},
+  hip:{name:'臀围',groups:['gluteal'],front:[700,204,436],back:[700,196,443]},
+  thigh:{name:'腿围',groups:['quadriceps','adductors','hamstring'],front:[800,197,295],back:[820,200,308]}
+};
+const FIG_OX={front:0,back:823};
+// 目标：腰不变，按目标比例放大肩宽/臀宽；臀围按同比例放大厚度
+function figMetrics(r){
+  const m=r.m, c=m.cm, t=r.t, tH=t.hwr*c.waistW;
+  const tgt={shoulder:t.swr*c.waistW,waist:null,hip:ellipse(tH,c.hipD*(tH/c.hipW)),thigh:null};
+  const cur={shoulder:c.shoulder,waist:c.waist,hip:c.hip,thigh:c.thigh};
+  const out={};
+  for(const k in FIG_LINES){
+    const d=tgt[k]==null?null:cur[k]-tgt[k];
+    let st;
+    if(d==null) st={cls:'na',color:'var(--muted)',label:''};
+    else if(Math.abs(d)<=1) st={cls:'ok',color:'var(--accent)',label:'✓'};
+    else st=d>0?{cls:'over',color:'var(--warm)',label:'+'+d.toFixed(1)}:{cls:'under',color:'var(--under)',label:d.toFixed(1)};
+    out[k]={cur:cur[k],tgt:tgt[k],d,...st};
   }
-  const L=secs[secs.length-1]; rings.push({x:L.x||0,y:L.y,z:L.z||0,w:L.w,d:L.d});
-  const pos=[], idx=[], ex=2/e;
-  rings.forEach(r=>{ for(let j=0;j<n;j++){ const a=j/n*Math.PI*2, c=Math.cos(a), s=Math.sin(a);
-    pos.push(r.x+Math.sign(c)*Math.pow(Math.abs(c),ex)*r.w, r.y, r.z+Math.sign(s)*Math.pow(Math.abs(s),ex)*r.d); } });
-  for(let i=0;i<rings.length-1;i++) for(let j=0;j<n;j++){ const a=i*n+j,b=i*n+(j+1)%n,c=(i+1)*n+j,d=(i+1)*n+(j+1)%n; idx.push(a,c,b,b,c,d); }
-  const cap=(ri,up)=>{ const r=rings[ri], ci=pos.length/3; pos.push(r.x,r.y+(up?.01:-.01),r.z);
-    for(let j=0;j<n;j++){ const a=ri*n+j,b=ri*n+(j+1)%n; if(up) idx.push(a,b,ci); else idx.push(b,a,ci); } };
-  if(capBot) cap(0,false); if(capTop) cap(rings.length-1,true);
-  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); g.setIndex(idx); g.computeVertexNormals();
-  // 截面从下往上排时三角形朝向相反，统一一下
-  return g;
+  return out;
 }
-function ringMesh(r,dashed,color,rad){
-  const THREE=window.THREE; const grp=new THREE.Group();
-  const w=dashed?r.tw:r.w, d=dashed?r.td:r.d, cx=r.x||0, cz=r.z||0, pad=1.025;
-  class Arc extends THREE.Curve{ constructor(a0,a1){ super(); this.a0=a0; this.a1=a1; }
-    getPoint(t,o=new THREE.Vector3()){ const a=this.a0+(this.a1-this.a0)*t; return o.set(cx+Math.cos(a)*w*pad, r.y, cz+Math.sin(a)*d*pad); } }
-  const mat=new THREE.MeshBasicMaterial({color,depthTest:false,transparent:true});
-  if(!dashed){ grp.add(new THREE.Mesh(new THREE.TubeGeometry(new Arc(0,Math.PI*2),96,rad,6,true),mat)); }
-  else { const N=28; for(let i=0;i<N;i++){ const a0=i/N*Math.PI*2; grp.add(new THREE.Mesh(new THREE.TubeGeometry(new Arc(a0,a0+Math.PI*2/N*.55),6,rad,5,false),mat)); } }
-  grp.children.forEach(c=>c.renderOrder=dashed?3:2);
-  return grp;
+function figureSVG(r,view){
+  const M=figMetrics(r), ox=FIG_OX[view], d=MM[view];
+  const owner={}; for(const k in FIG_LINES) FIG_LINES[k].groups.forEach(g=>owner[g]=k);
+  let body='';
+  for(const slug of Object.keys(d)){
+    const path=d[slug].join(' ');
+    if(FIG_INERT.has(slug)){ body+=`<path class="inert" d="${path}"/>`; continue; }
+    const k=owner[slug];
+    body+=k&&M[k].cls!=='na'?`<path class="m hl" data-metric="${k}" style="--st:${M[k].color}" d="${path}"/>`:`<path class="m" d="${path}"/>`;
+  }
+  const lx=ox+668;
+  let meas='';
+  for(const k in FIG_LINES){
+    const L=FIG_LINES[k], [y,x1,x2]=L[view], a=x1+ox, b=x2+ox, s=M[k];
+    let ticks=''; for(let x=a+12;x<b-6;x+=12) ticks+=`<line class="tick" x1="${x}" y1="${y-((((x-a)/12)%5===0)?9:5)}" x2="${x}" y2="${y}"/>`;
+    meas+=`<g class="meas" data-metric="${k}" data-act="focus" data-arg="${k}" style="--st:${s.color}">
+      <line class="tape" x1="${a}" y1="${y}" x2="${b}" y2="${y}"/>${ticks}
+      <line class="tick" x1="${a}" y1="${y-12}" x2="${a}" y2="${y+12}"/><line class="tick" x1="${b}" y1="${y-12}" x2="${b}" y2="${y+12}"/>
+      <path class="lead" d="M${b+8},${y} H${lx-14}"/><circle cx="${lx-8}" cy="${y}" r="5"/>
+      <text x="${lx+4}" y="${y-6}">${L.name}</text>
+      <text class="val" x="${lx+4}" y="${y+38}">${k==='shoulder'?f1(s.cur):Math.round(s.cur)}</text>
+      <text class="dl" x="${lx+(k==='shoulder'?112:80)}" y="${y+38}">${s.label}</text>
+      <rect x="${a}" y="${y-30}" width="${lx+190-a}" height="70" fill="transparent"/></g>`;
+  }
+  return `<svg id="fig" viewBox="${ox-10} 0 860 1450" role="img" aria-label="${view==='front'?'正面':'背面'}人体比例图" class="${T.hFocus?'dim':''}">${body}${meas}</svg>`;
 }
-function mount3D(el,m,t,onTags){
-  unmount3D();
-  const THREE=window.THREE;
-  if(!THREE){ el.insertAdjacentHTML('beforeend',`<div class="fallback">${figure2d(m,t)}</div>`); return; }
-  let renderer;
-  try{ renderer=new THREE.WebGLRenderer({antialias:true,alpha:true}); }catch(e){ el.insertAdjacentHTML('beforeend',`<div class="fallback">${figure2d(m,t)}</div>`); return; }
-  const spec=bodySpec(m,t), H=spec.H;
-  renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
-  el.appendChild(renderer.domElement);
-  const scene=new THREE.Scene();
-  const cam=new THREE.PerspectiveCamera(24,1,1,2000);
-  const body=new THREE.Group(); scene.add(body);
-  const skin=new THREE.MeshStandardMaterial({color:new THREE.Color(css('--body')).multiplyScalar(.93),roughness:.78,metalness:0,side:THREE.DoubleSide});
-  body.add(new THREE.Mesh(loftGeometry(spec.torso,{e:2.25}),skin));
-  spec.arms.forEach(a=>body.add(new THREE.Mesh(loftGeometry(a,{e:2.1}),skin)));
-  spec.legs.forEach(l=>body.add(new THREE.Mesh(loftGeometry(l,{e:2.15}),skin)));
-  const head=new THREE.Mesh(new THREE.SphereGeometry(1,40,28),skin); head.scale.set(spec.head.rx,spec.head.ry,spec.head.rz); head.position.set(0,spec.head.y,.6*spec.k); body.add(head);
-  spec.feet.forEach(f=>{ const g=new THREE.Mesh(new THREE.SphereGeometry(1,24,14),skin); g.scale.set(f.w,f.w*.55,f.len/2); g.position.set(f.x,f.y+1,f.len*.32); body.add(g); });
-  const ink=new THREE.Color(css('--ink')), acc=new THREE.Color(css('--accent'));
-  const rings={};
-  for(const key of ['shoulder','waist','hip','thigh']){
-    const r=spec.rings[key];
-    const now=ringMesh(r,false,ink,.16*spec.k); now.renderOrder=2; body.add(now);
-    let tgt=null; if(key!=='thigh'&&key!=='waist'){ tgt=ringMesh(r,true,acc,.2*spec.k); tgt.renderOrder=3; body.add(tgt); }
-    rings[key]={now,tgt,r};
-  }
-  scene.add(new THREE.HemisphereLight(0xffffff,0x9aa39f,.55));
-  const key=new THREE.DirectionalLight(0xffffff,.95); key.position.set(-160,240,220); scene.add(key);
-  const fill=new THREE.DirectionalLight(0xffffff,.25); fill.position.set(200,60,160); scene.add(fill);
-  const rim=new THREE.DirectionalLight(0xffffff,.45); rim.position.set(140,160,-240); scene.add(rim);
-  const tgtY=H*.52;
-  const st={rot:-.35,vel:0,auto:!matchMedia('(prefers-reduced-motion: reduce)').matches,drag:false,lx:0,raf:0,alive:true,last:performance.now()};
-  function size(){ const w=el.clientWidth,h=el.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); cam.aspect=w/h;
-    const fit=(H*.56)/Math.tan(cam.fov*Math.PI/360); const dist=fit*Math.max(1,.62/cam.aspect); cam.position.set(0,tgtY+dist*.16,dist); cam.lookAt(0,tgtY,0); cam.updateProjectionMatrix(); }
-  const tags=onTags?onTags(el):null;
-  const v=new THREE.Vector3();
-  function placeTags(){
-    if(!tags) return;
-    for(const k in tags){ const R=rings[k]; if(!R) continue; const r=R.r, w=Math.max(r.w,r.tw||0)*1.06;
-      // 取环在屏幕上最靠右的点
-      let best=null; for(let i=0;i<24;i++){ const a=i/24*Math.PI*2; v.set((r.x||0)+Math.cos(a)*w,r.y,(r.z||0)+Math.sin(a)*(Math.max(r.d,r.td||0))); v.applyMatrix4(body.matrixWorld).project(cam); if(!best||v.x>best.x) best=v.clone(); }
-      const x=(best.x*.5+.5)*el.clientWidth+14, y=(-best.y*.5+.5)*el.clientHeight;
-      tags[k].style.left=Math.min(el.clientWidth-40,x)+'px'; tags[k].style.top=y+'px'; }
-  }
-  function focus(k){ for(const key in rings){ const on=!k||key===k; rings[key].now.children.forEach(c=>c.material.opacity=on?1:.18); rings[key].now.children.forEach(c=>c.material.transparent=!on); if(rings[key].tgt) rings[key].tgt.children.forEach(c=>{c.material.transparent=!on;c.material.opacity=on?1:.18;}); if(tags&&tags[key]) tags[key].style.opacity=on?1:.25; } kick(); }
-  function frame(now){
-    st.raf=0; if(!st.alive) return;
-    const dt=Math.min(.05,(now-st.last)/1000); st.last=now;
-    if(!st.drag){ if(Math.abs(st.vel)>.0005){ st.rot+=st.vel; st.vel*=.92; } else if(st.auto) st.rot+=dt*.32; }
-    body.rotation.y=st.rot; body.updateMatrixWorld();
-    renderer.render(scene,cam); placeTags();
-    if(st.drag||st.auto||Math.abs(st.vel)>.0005) st.raf=requestAnimationFrame(frame);
-  }
-  function kick(){ if(!st.raf&&st.alive){ st.last=performance.now(); st.raf=requestAnimationFrame(frame); } }
-  const cv=renderer.domElement;
-  const down=e=>{ st.drag=true; st.auto=false; st.lx=e.clientX; st.vel=0; el.style.cursor='grabbing'; kick(); };
-  const move=e=>{ if(!st.drag) return; const dx=e.clientX-st.lx; st.lx=e.clientX; st.vel=dx*.012; st.rot+=dx*.012; };
-  const up=()=>{ if(!st.drag) return; st.drag=false; el.style.cursor=''; kick(); };
-  cv.addEventListener('pointerdown',down); window.addEventListener('pointermove',move); window.addEventListener('pointerup',up); window.addEventListener('pointercancel',up);
-  const ro=new ResizeObserver(()=>{ size(); kick(); }); ro.observe(el);
-  size(); kick();
-  B3.r={renderer,ro,st,focus,dispose(){ st.alive=false; cancelAnimationFrame(st.raf); ro.disconnect(); window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); window.removeEventListener('pointercancel',up);
-    scene.traverse(o=>{ if(o.geometry) o.geometry.dispose(); if(o.material) o.material.dispose(); }); renderer.dispose(); renderer.domElement.remove(); }};
-  if(T.hFocus) focus(T.hFocus);
+function applyFigFocus(){
+  const svg=$('fig'); if(!svg) return;
+  svg.classList.toggle('dim',!!T.hFocus);
+  svg.querySelectorAll('[data-metric]').forEach(n=>n.classList.toggle('focus',n.dataset.metric===T.hFocus));
+  document.querySelectorAll('.metric').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.arg===T.hFocus)));
 }
-function unmount3D(){ if(B3.r){ try{B3.r.dispose();}catch(e){} B3.r=null; } }
 
 /* ---------------- muscle map ----------------
    人体肌群轮廓来自 MuscleMap（Melih Colpan，MIT License），女性正/背面。 */
@@ -642,7 +550,12 @@ const P={
       <button class="btn block" type="button" data-tab="train">开始今天的训练</button>`; }
     else { const nd=weekDates().find(d=>d>new Date()&&SCHED[d.getDay()]); todayBlock=`<div><p class="eyebrow">今天休息</p><p class="h2">${nd?'下次 · 周'+DOW[nd.getDay()]+' '+plan[SCHED[nd.getDay()]].name:'下周一继续'}</p></div><button class="btn ghost block" type="button" data-tab="train">看训练计划</button>`; }
     return `
-    <section class="hero" id="hero" aria-label="3D 身材模型，可拖动旋转"><div class="legend"><span><i></i>现在</span><span><i class="d"></i>${esc(t.name)}</span></div><span class="hint">拖动旋转</span></section>
+    <section class="hero" id="hero">
+      <div class="herobar"><span class="xs muted">目标 · ${esc(t.name)}</span>
+        <div class="seg sm" role="group" aria-label="视角">${[['front','正面'],['back','背面']].map(([v,l])=>`<button type="button" data-act="figView" data-arg="${v}" aria-pressed="${(S.figView||'front')===v}">${l}</button>`).join('')}</div></div>
+      <div id="figHost">${figureSVG(r,S.figView||'front')}</div>
+      <div class="figkey"><span><i style="background:var(--under)"></i>比目标小</span><span><i style="background:var(--warm)"></i>比目标大</span><span><i style="background:var(--accent)"></i>±1 cm 达标</span></div>
+    </section>
     <div class="stack" style="gap:4px;margin-top:-10px">
       <p class="h1">${r.head}</p>
       <div class="row2"><span class="small muted">目标：${esc(t.name)}</span><button class="link" type="button" data-go="target">更换${I.chev}</button></div>
@@ -658,18 +571,7 @@ const P={
       ${isSample()?`<p class="small muted">这是演示用的样例身材。<button class="link" type="button" data-go="measure">测量我的${I.chev}</button></p>`:`<p class="xs muted">${m.est.length?'没有侧面照，围度按常见体型估算。':'围度由正面宽度和侧面厚度按椭圆估算。'}<button class="link xs" type="button" data-go="measure">更新测量${I.chev}</button></p>`}
     </div>
     <section class="today">${todayBlock}</section>`;
-  },after(){
-    const r=analyze(), el=$('hero'); if(!el) return;
-    const t=r.t;
-    mount3D(el,r.m,t,host=>{
-      const mk=(k,html,ok)=>{ const s=document.createElement('span'); s.className='tag'+(ok?' ok':''); s.innerHTML=html; host.appendChild(s); return s; };
-      return {
-        shoulder:mk('shoulder',r.dS>=0.04?`肩 <b>+${f1(r.gS)}</b>`:'肩 <b>✓</b>',r.dS<0.04),
-        waist:mk('waist',`腰 ${Math.round(r.m.cm.waist)}`,true),
-        hip:mk('hip',r.dH>=0.04?`臀 <b>+${f1(r.gH)}</b>`:'臀 <b>✓</b>',r.dH<0.04)
-      };
-    });
-  }},
+  },after(){ applyFigFocus(); }},
   plan:{title:'本周计划',render(){
     const r=analyze(), plan=weekPlan(r), today=todayISO();
     const focusTxt=r.focus.length?r.focus.map(id=>MUSCLES[id].name).join('、'):'整体保持';
@@ -779,7 +681,6 @@ function render(dir){
   const c=stack[stack.length-1], pg=P[c.p];
   if(curPage&&curPage!==pg&&curPage.leave) curPage.leave();
   if(c.p!=='session') stopSession();
-  if(c.p!=='home') unmount3D();
   if(c.p==='measure'||c.p==='session') setTimeout(()=>mpLoad().catch(()=>{}),300);
   $('app').classList.toggle('immersive',!!pg.immersive);
   const title=typeof pg.title==='function'?pg.title(c.a):pg.title;
@@ -1309,7 +1210,8 @@ const ACT={
   setTarget(a){S.target=a;save();refresh();toast('目标已改为 '+target().name);},
   toggle(a){S[a]=!S[a];save();refresh();},
   mode(a){ if(a==='photo'&&!S.meas){ go('measure'); return; } S.mode=a; if(a!=='photo'){S.rounded=SAMPLES[a].rounded;S.apt=SAMPLES[a].apt;} save(); refresh(); },
-  focus(k){ T.hFocus=T.hFocus===k?null:k; document.querySelectorAll('.metric').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.arg===T.hFocus))); if(B3.r) B3.r.focus(T.hFocus); },
+  focus(k){ T.hFocus=T.hFocus===k?null:k; applyFigFocus(); },
+  figView(v){ S.figView=v; save(); const h=$('figHost'); if(h) h.innerHTML=figureSVG(analyze(),v); document.querySelectorAll('[data-act="figView"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.arg===v))); applyFigFocus(); },
   selDay(a){ T.selDay=a; refresh(); },
   openDay(a){ T.selDay=a; tab('train'); },
   frame(a){ stopFrames(); showFrame(+a); },
@@ -1329,7 +1231,6 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') back(); });
 document.addEventListener('input',e=>{ if(e.target.id==='noteIn'){ const t=e.target; t.style.height='auto'; t.style.height=Math.min(120,t.scrollHeight)+'px'; } });
-document.addEventListener('visibilitychange',()=>{ if(B3.r){ if(document.hidden){ B3.r.st.auto=false; } } });
 
 render();
 loadPhotos();
