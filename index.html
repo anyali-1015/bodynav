@@ -1,9 +1,6 @@
-<!doctype html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>薄肌比例导航</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -117,6 +114,27 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .figkey{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);padding:0 8px}
 .figkey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 
+/* 3D body */
+.body3d{position:relative;height:clamp(300px,50vh,470px);touch-action:pan-y;cursor:grab;-webkit-user-select:none;user-select:none;overflow:hidden}
+.body3d.grab{cursor:grabbing}
+.body3d canvas{display:block;width:100%;height:100%}
+.body3d.flat{height:auto;cursor:auto}
+.b3load{position:absolute;inset:auto 0 46% 0;text-align:center}
+.body3d canvas~.b3load,.body3d.flat .b3load{display:none}
+.tags3{position:absolute;inset:0;pointer-events:none}
+.tag3{position:absolute;right:6px;transform:translateY(-50%);pointer-events:auto;display:flex;align-items:baseline;gap:5px;border:0;background:color-mix(in srgb,var(--bg) 82%,transparent);padding:3px 6px;border-radius:6px;font-size:11.5px;color:var(--ink);cursor:pointer;transition:opacity .25s}
+.tag3 i{position:absolute;right:100%;top:50%;width:var(--lead,20px);border-top:1px dashed var(--st);opacity:.8}
+.tag3 i::before{content:"";position:absolute;left:-3px;top:-3.5px;width:6px;height:6px;border-radius:50%;background:var(--st)}
+.tag3 b{font-weight:500;color:var(--muted)}
+.tag3 em{font-style:normal;font-weight:500;color:var(--st)}
+.tag3.dim{opacity:.3}
+.mpanel{padding:4px 8px 0;display:flex;flex-direction:column;gap:8px}
+.mp-hint{font-size:12px;color:var(--muted);text-align:center;margin:0}
+.mp-head{display:flex;align-items:flex-start;gap:8px}
+.mp-head>div{flex:1;min-width:0}
+.mp-head .badge{margin:6px 0 0}
+.mp-x{border:0;background:none;color:var(--muted);width:32px;height:32px;display:grid;place-items:center;margin:-2px -6px 0 0;cursor:pointer;border-radius:8px}
+.mp-x svg{width:16px;height:16px}
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0 12px}
 .metric{display:flex;flex-direction:column;gap:2px;border:0;background:none;text-align:left;padding:0 6px;cursor:pointer;border-left:1px solid var(--line)}
 .metric:first-child{border-left:0;padding-left:2px}
@@ -160,12 +178,15 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 [aria-checked="true"] .switch::after{transform:translateX(18px)}
 
 /* measure */
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.steps button{border:0;background:none;padding:0 0 8px;text-align:left;cursor:pointer;color:var(--faint);font-size:13px;border-bottom:2px solid var(--line)}
-.steps button b{display:block;font:500 11px var(--mono);letter-spacing:.06em}
-.steps button[aria-current="step"]{color:var(--ink);border-color:var(--ink)}
-.steps button.done{color:var(--muted)}
-.steps button.done b{color:var(--accent)}
+.mtabs{display:grid;grid-template-columns:1fr 1fr;width:100%}
+.mtabs button{padding:9px 14px;font-size:14px}
+.mfields{display:grid;grid-template-columns:1fr 1fr;gap:20px 18px}
+.mf{display:flex;flex-direction:column;gap:2px;min-width:0}
+.mf .t{font-size:13px;font-weight:600}
+.mf .t em{font:500 10px var(--mono);font-style:normal;color:var(--faint);margin-left:6px;letter-spacing:.04em}
+.mf .field input{font-size:36px;width:100%;min-width:0}
+.mf .field input::placeholder{color:var(--faint)}
+.mf .xs{line-height:1.45;margin-top:4px}
 .field{display:flex;align-items:baseline;gap:8px;border-bottom:1px solid var(--line);padding:6px 0}
 .field input{border:0;background:none;font-family:var(--num);font-size:56px;line-height:1.1;width:3.2ch;padding:0;outline:none}
 .field span{font:500 13px var(--mono);color:var(--muted)}
@@ -262,13 +283,13 @@ ol.how li::before{content:counter(s,decimal-leading-zero);font:500 12px/1.9 var(
 .big{font-size:22px;font-weight:600;line-height:1.3}
 .label{font:500 11px var(--mono);letter-spacing:.06em;color:var(--muted)}
 </style>
-</head>
-<body>
+<!--BODY-->
 <div class="app" id="app">
   <header class="top" id="top"></header>
   <main class="view" id="view"></main>
   <nav class="tabs" id="tabs" aria-label="主导航"></nav>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
 "use strict";
@@ -329,7 +350,18 @@ const EX={
   goblet:{name:'高脚杯深蹲',reps:'10 次',img:'Goblet_Squat',p:['quadriceps','gluteal'],s:['adductors','abs'],steps:['胸前捧住哑铃，脚略宽于肩','蹲到大腿接近水平','脚掌发力站起'],cue:'膝盖朝脚尖方向',avoid:'膝盖内扣'},
   split_squat:{name:'分腿蹲',reps:'8 次/侧',img:'Split_Squats',p:['quadriceps','gluteal'],s:['hamstring','adductors'],steps:['前后分腿，后脚跟抬起','身体垂直下降','前脚发力站起'],cue:'上身直立',avoid:'前膝过度前冲'},
   hipflex_stretch:{name:'髋屈肌拉伸',reps:'每侧 2×30 秒',img:'Kneeling_Hip_Flexor',p:['quadriceps'],s:['abs'],steps:['单膝跪地，前腿屈膝 90°','收紧后侧臀部，骨盆微微后卷','身体前移，感受大腿前侧上方拉伸'],cue:'先卷骨盆，再前移',avoid:'腰向前塌'},
-  chest_stretch:{name:'门框胸部拉伸',reps:'2×30 秒',img:'Chest_And_Front_Of_Shoulder_Stretch',p:['chest'],s:['deltoids'],steps:['前臂贴住门框，手肘与肩同高','身体慢慢向前','感受胸前拉伸'],cue:'肩膀不要耸起',avoid:'拉到疼'}
+  chest_stretch:{name:'门框胸部拉伸',reps:'2×30 秒',img:'Chest_And_Front_Of_Shoulder_Stretch',p:['chest'],s:['deltoids'],steps:['前臂贴住门框，手肘与肩同高','身体慢慢向前','感受胸前拉伸'],cue:'肩膀不要耸起',avoid:'拉到疼'},
+  db_curl:{name:'哑铃弯举',reps:'10–12 次',img:'Dumbbell_Bicep_Curl',p:['biceps'],s:[],steps:['站直，掌心朝前，哑铃垂在身体两侧','上臂贴住身体，屈肘把哑铃举到肩前','顶端停 1 秒，2–3 秒慢慢放下'],cue:'只有小臂在动',avoid:'身体前后晃、手肘往前跑'},
+  hammer_curl:{name:'锤式弯举',reps:'10–12 次',img:'Hammer_Curls',p:['biceps'],s:[],steps:['掌心相对握住哑铃','上臂不动，屈肘举起','慢慢放下到手臂伸直'],cue:'像拿锤子一样握',avoid:'耸肩、借力甩'},
+  pushdown:{name:'绳索下压',reps:'12–15 次',img:'Triceps_Pushdown',p:['triceps'],s:[],steps:['面对绳索站，手肘夹在身体两侧','向下伸直手臂，底部手腕微微外翻','控制着回到小臂与地面平行'],cue:'手肘像钉在肋骨旁',avoid:'身体前压借力'},
+  bench_dip:{name:'凳上臂屈伸',reps:'8–12 次',img:'Bench_Dips',p:['triceps'],s:['chest','deltoids'],steps:['双手撑在身后凳边，手指朝前','屈肘让身体下降到上臂接近水平','手掌发力撑起'],cue:'背贴着凳子上下走',avoid:'肩膀往前扣、下得太深'},
+  calf_raise:{name:'站姿提踵',reps:'15–20 次',img:'Standing_Calf_Raises',p:['calves'],s:[],steps:['前脚掌站在台阶边缘','踮起到最高，停 1 秒','脚跟慢慢落到台阶以下'],cue:'全程走完，不要弹',avoid:'膝盖弯曲借力'},
+  seated_calf:{name:'坐姿提踵',reps:'15–20 次',img:'Seated_Calf_Raise',p:['calves'],s:[],steps:['坐稳，重量压在大腿靠膝处','前脚掌踩实，抬起脚跟','慢慢放下到有拉伸感'],cue:'练的是深层的比目鱼肌',avoid:'动作太快'},
+  side_plank:{name:'侧桥',reps:'20–30 秒/侧',img:'Side_Bridge',p:['obliques'],s:['abs','gluteal'],steps:['侧卧，前臂撑地，手肘在肩下','抬起髋部，身体成一条直线','保持后换另一侧'],cue:'髋往上顶，别往下掉',avoid:'身体前倾或后仰'},
+  russian_twist:{name:'俄罗斯转体',reps:'10 次/侧',img:'Russian_Twist',p:['obliques'],s:['abs'],steps:['坐姿，上身后倾约 45°，脚可着地','双手合在胸前，向一侧转','回到中间再转向另一侧'],cue:'转的是胸口，不只是手',avoid:'弓背、速度太快'},
+  superman:{name:'超人式',reps:'10–12 次',img:'Superman',p:['lowerBack'],s:['gluteal'],steps:['俯卧，手臂向前伸直','同时抬起手臂和腿','停 2 秒后慢慢放下'],cue:'往远处伸，而不是往高处抬',avoid:'仰头'},
+  back_ext:{name:'山羊挺身',reps:'10–12 次',img:'Hyperextensions_Back_Extensions',p:['lowerBack'],s:['gluteal','hamstring'],steps:['髋部卡在垫子边缘，双手抱胸','背部平直地向下俯身','臀部发力，起到身体成直线'],cue:'起到平直就停',avoid:'顶端过度后仰'},
+  plie_squat:{name:'相扑深蹲',reps:'10–12 次',img:'Plie_Dumbbell_Squat',p:['adductors','quadriceps'],s:['gluteal'],steps:['双脚宽站，脚尖外转约 45°','双手持哑铃垂在中间','垂直下蹲，再用脚掌发力站起'],cue:'膝盖和脚尖同一方向',avoid:'膝盖内扣'}
 };
 const SLUG_CN={deltoids:'三角肌',trapezius:'斜方肌',upperBack:'背阔肌',rhomboids:'菱形肌',biceps:'肱二头肌',triceps:'肱三头肌',chest:'胸大肌',abs:'腹直肌',obliques:'腹斜肌',gluteal:'臀肌',hamstring:'腘绳肌',quadriceps:'股四头肌',adductors:'内收肌',calves:'小腿',lowerBack:'下背'};
 const MUSCLES={
@@ -343,6 +375,24 @@ const MUSCLES={
   hams:{name:'腘绳肌',area:'大腿后侧',ex:['rdl','leg_curl']},
   quads:{name:'股四头肌',area:'大腿前侧',ex:['goblet','split_squat']}
 };
+// 3D 人体上可点的肌群：区块 → 名称、作用、对应动作；mu 指向训练计划里的肌群
+const RINFO={
+  pecs:{name:'胸大肌',area:'胸部',fn:'把手臂往前推、往里合。圆肩的人胸常偏紧，先拉伸再练。',mu:'pecs',ex:['pushup','chest_stretch']},
+  delts:{name:'三角肌',area:'肩部',fn:'把手臂向前、侧、后抬起。中束是肩宽最直接的来源。',mu:'delt',ex:['lat_raise','cable_lat','band_lat','reverse_fly']},
+  biceps:{name:'肱二头肌',area:'上臂前侧',fn:'屈肘。下拉、划船时也在帮忙。',ex:['db_curl','hammer_curl']},
+  triceps:{name:'肱三头肌',area:'上臂后侧',fn:'伸肘，占上臂围度的一大半，决定手臂后侧线条。',ex:['pushdown','bench_dip','pushup']},
+  abs:{name:'腹直肌',area:'腹部',fn:'让躯干前屈，更重要的是稳住骨盆、不塌腰。',mu:'core',ex:['dead_bug','plank']},
+  obliques:{name:'腹斜肌',area:'腰两侧',fn:'负责转体和侧屈，帮躯干抗扭转。',ex:['side_plank','russian_twist','dead_bug']},
+  traps:{name:'斜方肌',area:'颈肩与上背',fn:'中下束把肩胛往后下方拉，改善圆肩；上束容易代偿，练时别耸肩。',mu:'rear',ex:['face_pull','reverse_fly','band_pull']},
+  lats:{name:'背阔肌',area:'背部两侧',fn:'把手臂往下、往后拉。背变宽，腰就显细。',mu:'lats',ex:['pulldown','db_row']},
+  lowback:{name:'竖脊肌',area:'下背',fn:'保持脊柱挺直，硬拉、臀推时一直在出力。',ex:['superman','back_ext','rdl']},
+  gmax:{name:'臀大肌',area:'臀部',fn:'伸髋。臀部的厚度和形状主要来自它。',mu:'gmax',ex:['hip_thrust','glute_bridge']},
+  gmed:{name:'臀中肌',area:'臀部外上侧',fn:'把腿向外打开，走路时稳住骨盆；练它让臀部上侧更饱满。',mu:'gmed',ex:['band_walk','side_leg']},
+  quads:{name:'股四头肌',area:'大腿前侧',fn:'伸膝，蹲起时的主力。',mu:'quads',ex:['goblet','split_squat']},
+  hams:{name:'腘绳肌',area:'大腿后侧',fn:'屈膝、伸髋，和臀一起发力。',mu:'hams',ex:['rdl','leg_curl']},
+  adductors:{name:'内收肌',area:'大腿内侧',fn:'把腿往里收，深蹲时帮你稳住膝盖。',ex:['plie_squat','goblet']},
+  calves:{name:'小腿三头肌',area:'小腿后侧',fn:'踮脚。站姿练腓肠肌，坐姿练深层的比目鱼肌。',ex:['calf_raise','seated_calf']}
+};
 const W={focus:3,boost:2,keep:1,less:.5};
 const LVNAME={focus:'重点',boost:'加强',keep:'保持',less:'少量'};
 const UPPER=['delt','lats','rear','pecs'], LOWER=['gmax','gmed','hams','quads'];
@@ -353,7 +403,7 @@ const DAYNAME={A:'上肢',B:'下肢',C:'重点强化'};
 /* ---------------- state ---------------- */
 const KEY='bodynav.v4';
 const S={mode:'a',target:'square',rounded:true,apt:false,meas:null,done:{},swap:{},notes:{},voice:true,countVoice:true,h:null};
-const T={ph:{front:null,side:null},step:'h',coachKey:'A',draft:null,hFocus:null,selDay:null};
+const T={ph:{front:null,side:null},step:'front',mtab:S.meas&&S.meas.src==='scan'?'scan':'manual',man:null,coachKey:'A',draft:null,hFocus:null,selDay:null,muscle:null};
 try{
   const r=localStorage.getItem(KEY);
   if(r) Object.assign(S,JSON.parse(r));
@@ -509,6 +559,321 @@ function applyFigFocus(){
   document.querySelectorAll('.metric').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.arg===T.hFocus)));
 }
 
+/* ---------------- 3D 人体：网格与拟合 ----------------
+   body.mesh.wasm = MakeHuman 女性基础网格（MPFB2，CC0）+ 4 个测量形变（肩宽/腰围/臀围/腿围）+ 每个顶点在 MuscleMap 正/背面图上的坐标。
+   按你的测量值用平面截面求周长，反推每个形变的强度，再整体缩放到你的身高。 */
+const REGIONS=['','pecs','delts','biceps','triceps','abs','obliques','traps','lats','lowback','gmax','gmed','quads','hams','adductors','calves'];
+const MESH={d:null,p:null,fit:{}};
+function meshParse(buf){
+  const dv=new DataView(buf); if(dv.getUint32(0,true)!==0x324d4e42) throw new Error('bad mesh');
+  const nv=dv.getUint32(4,true), nt=dv.getUint32(8,true), nm=dv.getUint32(12,true); let o=16;
+  const q=new Int16Array(buf,o,nv*3); o+=nv*6; const base=new Float32Array(nv*3); for(let i=0;i<q.length;i++) base[i]=q[i]/16384;
+  const D=[]; for(let m=0;m<nm;m++){ const a=new Int16Array(buf,o,nv*3); o+=nv*6; const f=new Float32Array(nv*3); for(let i=0;i<a.length;i++) f[i]=a[i]/65536; D.push(f); }
+  const idx=new Uint16Array(buf,o,nt*3); o+=nt*6;
+  const q2=new Int16Array(buf,o,nv*3); o+=nv*6; const sv=new Float32Array(nv*3); for(let i=0;i<q2.length;i++) sv[i]=q2[i]/4;
+  const part=new Uint8Array(buf,o,nv);
+  return {nv,nt,base,D,idx,sv,part};
+}
+function meshLoad(){
+  if(MESH.p) return MESH.p;
+  return MESH.p=fetch('body.mesh.wasm').then(r=>{ if(!r.ok) throw new Error('mesh '+r.status); return r.arrayBuffer(); })
+    .then(b=>MESH.d=meshParse(b)).catch(e=>{ MESH.p=null; throw e; });
+}
+function morphed(M,w){ const X=new Float32Array(M.base); M.D.forEach((d,m)=>{ const k=w[m]; if(k) for(let i=0;i<X.length;i++) X[i]+=d[i]*k; }); return X; }
+// 平面 y 与三角形的交点（只取 parts 位掩码里的部件），返回 xz 凸包——等于软尺绕一圈
+function section(M,X,y,parts){
+  const I=M.idx, P=M.part, pts=[];
+  const cut=(a,b)=>{ const ya=X[a*3+1]-y, yb=X[b*3+1]-y; if((ya<0)!==(yb<0)){ const t=ya/(ya-yb); pts.push([X[a*3]+(X[b*3]-X[a*3])*t, X[a*3+2]+(X[b*3+2]-X[a*3+2])*t]); } };
+  for(let f=0;f<I.length;f+=3){ const a=I[f],b=I[f+1],c=I[f+2]; if(!((parts>>P[a])&1)) continue; cut(a,b); cut(b,c); cut(c,a); }
+  return hull(pts);
+}
+function hull(p){
+  if(p.length<3) return p; p.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+  const cr=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]); const lo=[],up=[];
+  for(const q of p){ while(lo.length>1&&cr(lo[lo.length-2],lo[lo.length-1],q)<=0) lo.pop(); lo.push(q); }
+  for(let i=p.length-1;i>=0;i--){ const q=p[i]; while(up.length>1&&cr(up[up.length-2],up[up.length-1],q)<=0) up.pop(); up.push(q); }
+  lo.pop(); up.pop(); return lo.concat(up);
+}
+const perim=h=>{ let s=0; for(let i=0;i<h.length;i++){ const a=h[i],b=h[(i+1)%h.length]; s+=Math.hypot(a[0]-b[0],a[1]-b[1]); } return s; };
+const PT={torso:1,arms:2,legL:4,legR:8};
+function measureX(M,X){
+  let H=0; for(let i=1;i<X.length;i+=3) if(X[i]>H) H=X[i];
+  let a=1e9,b=-1e9; for(let j=0;j<M.nv;j++){ if(M.part[j]>1) continue; const y=X[j*3+1]/H; if(Math.abs(y-.81)<.008){ const x=X[j*3]; if(x<a) a=x; if(x>b) b=x; } }
+  let waist=1e9,wy=0,hip=0,hy=0;
+  for(let h=.58;h<.665;h+=.01){ const p=perim(section(M,X,h*H,PT.torso)); if(p<waist){ waist=p; wy=h; } }
+  for(let h=.47;h<.545;h+=.01){ const p=perim(section(M,X,h*H,PT.torso|PT.legL|PT.legR)); if(p>hip){ hip=p; hy=h; } }
+  return {H,shoulder:b-a,waist,hip,thigh:perim(section(M,X,.44*H,PT.legL)),y:{shoulder:.81,waist:wy,hip:hy,thigh:.44}};
+}
+const MKEYS=['shoulder','waist','hip','thigh'];
+// goal: 实际尺寸（米）{h,shoulder,waist,hip,thigh}；返回形变强度、网格坐标、缩放
+function fitBody(M,goal){
+  const id=MKEYS.map(k=>goal[k].toFixed(4)).join()+goal.h; if(MESH.fit[id]) return MESH.fit[id];
+  const w=[.5,.5,.5,.5];
+  const sl=MKEYS.map((k,i)=>{ const a=w.slice(),b=w.slice(); a[i]=0; b[i]=1; return measureX(M,morphed(M,b))[k]-measureX(M,morphed(M,a))[k]; });
+  let X,mm,s;
+  for(let it=0;it<4;it++){
+    X=morphed(M,w); mm=measureX(M,X); s=goal.h/mm.H;
+    if(it===3) break;
+    MKEYS.forEach((k,i)=>{ w[i]=Math.max(-.35,Math.min(1.35,w[i]+(goal[k]/s-mm[k])/sl[i])); });
+  }
+  return MESH.fit[id]={w,X,mm,s};
+}
+
+/* 显示用网格：只改外观，不影响测量——头部抹成光滑的人台头、手和全身轻度平滑、手臂向身体收拢，再 Loop 细分一次 */
+function adjOf(nv,idx){
+  const off=new Uint32Array(nv+1), es=[];
+  for(let f=0;f<idx.length;f+=3) for(let e=0;e<3;e++){ const a=idx[f+e], b=idx[f+(e+1)%3]; if(a<b) es.push(a,b); } // 闭合网格：每条边恰好出现一次 a<b
+  for(let i=0;i<es.length;i+=2){ off[es[i]+1]++; off[es[i+1]+1]++; }
+  for(let i=0;i<nv;i++) off[i+1]+=off[i];
+  const nb=new Uint32Array(off[nv]), at=off.slice(0,nv);
+  for(let i=0;i<es.length;i+=2){ const a=es[i],b=es[i+1]; nb[at[a]++]=b; nb[at[b]++]=a; }
+  return {off,nb};
+}
+// 向邻居平均值移动 k·w；dim=3 是坐标，dim=1 是标量
+function relax(V,A,w,k,dim){
+  const n=A.off.length-1, D=new Float32Array(n*dim);
+  for(let i=0;i<n;i++){ const wi=w?w[i]:1; if(!wi) continue; const o=A.off[i], e=A.off[i+1];
+    for(let c=0;c<dim;c++){ let t=0; for(let j=o;j<e;j++) t+=V[A.nb[j]*dim+c]; D[i*dim+c]=(t/(e-o)-V[i*dim+c])*wi*k; } }
+  for(let i=0;i<D.length;i++) V[i]+=D[i];
+}
+const taubin=(X,A,w,it)=>{ for(let i=0;i<it;i++){ relax(X,A,w,.5,3); relax(X,A,w,-.53,3); } };
+const sstep=(a,b,x)=>{ const t=Math.min(1,Math.max(0,(x-a)/(b-a))); return t*t*(3-2*t); };
+// 原始网格是 A 字姿势（手臂与竖直约 40°、略向前），绕肩关节转到约 19°并向后收一点，肩根处渐变过渡
+function poseArms(M,X,H){
+  const a0=.69, rot=.36, back=.2, py=.80*H, pz=-.03*H;
+  for(let i=0;i<M.nv;i++){
+    const x=X[i*3], y=X[i*3+1]/H, p=M.part[i]; if(!(p===1||(p===4&&y>.4&&y<.8))) continue;
+    const sg=x>0?1:-1, px=sg*.11*H, dx=x-px, dy=X[i*3+1]-py, t=dx*sg*Math.sin(a0)-dy*Math.cos(a0);
+    const w=sstep(0,.07*H,t); if(!w) continue;
+    const th=-sg*rot*w, c=Math.cos(th), sn=Math.sin(th);
+    const ny=dx*sn+dy*c, dz=X[i*3+2]-pz, cb=Math.cos(back*w), sb=Math.sin(back*w);
+    X[i*3]=px+dx*c-dy*sn; X[i*3+1]=py+ny*cb-dz*sb; X[i*3+2]=pz+ny*sb+dz*cb;
+  }
+}
+// 头部投影到一个上圆下收的蛋形上，去掉五官和耳朵，像人台
+function eggHead(M,X,H){
+  const hd=[]; let cx=0,cz=0,y0=1e9,y1=-1e9,zx=0,z0=1e9,z1=-1e9;
+  for(let i=0;i<M.nv;i++){ const y=X[i*3+1]/H; if(M.part[i]!==4||y<.885) continue; hd.push(i); cx+=X[i*3]; y0=Math.min(y0,X[i*3+1]); y1=Math.max(y1,X[i*3+1]); z0=Math.min(z0,X[i*3+2]); z1=Math.max(z1,X[i*3+2]); }
+  if(!hd.length) return; cx/=hd.length; cz=(z0+z1)/2;
+  const ry=(y1-y0)/2, cy=y0+ry*1.05, rz=(z1-z0)/2*.84, rx=Math.min(rz*.9,ry*.74); cz+=rz*.18; // 头往前一点坐在脖子上
+  const wv=new Float32Array(M.nv); for(let i=0;i<M.nv;i++) if(M.part[i]===4) wv[i]=sstep(.848,.888,X[i*3+1]/H);
+  const project=()=>{ for(let i=0;i<M.nv;i++){ if(!wv[i]) continue;
+    const dx=X[i*3]-cx, dy=X[i*3+1]-cy, dz=X[i*3+2]-cz, u=Math.max(-1,Math.min(1,dy/ry));
+    const tp=u<0?1-.34*u*u:1;                       // 下半部收窄成下巴
+    const sx=rx*tp, sz=rz*tp, sy=ry*(u<0?1.22:1);
+    const k=1/Math.sqrt((dx/sx)**2+(dy/sy)**2+(dz/sz)**2||1);
+    X[i*3]+=dx*(k-1)*wv[i]; X[i*3+1]+=dy*(k-1)*wv[i]; X[i*3+2]+=dz*(k-1)*wv[i]; } };
+  // 眼窝、嘴里的点投影后会折叠：投影和松弛交替几轮，让网格在蛋形上铺平
+  const A=MESH.adj; for(let r=0;r<6;r++){ project(); for(let i=0;i<4;i++) relax(X,A,wv,.6,3); } project();
+}
+function loopSub(M,X,A){
+  const nv=M.nv, I=M.idx, emap=new Map(), E=[], eid=new Uint32Array(I.length); let ne=0;
+  for(let f=0;f<I.length;f+=3) for(let e=0;e<3;e++){
+    const a=I[f+e], b=I[f+(e+1)%3], c=I[f+(e+2)%3], key=a<b?a*nv+b:b*nv+a; let id=emap.get(key);
+    if(id===undefined){ id=ne++; emap.set(key,id); E.push(a,b,c,c); } else E[id*4+3]=c;
+    eid[f+e]=nv+id; }
+  const N=nv+ne, Y=new Float32Array(N*3), sv=new Float32Array(N*3), part=new Uint8Array(N);
+  for(let i=0;i<nv;i++){ const o=A.off[i], n=A.off[i+1]-o, be=n===3?3/16:3/(8*n);
+    for(let k=0;k<3;k++){ let t=0; for(let j=o;j<o+n;j++) t+=X[A.nb[j]*3+k]; Y[i*3+k]=X[i*3+k]*(1-n*be)+t*be; sv[i*3+k]=M.sv[i*3+k]; }
+    part[i]=M.part[i]; }
+  for(let e=0;e<ne;e++){ const a=E[e*4],b=E[e*4+1],c=E[e*4+2],d=E[e*4+3], o=(nv+e)*3;
+    for(let k=0;k<3;k++){ Y[o+k]=.375*(X[a*3+k]+X[b*3+k])+.125*(X[c*3+k]+X[d*3+k]); sv[o+k]=(M.sv[a*3+k]+M.sv[b*3+k])/2; }
+    part[nv+e]=M.part[a]; }
+  const idx=new (N>65535?Uint32Array:Uint16Array)(I.length*4);
+  for(let f=0,t=0;f<I.length;f+=3,t+=12){ const a=I[f],b=I[f+1],c=I[f+2],ab=eid[f],bc=eid[f+1],ca=eid[f+2];
+    idx.set([a,ab,ca, ab,b,bc, ca,bc,c, ab,bc,ca],t); }
+  return {nv:N,idx,sv,part,X:Y,adj:adjOf(N,idx)};
+}
+function dispMesh(M,F){
+  if(F.disp) return F.disp;
+  const X=new Float32Array(F.X), H=F.mm.H, nv=M.nv, A=MESH.adj||(MESH.adj=adjOf(nv,M.idx)), w=new Float32Array(nv);
+  eggHead(M,X,H);
+  for(let i=0;i<nv;i++){ const y=X[i*3+1]/H; w[i]=M.part[i]===4&&y>.8?sstep(.84,.9,y):0; } taubin(X,A,w,12);
+  for(let i=0;i<nv;i++){ const y=X[i*3+1]/H; w[i]=M.part[i]===4&&y>.4&&y<.8?.9:0; } taubin(X,A,w,30);
+  taubin(X,A,null,2);
+  poseArms(M,X,H);
+  return F.disp=loopSub(M,X,A);
+}
+
+/* 肌群标签图：把 MuscleMap 正/背面图按肌群画成一张编号图（半分辨率），着色器按顶点的图上坐标取色 */
+const LAB_ID={front:{chest:'pecs',abs:'abs',obliques:'obliques',trapezius:'traps',deltoids:'delts',biceps:'biceps',triceps:'triceps',quadriceps:'quads',adductors:'adductors',calves:'calves',forearm:16,tibialis:16},
+  back:{trapezius:'traps',rhomboids:'traps',upperBack:'lats',lowerBack:'lowback',deltoids:'delts',triceps:'triceps',gluteal:'gmax',hamstring:'hams',adductors:'adductors',calves:'calves',forearm:16}};
+const LAB={W:740,H:725,ids:null};
+function labelMap(){
+  if(LAB.ids) return LAB.ids;
+  const {W,H}=LAB, ids=new Uint8Array(W*H), c=document.createElement('canvas'); c.width=W; c.height=H; const g=c.getContext('2d',{willReadFrequently:true});
+  for(const v of ['front','back']) for(const slug in LAB_ID[v]){
+    const L=LAB_ID[v][slug], id=typeof L==='number'?L:REGIONS.indexOf(L); if(!MM[v][slug]) continue;
+    g.setTransform(1,0,0,1,0,0); g.clearRect(0,0,W,H); g.setTransform(.5,0,0,.5,0,0); g.fill(new Path2D(MM[v][slug].join(' ')));
+    const d=g.getImageData(0,0,W,H).data; for(let i=0,n=W*H;i<n;i++) if(d[i*4+3]>127) ids[i]=id;
+  }
+  // 臀大肌的外上部分算臀中肌
+  const gx=REGIONS.indexOf('gmax'), gm=REGIONS.indexOf('gmed');
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){ const i=y*W+x; if(ids[i]===gx&&y*2<672&&Math.abs(x*2-1143)>78) ids[i]=gm; }
+  return LAB.ids=ids;
+}
+const labelAt=(sx,sy)=>{ const x=Math.round(sx/2), y=Math.round(sy/2); return x<0||y<0||x>=LAB.W||y>=LAB.H?0:LAB.ids[y*LAB.W+x]; };
+
+/* ---------------- 3D 人体：显示与交互 ---------------- */
+const B3={r:null};
+const cssv=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const cssColor=c=>{ const m=/var\((--[\w-]+)\)/.exec(c); return m?cssv(m[1]):c; };
+function regionLevel(key){
+  const R=RINFO[key], r=analyze();
+  if(R.mu) return {lv:r.L[R.mu],txt:LVNAME[r.L[R.mu]]+' · 每周 '+r.sets[R.mu]+' 组'};
+  return {lv:'',txt:'计划外 · 想练可以加'};
+}
+function musclePanel(key){
+  if(!key||!RINFO[key]) return `<p class="mp-hint">点一块肌肉，看它是什么、怎么练 · 左右拖动旋转</p>`;
+  const R=RINFO[key], L=regionLevel(key);
+  return `<div class="mp-head"><div><p class="eyebrow">${R.area}</p><p class="h2">${R.name}</p></div>
+      <span class="badge ${L.lv==='focus'||L.lv==='boost'?'acc':''}">${L.txt}</span>
+      <button class="mp-x" type="button" data-act="muscle" data-arg="" aria-label="关闭">${I.x||'×'}</button></div>
+    <p class="small muted">${R.fn}</p>
+    <div class="list">${R.ex.map(e=>`<button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span style="min-width:0"><span class="t">${EX[e].name}${notesOf(e).length?'<span class="badge">备注</span>':''}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div>`;
+}
+function unmount3D(){ if(B3.r){ try{ B3.r.dispose(); }catch(e){} B3.r=null; } }
+function body3dFallback(el,r){ el.classList.add('flat'); el.innerHTML=figureSVG(r,S.figView||'front'); applyFigFocus(); }
+function mountBody(el,r){
+  unmount3D();
+  const THREE=window.THREE; let ok=!!THREE;
+  if(ok){ try{ const c=document.createElement('canvas'); ok=!!(c.getContext('webgl')||c.getContext('experimental-webgl')); }catch(e){ ok=false; } }
+  if(!ok){ body3dFallback(el,r); return; }
+  el.classList.add('loading');
+  meshLoad().then(M=>{ if(!el.isConnected) return; el.classList.remove('loading'); build3D(el,r,M); })
+    .catch(()=>{ if(el.isConnected){ el.classList.remove('loading'); body3dFallback(el,r); } });
+}
+function build3D(el,r,M){
+  const THREE=window.THREE, m=r.m, c=m.cm;
+  const goal={h:(m.h||163)/100,shoulder:c.shoulder/100,waist:c.waist/100,hip:c.hip/100,thigh:c.thigh/100};
+  const F=fitBody(M,goal), s=F.s, H=F.mm.H, D=dispMesh(M,F), X=D.X, A=D.adj, nv=D.nv;
+  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+  if('outputEncoding' in renderer) renderer.outputEncoding=THREE.sRGBEncoding;
+  const cv=renderer.domElement; cv.setAttribute('aria-label','你的 3D 身体模型，可拖动旋转，点肌肉查看练法'); cv.setAttribute('role','img');
+  el.prepend(cv);
+  const scene=new THREE.Scene(), cam=new THREE.PerspectiveCamera(22,1,.05,20);
+  const root=new THREE.Group(); root.scale.setScalar(s); scene.add(root);
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(X,3));
+  geo.setIndex(new THREE.BufferAttribute(D.idx,1));
+  geo.computeVertexNormals();
+  const col=new Float32Array(nv*3); geo.setAttribute('color',new THREE.BufferAttribute(col,3));
+  // 每个顶点属于哪块肌群（按顶点在 MuscleMap 正/背面图上的坐标查表）
+  labelMap();
+  const nrm=geo.attributes.normal.array, rid=new Uint8Array(nv);
+  for(let j=0;j<nv;j++) rid[j]=labelAt(nrm[j*3+2]>=0?D.sv[j*3]:D.sv[j*3+1],D.sv[j*3+2]);
+  // 肌群图之间有空隙：在躯干和四肢上向外长几圈，把空隙补上
+  for(let it=0;it<6;it++){ const nx=rid.slice();
+    for(let j=0;j<nv;j++){ if(rid[j]||D.part[j]>3) continue; for(let q=A.off[j];q<A.off[j+1];q++){ const v=rid[A.nb[q]]; if(v&&v!==16){ nx[j]=v; break; } } }
+    rid.set(nx); }
+  // 凹处稍暗（腋下、腿缝、锁骨窝），给模型一点体积感
+  const ao=new Float32Array(nv);
+  for(let j=0;j<nv;j++){ const o=A.off[j], e=A.off[j+1]; let x=0,y=0,z=0,l=0;
+    for(let q=o;q<e;q++){ const k=A.nb[q]*3; x+=X[k]; y+=X[k+1]; z+=X[k+2]; l+=Math.hypot(X[k]-X[j*3],X[k+1]-X[j*3+1],X[k+2]-X[j*3+2]); }
+    const n=e-o, cvx=((x/n-X[j*3])*nrm[j*3]+(y/n-X[j*3+1])*nrm[j*3+1]+(z/n-X[j*3+2])*nrm[j*3+2])/(l/n||1);
+    ao[j]=Math.max(0,cvx); }
+  for(let i=0;i<4;i++) relax(ao,A,null,.6,1);
+  for(let j=0;j<nv;j++) ao[j]=1-Math.min(.32,ao[j]*1.6);
+  const rimC={value:new THREE.Color()};
+  const mat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.5,metalness:0});
+  mat.onBeforeCompile=sh=>{
+    sh.uniforms.rimC=rimC;
+    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nuniform vec3 rimC;')
+      .replace('#include <dithering_fragment>','float fres=pow(1.0-clamp(abs(dot(normalize(normal),normalize(vViewPosition))),0.0,1.0),2.2);\ngl_FragColor.rgb=mix(gl_FragColor.rgb,rimC,fres*0.42);\n#include <dithering_fragment>');
+  };
+  const body=new THREE.Mesh(geo,mat); root.add(body);
+  // 脚下柔和的接触阴影
+  const shC=document.createElement('canvas'); shC.width=shC.height=128; { const g=shC.getContext('2d'), gr=g.createRadialGradient(64,64,0,64,64,64); gr.addColorStop(0,'rgba(0,0,0,.55)'); gr.addColorStop(.45,'rgba(0,0,0,.18)'); gr.addColorStop(1,'rgba(0,0,0,0)'); g.fillStyle=gr; g.fillRect(0,0,128,128); }
+  const shadow=new THREE.Mesh(new THREE.PlaneGeometry(.62,.42),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(shC),transparent:true,depthWrite:false,opacity:.5}));
+  shadow.rotation.x=-Math.PI/2; shadow.position.y=.002; scene.add(shadow);
+  // 每个肌群的质心（用来转身对准）
+  const cen={}; for(let j=0;j<nv;j++){ const k=REGIONS[rid[j]]; if(!k) continue; const o=cen[k]||(cen[k]=[0,0,0,0]); o[0]+=X[j*3]; o[1]+=X[j*3+1]; o[2]+=X[j*3+2]; o[3]++; }
+  const lin=h=>new THREE.Color(h).convertSRGBToLinear();
+  function paint(){
+    const bg=lin(cssv('--bg')), base=lin(cssv('--body')), acc=lin(cssv('--accent')), sel=T.muscle, lv=analyze().L, dark=bg.r+bg.g+bg.b<.3;
+    const skin=dark?base.clone().lerp(lin('#ffffff'),.06):base.clone().lerp(lin('#ffffff'),.35);
+    rimC.value.copy(bg); shadow.material.opacity=dark?.8:.5;
+    const pal=REGIONS.map((k,i)=>{ if(!i) return skin; const mu=RINFO[k]&&RINFO[k].mu, hot=mu&&(lv[mu]==='focus'||lv[mu]==='boost');
+      return k===sel?skin.clone().lerp(acc,.8):hot?skin.clone().lerp(acc,sel?.25:.5):skin; });
+    for(let j=0;j<nv;j++){ const p=pal[rid[j]]||skin; col[j*3]=p.r; col[j*3+1]=p.g; col[j*3+2]=p.b; }
+    for(let i=0;i<3;i++) relax(col,A,null,.5,3);   // 肌群边缘柔化成渐变
+    for(let j=0;j<nv;j++){ col[j*3]*=ao[j]; col[j*3+1]*=ao[j]; col[j*3+2]*=ao[j]; }
+    geo.attributes.color.needsUpdate=true; kick();
+  }
+  // 软尺：截面凸包，略向外放一点
+  const FM=figMetrics(r), rings={};
+  const partsOf={shoulder:PT.torso|PT.arms,waist:PT.torso,hip:PT.torso|PT.legL|PT.legR,thigh:PT.legL};
+  for(const k of MKEYS){
+    const y=F.mm.y[k]*H, h=section(D,X,y,partsOf[k]); if(h.length<3) continue;
+    let cx=0,cz=0; h.forEach(p=>{cx+=p[0];cz+=p[1];}); cx/=h.length; cz/=h.length;
+    const g=new THREE.Group(), color=lin(cssColor(FM[k].color));
+    const mk=(sx,sz,dash)=>{ const pts=h.map(p=>new THREE.Vector3(cx+(p[0]-cx)*sx,y,cz+(p[1]-cz)*sz)); 
+      if(dash){ const geo2=new THREE.BufferGeometry().setFromPoints(pts.concat([pts[0]])); const ln=new THREE.Line(geo2,new THREE.LineDashedMaterial({color:lin(cssv('--accent')),dashSize:.012,gapSize:.01,transparent:true,opacity:.9})); ln.computeLineDistances(); return ln; }
+      const curve=new THREE.CatmullRomCurve3(pts,true,'centripetal'); return new THREE.Mesh(new THREE.TubeGeometry(curve,Math.max(64,pts.length*3),.0026/s,6,true),new THREE.MeshBasicMaterial({color,transparent:true})); };
+    const ring=mk(1.012,1.012,false); g.add(ring);
+    const legs=[ring]; if(k==='thigh'){ const r2=ring.clone(); r2.material=ring.material; r2.scale.x=-1; g.add(r2); legs.push(r2); }
+    const t=FM[k]; if(t.tgt&&Math.abs(t.d)>1){ const q=k==='shoulder'?t.tgt/t.cur:t.tgt/t.cur; g.add(mk(1.012*q,k==='shoulder'?1.012:1.012*q,true)); }
+    root.add(g); rings[k]={g,h,y,cx,cz,meshes:legs};
+  }
+  // 标签
+  const tags={}; const tagBox=document.createElement('div'); tagBox.className='tags3'; el.appendChild(tagBox);
+  for(const k in rings){ const t=FM[k], b=document.createElement('button'); b.type='button'; b.className='tag3'; b.dataset.act='focus'; b.dataset.arg=k; b.style.setProperty('--st',t.color);
+    b.innerHTML=`<i></i><span>${FIG_LINES[k].name}</span><b class="mono">${k==='shoulder'?f1(t.cur):Math.round(t.cur)}</b>${t.label?`<em class="mono">${t.label}</em>`:''}`; tagBox.appendChild(b); tags[k]=b; }
+  scene.add(new THREE.HemisphereLight(0xffffff,0x8a8f8c,.62));
+  const key=new THREE.DirectionalLight(0xfffaf4,.82); key.position.set(-1.4,2.4,2.6); scene.add(key);
+  const fill=new THREE.DirectionalLight(0xf2f6ff,.28); fill.position.set(2.2,.9,1.4); scene.add(fill);
+  const rim=new THREE.DirectionalLight(0xffffff,.55); rim.position.set(1.2,2,-2.8); scene.add(rim);
+  const Hs=H*s, cy=Hs*.5;
+  const st={rot:S.figView==='back'?Math.PI:-.3,vel:0,goal:null,auto:!matchMedia('(prefers-reduced-motion: reduce)').matches&&!T.muscle,drag:false,moved:0,lx:0,ly:0,raf:0,alive:true,last:performance.now()};
+  function size(){ const w=el.clientWidth,h=el.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); cam.aspect=w/h;
+    const dist=(Hs*.56)/Math.tan(cam.fov*Math.PI/360)*Math.max(1,.5/cam.aspect); cam.position.set(0,cy+dist*.08,dist); cam.lookAt(0,cy,0); cam.updateProjectionMatrix(); }
+  const v=new THREE.Vector3();
+  function placeTags(){
+    const W=el.clientWidth, Hh=el.clientHeight;
+    for(const k in tags){ const R=rings[k]; let bx=-1e9,by=0;
+      for(let i=0;i<R.h.length;i+=Math.max(1,R.h.length>>5)){ const p=R.h[i]; v.set(p[0],R.y,p[1]).applyMatrix4(root.matrixWorld).project(cam); if(v.x>bx){ bx=v.x; by=v.y; } }
+      const x=(bx*.5+.5)*W, y=(-by*.5+.5)*Hh, tg=tags[k];
+      tg.style.top=y+'px'; tg.style.setProperty('--lead',Math.max(8,W-tg.offsetWidth-6-x)+'px'); }
+  }
+  function focus(k){ for(const key in rings){ const on=!k||key===k; rings[key].g.traverse(o=>{ if(o.material){ o.material.opacity=on?1:.15; } }); tags[key]&&tags[key].classList.toggle('dim',!on); } kick(); }
+  const wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
+  function frame(now){
+    st.raf=0; if(!st.alive) return;
+    const dt=Math.min(.05,(now-st.last)/1000); st.last=now;
+    if(!st.drag){ if(st.goal!=null){ const d=wrap(st.goal-st.rot); st.rot+=d*Math.min(1,dt*7); if(Math.abs(d)<.002){ st.rot=st.goal; st.goal=null; } }
+      else if(Math.abs(st.vel)>.0005){ st.rot+=st.vel; st.vel*=.92; } else if(st.auto) st.rot+=dt*.28; }
+    root.rotation.y=st.rot; root.updateMatrixWorld();
+    renderer.render(scene,cam); placeTags();
+    if(st.drag||st.auto||st.goal!=null||Math.abs(st.vel)>.0005) st.raf=requestAnimationFrame(frame);
+  }
+  function kick(){ if(!st.raf&&st.alive){ st.last=performance.now(); st.raf=requestAnimationFrame(frame); } }
+  function turnTo(a){ st.auto=false; st.vel=0; st.goal=a; kick(); }
+  const ray=new THREE.Raycaster(), ndc=new THREE.Vector2();
+  function pick(e){
+    const b=cv.getBoundingClientRect(); ndc.set((e.clientX-b.left)/b.width*2-1,-(e.clientY-b.top)/b.height*2+1);
+    ray.setFromCamera(ndc,cam); const hit=ray.intersectObject(body,false)[0];
+    let k=''; if(hit){ const f=hit.face, p=body.worldToLocal(hit.point.clone()), A=new THREE.Vector3(),B=new THREE.Vector3(),C=new THREE.Vector3(),w=new THREE.Vector3();
+      A.fromArray(X,f.a*3); B.fromArray(X,f.b*3); C.fromArray(X,f.c*3); THREE.Triangle.getBarycoord(p,A,B,C,w);
+      const j=w.x>=w.y&&w.x>=w.z?f.a:w.y>=w.z?f.b:f.c; k=REGIONS[rid[j]]||''; }
+    ACT.muscle(k);
+  }
+  const down=e=>{ if(e.button>0) return; st.drag=true; st.moved=0; st.lx=e.clientX; st.ly=e.clientY; st.vel=0; st.goal=null; kick(); };
+  const move=e=>{ if(!st.drag) return; const dx=e.clientX-st.lx; st.moved+=Math.abs(dx)+Math.abs(e.clientY-st.ly); st.lx=e.clientX; st.ly=e.clientY;
+    if(st.moved>6){ st.auto=false; el.classList.add('grab'); st.vel=dx*.012; st.rot+=dx*.012; } };
+  const up=e=>{ if(!st.drag) return; st.drag=false; el.classList.remove('grab'); if(st.moved<=6&&e.type==='pointerup') pick(e); kick(); };
+  cv.addEventListener('pointerdown',down); window.addEventListener('pointermove',move); window.addEventListener('pointerup',up); window.addEventListener('pointercancel',up);
+  const ro=new ResizeObserver(()=>{ size(); kick(); }); ro.observe(el);
+  const onVis=()=>{ if(document.hidden) st.auto=false; }; document.addEventListener('visibilitychange',onVis);
+  size(); paint();
+  B3.r={st,focus,paint,turnTo,
+    face(k){ const o=cen[k]; if(!o) return; const x=o[0]/o[3], z=o[2]/o[3]; turnTo(Math.atan2(-x,z)); },
+    dispose(){ st.alive=false; cancelAnimationFrame(st.raf); ro.disconnect(); document.removeEventListener('visibilitychange',onVis);
+      window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); window.removeEventListener('pointercancel',up);
+      scene.traverse(o=>{ if(o.geometry) o.geometry.dispose(); if(o.material) o.material.dispose(); }); renderer.dispose(); cv.remove(); tagBox.remove(); }};
+  if(T.hFocus) focus(T.hFocus);
+}
+
 /* ---------------- muscle map ----------------
    人体肌群轮廓来自 MuscleMap（Melih Colpan，MIT License），女性正/背面。 */
 const MM={"front":{"neck":["M 332.05,262.18 c -0.78,8.99 -5.96,18.06 -11.27,26.44 a 0.35,0.35 0 0 1 -0.59,0.01 q -6.05,-9.29 -9.58,-18.59 -1.68,-4.42 -1.62,-8.04 0.06,-3.36 4.03,-3.55 6.44,-0.31 14.09,-0.13 c 2.41,0.05 5.19,0.99 4.94,3.86 z","M 290.15,290.93 c 3.28,4.65 5.62,9.8 7.15,15.32 0.7,2.53 -1.37,5.04 -3.97,5.05 q -6.56,0.04 -11.88,-2.03 a 2.07,2.06 14.4 0 1 -1.3,-2.18 c 0.77,-5.99 4.87,-11.91 8.89,-16.23 a 0.72,0.71 -41.3 0 1 1.11,0.07 z","M 301.06,294.13 c -3.51,-6.07 -6.56,-12.38 -9.23,-18.87 q -1.42,-3.46 -1.56,-6.85 -0.36,-8.56 0.86,-17.74 a 0.44,0.44 0 0 1 0.53,-0.37 q 0.46,0.1 0.79,0.48 4.65,5.35 7.86,11.31 c 6.42,11.93 11.65,25.19 18.44,37.61 a 5.28,5.26 30.8 0 1 0.66,2.59 L 319.3,321 a 0.79,0.79 0 0 1 -0.79,0.79 c -1.83,0 -3.44,-1.1 -4.21,-2.73 q -5.68,-11.89 -13.24,-24.93 z","M 328.11,315.98 c -1.39,2.8 -1.85,5.31 -5.45,5.84 a 0.92,0.91 85.6 0 1 -1.04,-0.9 q -0.09,-9.72 -0.08,-18.23 0,-1.57 0.75,-3.05 6.71,-13.16 12.25,-25.58 c 3.49,-7.85 8.12,-17.17 14.42,-23.56 q 0.19,-0.18 0.45,-0.19 a 0.43,0.42 -3.6 0 1 0.44,0.38 q 0.95,7.84 0.93,15.61 -0.02,4.3 -1.34,7.91 -3.03,8.27 -7.56,16.2 -8.05,14.11 -13.77,25.57 z","M 343.58,306.54 c 1.42,-5.58 3.9,-10.86 7.19,-15.57 a 0.69,0.68 -50.1 0 1 1.04,-0.1 c 3.9,3.84 9.01,11.14 8.89,17.13 a 1.07,1.06 79.1 0 1 -0.65,0.97 q -5.44,2.34 -12.5,2.38 c -2.39,0.01 -4.57,-2.43 -3.97,-4.81 z"],"trapezius":["M 241.01,294.28 c 12.76,-8.28 25.21,-16.07 39.54,-21.44 2.58,-0.96 6.02,0.04 5.63,3.51 q -0.44,3.92 -1.62,5.3 c -6.48,7.58 -12.74,12.81 -19.24,19.14 -1.03,1.01 -1.87,1.15 -3.25,1.03 q -8.13,-0.69 -18.79,-2.97 -2.99,-0.65 -2.7,-3.86 0.05,-0.46 0.43,-0.71 z","M 366.31,275.29 c 12,4.97 22.67,11.96 33.55,18.94 q 0.51,0.33 0.54,0.94 c 0.08,1.63 -0.71,3.2 -2.44,3.59 q -9.65,2.18 -18.62,2.99 c -1.26,0.11 -2.4,0.24 -3.39,-0.7 q -5.03,-4.78 -10.97,-10.25 -6.53,-6.01 -8.56,-9.16 -1.87,-2.89 -1.63,-6.77 0.03,-0.49 0.35,-0.85 c 3.04,-3.4 7.94,-0.07 11.17,1.27 z"],"hair":["M 274.27,0 h 7.5 q 18.53,1.85 32.68,8.03 c 12.49,5.46 24.03,14.94 27.55,28.42 a 2.51,2.49 89.9 0 0 1.78,1.79 c 62.05,16.11 59.99,92.38 46.77,140.06 q -2.56,9.24 -6.49,17.96 c -2.53,5.64 -4.61,7.93 -10.53,9.62 l -0.26,-0.1 q -0.2,-0.09 -0.11,-0.29 3.73,-8.25 6.16,-16.1 a 1.18,1.17 -83.3 0 1 1.03,-0.82 c 9.73,-0.81 11.84,-26.25 11.81,-33.17 q 0,-2.26 -1.89,-3.46 -0.54,-0.35 -1.17,-0.24 -2.13,0.37 -4.08,0.23 c -5.7,-0.39 -8.68,-13.45 -9.55,-17.9 q -2.57,-13.24 -5.09,-28.6 -0.65,-3.97 -2.37,-7.72 a 2.7,2.65 86.8 0 0 -1.54,-1.4 C 357.04,93.05 347.03,89.65 337,88.5 q -7.76,-0.88 -14.28,3.52 c -7.75,5.24 -15.65,10.37 -23.95,14.33 q -15.27,7.3 -31.5,12.13 a 1.86,1.85 -0.3 0 0 -1.25,1.26 c -2.08,7.3 -3.02,14.59 -4.33,22.04 -0.77,4.35 -2.6,10.1 -8.02,10.27 q -1.4,0.05 -2.82,-0.07 -0.58,-0.04 -0.95,0.42 -1.31,1.64 -1.26,3.95 0.23,12.21 3.9,23.14 c 1.3,3.87 3.66,8.51 8.11,9.16 a 1.22,1.22 0 0 1 0.99,0.84 q 5.67,17.91 15.65,33.72 0.59,0.93 0.76,2 0.62,15.66 -0.31,31.34 -0.33,0.59 -0.86,1.05 -10.81,9.38 -25.26,12.16 -3.21,-0.66 -6.4,-1 -2.96,-0.31 -6.35,-1.14 -4.1,-0.99 -8.5,-0.85 -19.12,0.63 -38.2,1.5 -7.58,0.35 -14.57,-0.86 a 1.74,1.73 -87.9 0 1 -1.44,-1.56 c -0.81,-8.45 2.45,-17.97 5.45,-25.54 7.91,-19.94 16.52,-39.52 21.72,-59.8 q 3.8,-14.84 3.36,-29.24 -0.62,-20.32 -5.16,-56.52 -0.99,-7.83 -0.58,-13.57 1.97,-27.81 13.7,-48.73 C 220.38,22.24 229.09,15.56 238.9,9.81 Q 254.97,0.39 274.27,0 Z m 61.27,35.35 c -9.93,-7.61 -23.32,-7.23 -32.78,1.35 q -1.11,1.01 0.36,0.73 c 10.93,-2.09 20.77,-2.59 31.88,-0.82 q 2.75,0.43 0.54,-1.26 z","M 302.76,36.7 c 9.46,-8.58 22.85,-8.96 32.78,-1.35 q 2.21,1.69 -0.54,1.26 c -11.11,-1.77 -20.95,-1.27 -31.88,0.82 q -1.47,0.28 -0.36,-0.73 z"],"deltoids":["M 215.94,289.45 c -21.5,15.97 -35.81,41.69 -45.18,66.64 a 0.54,0.54 0 0 1 -0.75,0.3 c -1.36,-0.68 -2.91,-1.32 -2.88,-3.16 q 0.36,-18.38 4.6,-33.36 c 4.12,-14.55 12.32,-23.54 25.35,-31.51 5.06,-3.09 15.01,-5.79 18.99,0.41 a 0.51,0.51 0 0 1 -0.13,0.68 z","M 233,326.79 c -5.53,27.66 -26.78,45.52 -55.22,43.68 a 0.54,0.54 0 0 1 -0.5,-0.61 c 4.48,-32.74 28.09,-58.38 54.53,-76.41 q 2.3,-1.57 4.86,-0.86 a 1.61,1.61 0 0 1 1.18,1.72 Q 236,311.81 233,326.79 Z","M 470.13,355.96 C 463.5,338.45 454.92,322.09 443.6,307.63 q -8.16,-10.43 -18.47,-18.02 a 0.95,0.94 33.2 0 1 -0.26,-1.22 c 3.34,-5.94 13.06,-3.27 17.74,-0.68 13.57,7.5 23.02,17.38 27.32,32.28 q 3.99,13.8 4.29,33.5 0.02,0.68 -0.47,1.17 -1.06,1.07 -2.71,1.71 a 0.71,0.71 0 0 1 -0.91,-0.41 z","M 463.02,370.48 c -23.85,1.37 -44.22,-11.24 -52.35,-33.91 q -2.31,-6.45 -3.64,-14.34 -2.64,-15.63 -3.89,-27.26 -0.28,-2.56 2.36,-2.63 1.96,-0.05 4.36,1.61 c 25.95,18.03 49.33,43.22 53.78,75.78 q 0.1,0.71 -0.62,0.75 z"],"head":["M 333.98559,84.905706 c 18.21278,1.634629 31.69605,8.136487 37.2945,12.907787 5.05164,4.305277 7.19576,45.031667 12.65256,51.693107 1.8636,2.27501 8.59028,-1.54865 8.92968,2.02054 0.963,10.12704 -1.13955,23.87461 -5.01774,34.09876 -2.76635,7.29296 -5.63968,2.08994 -7.32662,6.61326 -4.20041,11.26291 -13.37526,37.43537 -39.7435,47.10729 -18.23028,5.87857 -27.73171,4.95957 -42.38166,-0.61061 -10.53425,-7.41801 -26.32238,-15.61151 -35.48901,-45.82179 -2.15595,-7.10532 -5.07953,-2.63217 -8.24698,-7.1806 -8.2816,-11.89228 -6.24233,-24.37427 -6.11257,-33.09312 1.24002,-3.08768 8.39807,0.42491 9.86574,-4.98496 1.75809,-6.48033 5.74751,-21.52642 6.67934,-30.11758 42.80886,-10.2119 49.53647,-34.194904 68.89626,-32.632084 z"],"chest":["M 215.31,402.8 c 3.26,-19.61 9.28,-38.69 19.81,-54.85 q 13.83,-21.23 37.68,-27.16 c 4.19,-1.04 8.16,-1.75 12.65,-1.52 q 12.07,0.63 26.16,3.99 1.78,0.43 1.87,2.25 1.29,25.82 3.16,54.8 0.99,15.38 0.3,27.45 -0.37,6.41 -1.94,10.48 c -1.58,4.08 -6.16,7.97 -9.72,10.84 -4.33,3.5 -10.61,4.16 -16,3.9 q -10.92,-0.53 -23.26,-4.83 c -17.71,-6.16 -33.56,-14.26 -50.09,-24.02 a 1.31,1.29 20.5 0 1 -0.62,-1.33 z","M 363.91,319.81 c 13.87,2.63 26.6,9.35 35.84,20.13 14.46,16.89 22.21,40.73 25.93,63.05 q 0.11,0.67 -0.48,1.03 -23.28,13.86 -44.52,22.12 c -11.73,4.57 -25.54,8.27 -37.94,6.2 -5.84,-0.97 -14.69,-8.68 -16.85,-14.18 q -1.62,-4.13 -2.04,-13.18 -0.45,-9.71 0.29,-21.75 1.69,-27.64 3.41,-58.27 a 1.18,1.16 -22 0 1 0.33,-0.76 q 0.76,-0.78 1.88,-1.05 11.52,-2.78 22.73,-3.71 6.58,-0.54 11.42,0.37 z"],"biceps":["M 155.35,437.19 c 0.88,-13.89 5.09,-26.01 11.66,-38.24 4.28,-7.95 13.01,-13.06 21.68,-14.64 q 5.04,-0.91 8.47,-1.31 c 3.81,-0.44 9.89,1.7 10.16,6.4 q 0.6,10.54 -0.27,19.31 c -1.87,18.75 -10.06,34.69 -22.69,48.75 q -8.64,9.63 -17.84,18.84 a 1.95,1.9 16.8 0 1 -0.98,0.51 q -3.19,0.6 -7.01,-0.16 c -1.52,-0.3 -2.45,-1.78 -2.7,-3.22 -0.63,-3.64 -1.32,-7.25 -1.31,-10.96 q 0.05,-12.9 0.83,-25.28 z","M 478.52,408.27 q 5.57,13 6.67,24.56 1.21,12.62 1.22,28.51 0,5.95 -1.27,12.12 c -0.81,3.98 -5.47,3.81 -8.54,3.62 q -1.7,-0.11 -3.27,-1.75 c -13.93,-14.57 -28.48,-28.44 -35.35,-48.06 -4.33,-12.36 -5.34,-25.85 -4.21,-39.01 q 0.06,-0.73 0.51,-1.3 c 2.72,-3.44 6.57,-4.44 11.44,-3.76 q 7.25,1.01 11.78,2.52 9.47,3.16 14.86,10.89 3.02,4.33 6.16,11.66 z"],"triceps":["M 203.67,452.99 c -7.1,14.55 -18.61,30.01 -32.29,39.49 q -2.32,1.61 -4.85,0.35 l -0.31,-0.15 q -2.42,-1.22 -0.37,-2.98 c 17.2,-14.83 28.72,-32 37.23,-52.62 q 0.8,-1.93 2.34,-3.04 a 1.28,1.28 0 0 1 1.8,0.31 q 1.35,1.95 0.97,4.41 -1.1,7.22 -4.52,14.23 z","M 442.12,446.42 q 12.14,25.77 33.26,43.55 1.47,1.24 -0.14,2.3 l -0.63,0.42 a 4.39,4.37 45.8 0 1 -4.92,-0.08 q -8.08,-5.68 -15.21,-13.9 c -9.9,-11.44 -19.12,-25.17 -21.69,-39.38 q -0.62,-3.4 1.39,-5.43 0.44,-0.44 0.99,-0.15 1.54,0.81 2.17,2.22 2.35,5.31 4.78,10.45 z"],"obliques":["M 234.32,446.92 c -0.55,-2.95 -0.73,-5.84 -1.94,-8.63 q -4.84,-11.24 -8.61,-21.89 -1.12,-3.17 1.19,-0.73 c 6.09,6.44 10.93,13.52 16.12,20.74 a 1.71,1.68 28.7 0 1 0.33,1.09 q -0.53,11.15 -1.88,22.64 -0.27,2.38 -1.24,0.18 -2.52,-5.75 -3.97,-13.4 z","M 242.67,456.5 c 3.65,1.14 7.61,3.78 10.54,6.08 q 2.32,1.82 2.25,4.78 l -0.21,8.13 q -0.04,1.79 -1.45,0.68 -5.7,-4.52 -10.18,-10.21 c -1.95,-2.48 -2.49,-5.57 -2.19,-8.64 a 0.96,0.96 0 0 1 1.24,-0.82 z","M 246.6,490.48 c -6.03,-4.05 -7.7,-15.15 -7.34,-21.92 a 0.29,0.29 0 0 1 0.5,-0.19 c 4.79,4.87 9.23,10.01 14.82,13.93 a 1.71,1.7 17.7 0 1 0.72,1.39 l -0.03,11.84 a 0.6,0.6 0 0 1 -0.96,0.47 q -4.04,-3.05 -7.71,-5.52 z","M 252.02,456.3 c -3.08,-1.43 -6.59,-6.27 -8.84,-9.51 q -1.03,-1.49 -0.89,-3.31 a 1.39,1.38 -88.2 0 1 1.35,-1.28 q 2.27,-0.04 4.18,0.73 4.36,1.77 9.23,3.14 0.54,0.15 0.58,0.71 0.4,6.12 -1.21,11.67 a 0.35,0.35 0 0 1 -0.56,0.18 q -1.73,-1.34 -3.84,-2.33 z","M 257.8,616.66 c -4.79,-0.24 -10.33,-3.88 -14.25,-6.47 -3.22,-2.12 -4.01,-14.52 -4.21,-18.14 q -0.65,-12.12 -0.53,-21.74 0.32,-25.23 0.51,-50.71 c 0.03,-4.43 0.42,-8.84 0.73,-13.1 q 0.3,-4 1.6,-7.53 0.76,-2.05 2.82,-1.27 c 12.29,4.68 12.69,15.09 12.12,26.28 q -0.16,3.03 0.13,5.86 2.02,19.75 1.8,41.33 -0.05,4.7 0.76,9.52 1.4,8.43 2.19,17.36 0.85,9.42 -2.51,17.86 a 1.18,1.17 -77.7 0 1 -1.16,0.75 z","M 259.53,441.27 c -6.09,-0.94 -15.24,-7.47 -17.83,-12.96 a 1.96,1.95 -46.6 0 1 -0.04,-1.54 c 0.68,-1.67 2.51,-1.45 3.82,-0.88 q 8.66,3.77 17.36,6.42 a 0.45,0.45 0 0 1 0.31,0.35 q 0.79,4.96 -2.71,8.32 -0.38,0.37 -0.91,0.29 z","M 384.22,445.83 c 4.32,-0.61 8.05,-3.04 12.37,-3.63 q 1.44,-0.19 1.87,1.19 0.52,1.66 -0.54,3.18 c -4.17,5.96 -7.23,9.14 -12.91,11.89 a 0.38,0.38 0 0 1 -0.53,-0.24 q -1.53,-5.28 -1.13,-11.45 a 1.03,1.01 88.3 0 1 0.87,-0.94 z","M 393.51,426.7 q 1.7,-0.72 3.57,-1.16 a 1.83,1.83 0 0 1 1.91,0.73 c 0.66,0.94 0.41,2.29 -0.25,3.15 q -6.32,8.23 -15.71,11.52 -3.03,1.06 -4.1,-1.97 -1.12,-3.14 -1.26,-3.53 -1.02,-2.87 1.9,-3.71 6.45,-1.87 13.94,-5.03 z","M 397.15,610.37 c -3.94,2.47 -9.2,6.06 -13.86,6.26 a 1.49,1.48 77.9 0 1 -1.43,-0.93 q -3.33,-8.47 -2.36,-18.41 0.73,-7.6 1.89,-14.77 1,-6.17 0.99,-11.23 c -0.02,-13.26 0.27,-26.67 1.74,-39.85 q 0.47,-4.28 0.19,-8.9 c -0.66,-10.78 0.81,-21.31 12.66,-24.94 a 1.78,1.77 69.5 0 1 2.14,0.98 q 1,2.27 1.34,4.92 1.19,9.27 1.26,20.24 0.16,23.43 0.38,48.3 c 0.09,11.08 -0.18,22.85 -2.37,33.89 -0.34,1.72 -0.99,3.45 -2.57,4.44 z","M 398.41,456.38 a 0.8,0.8 0 0 1 1.09,0.63 c 0.86,5.62 -1.96,9.16 -5.73,13.05 q -3.65,3.78 -7.3,6.56 a 0.41,0.41 0 0 1 -0.66,-0.3 q -0.29,-4.61 -0.24,-8.98 0.03,-3.34 2.9,-5.44 4.69,-3.42 9.94,-5.52 z","M 401.76,469.17 c 0.19,6.21 -1.1,14.25 -5.22,19.11 -2.62,3.1 -6.7,5.34 -10.07,7.78 q -0.73,0.53 -0.74,-0.38 l -0.07,-12.12 q 0,-0.59 0.46,-0.96 8.07,-6.31 14.53,-13.82 1.06,-1.24 1.11,0.39 z","M 417.44,415.21 c -2.14,7.47 -5.47,14.6 -8.52,22.06 q -1.36,3.31 -1.79,6.59 -1.11,8.53 -4.58,16.68 -0.79,1.86 -1.07,-0.14 -1.42,-10.38 -1.9,-22.98 a 1.58,1.57 -28.9 0 1 0.29,-1 q 6.57,-9.46 12.8,-17.21 1.87,-2.32 4.3,-4.31 0.73,-0.59 0.47,0.31 z"],"abs":["M 261.73,482.62 c 0.12,-10.88 -0.33,-22.8 7.93,-31.04 10.43,-10.39 25.75,-12.91 39.95,-10.63 q 0.47,0.08 0.45,0.54 l -0.87,24.33 a 0.96,0.95 88.3 0 1 -0.86,0.92 q -8.51,0.88 -17.53,2.35 c -11.22,1.83 -20.06,5.16 -28.09,13.92 q -1,1.08 -0.98,-0.39 z","M 263.89,560.38 c 18.37,-2.6 32.63,0.35 44.32,15.16 q 0.72,0.91 0.91,2.02 0.98,5.72 1.19,10.92 2.01,48.7 2.07,81.21 0.01,2.91 -2.63,5.03 c -2.77,2.21 -10.61,5.88 -13.52,2.38 -6.1,-7.32 -10.49,-16.08 -14.05,-25.36 q -14.5,-37.75 -18.65,-78.2 -0.6,-5.83 -0.33,-12.39 0.03,-0.68 0.69,-0.77 z","M 283.92,476.78 q 12.55,-5.43 25.84,-3.32 0.36,0.06 0.36,0.42 0.41,19.6 -0.86,38.86 a 0.91,0.91 0 0 1 -1,0.85 c -13.44,-1.32 -28.43,-1.82 -41.54,1.88 q -1.32,0.37 -1.93,-0.86 c -9,-18.41 3.35,-31 19.13,-37.83 z","M 300.31,556.68 q -4.15,-2.21 -8.98,-2.91 -13.66,-2 -27.37,-1.31 a 0.95,0.95 0 0 1 -0.97,-0.72 q -2.73,-10.93 -1.37,-23.2 0.2,-1.78 1.77,-2.92 c 6.36,-4.65 14.69,-8.3 22.33,-8.94 q 12.38,-1.05 23.44,4.26 a 2.06,2.06 0 0 1 1.17,1.89 q -0.3,18.75 -1.38,35.86 -0.03,0.52 -0.55,0.61 c -2.7,0.45 -5.69,-1.34 -8.09,-2.62 z","M 349.65,553.77 c -5.34,0.78 -9.22,3.16 -13.94,5.24 q -1.59,0.69 -3.28,0.24 a 0.64,0.63 -83.8 0 1 -0.47,-0.59 q -1.23,-19.64 -1.28,-36.09 a 1.7,1.68 -13.4 0 1 0.95,-1.53 c 15.64,-7.64 31.83,-5.42 45.86,4.48 0.94,0.67 1.65,1.44 1.78,2.61 q 1.39,12.16 -1.2,23.23 -0.25,1.07 -1.34,1.03 -13.86,-0.54 -27.08,1.38 z","M 354.08,475.63 c 16.7,6.15 32.39,19.94 21.71,39.55 a 0.9,0.9 0 0 1 -1.05,0.43 c -13.38,-3.92 -27.7,-3.22 -41.96,-2.05 a 0.9,0.9 0 0 1 -0.97,-0.78 c -1.62,-12.74 -1.1,-26.27 -1.03,-38.85 a 0.48,0.47 86.4 0 1 0.4,-0.46 q 11.86,-1.91 22.9,2.16 z","M 362.23,642.32 c -4.21,12.26 -9.35,24.52 -17.49,34.79 q -0.9,1.12 -2.2,1.22 -6.54,0.54 -11.69,-3.91 c -1.34,-1.16 -2.37,-2.61 -2.35,-4.44 q 0.27,-32.33 1.7,-73.01 0.36,-10.37 1.51,-19.31 0.12,-0.89 0.67,-1.6 c 11.52,-15 26.64,-18.71 44.72,-15.65 a 0.85,0.84 -86 0 1 0.71,0.83 q 0.06,12.43 -1.93,25.22 -4.56,29.34 -13.65,55.86 z","M 378.34,483.09 c -8.04,-8.87 -17.3,-12.26 -29.19,-14.16 q -8.48,-1.35 -16.49,-2.17 a 1.05,1.04 2.2 0 1 -0.93,-1 l -0.83,-24.24 q -0.02,-0.53 0.51,-0.61 18.35,-2.62 31.52,4.43 14.18,7.59 15.53,22.29 0.76,8.32 0.7,15.15 -0.01,1.2 -0.82,0.31 z"],"forearm":["M 80.93,647.88 c 14.1,-28.26 32.44,-54.05 52.98,-78.01 6.28,-7.32 12.52,-13.04 22.3,-14.76 a 0.44,0.44 0 0 1 0.44,0.67 q -33.59,51.14 -75.12,92.53 -1.62,1.61 -0.6,-0.43 z","M 85.85,647.42 q 11.51,-11.53 23.19,-23.33 6.63,-6.71 16.74,-19.55 c 13.51,-17.18 26.63,-37.24 39.52,-56.02 a 1.08,1.08 0 0 1 1.85,0.11 q 0.51,0.96 0.26,2.09 c -1.73,8.15 -5.44,14.39 -10.55,22.73 q -11.14,18.18 -25.7,34.1 -18.98,20.74 -39.21,37.61 -2.7,2.25 -6.02,3.82 -0.28,0.13 -0.57,0.24 -1.42,0.54 -1.26,-0.09 0.03,-0.14 0.14,-0.23 0.8,-0.67 1.61,-1.48 z","M 158.49,493 c -4.72,28.27 -19.05,55.5 -36.58,78.04 q -10.8,13.89 -20.36,28.46 -4.33,6.6 -7.59,13.38 c -5.52,11.5 -11.24,22.8 -19.41,32.11 q -1.49,1.7 -0.81,-0.46 c 3.77,-11.82 9.38,-23.48 14.74,-35.02 3.82,-8.21 7.5,-17.64 10.42,-26.75 7.62,-23.71 16.99,-47.77 29.34,-68.38 7.41,-12.37 17.14,-24.67 29.9,-31.38 a 0.72,0.71 -14.7 0 1 1.05,0.61 q 0.12,4.42 -0.7,9.39 z","M 176.77,536.74 c -5.58,2.64 -11.34,4.68 -16.45,7.91 -5.83,3.68 -11.93,7.82 -18.84,8.99 a 1.21,1.21 0 0 1 -1.41,-1.13 c -0.29,-5.42 4.57,-12.34 7.66,-16.52 q 10.15,-13.75 23.71,-26.94 c 1.35,-1.32 3.26,-2.11 5.16,-1.83 a 1.02,1.02 0 0 1 0.86,0.86 q 2.03,13.42 -0.05,27.79 a 1.12,1.12 0 0 1 -0.64,0.87 z","M 478.46,543.49 c -4.04,-2.35 -8.89,-4.3 -13.28,-6.25 -2.13,-0.95 -1.9,-3.18 -2.11,-5.15 q -1.32,-12.65 0.43,-23.9 a 1.38,1.38 0 0 1 1.54,-1.16 c 1.68,0.21 3.26,0.93 4.5,2.12 q 12.39,11.96 22.31,25.05 c 2.67,3.51 10.26,13.94 8.99,18.38 a 1.51,1.51 0 0 1 -1.8,1.06 q -5.3,-1.25 -8.83,-3.31 -5.39,-3.14 -11.75,-6.84 z","M 480.72,568.04 c -3.26,-5.55 -5.96,-11.12 -7.24,-17.31 q -0.33,-1.61 0.58,-2.51 a 1.03,1.03 0 0 1 1.57,0.16 c 13.24,19.66 27,40.11 41.05,58.18 11.56,14.88 25.47,28 38.8,41.13 q 0.56,0.55 1.06,1.21 0.78,1.05 -0.44,0.58 -3.39,-1.29 -6.75,-4.08 -19.67,-16.3 -37.87,-35.97 -17.53,-18.94 -30.76,-41.39 z","M 484.61,555.07 c 11.21,1.91 17.39,8.95 24.45,17.26 18.64,21.97 34.4,44.56 47.76,69.37 q 1.9,3.52 3.32,6.62 0.61,1.33 -0.43,0.3 -42.24,-42.1 -75.48,-92.97 -0.48,-0.73 0.38,-0.58 z","M 540.63,578.72 c 5.89,18.68 13.76,35.38 21.55,52.65 q 2.61,5.79 4.88,12.9 0.81,2.52 -0.89,0.5 c -7.48,-8.88 -12.5,-17.92 -17.97,-29.24 q -6.73,-13.92 -15.23,-25.62 -8.17,-11.25 -17.48,-23.63 c -15.23,-20.26 -27.78,-45.5 -32.6,-70.62 q -1.21,-6.31 -1.13,-11.97 0.01,-1.19 1.06,-0.64 c 10.4,5.42 18.51,14.3 25.31,24.31 13.82,20.33 24.84,47.05 32.5,71.36 z"],"hands":["M 76.9,699.46 c -1.68,6.93 -4.86,14.23 -9.75,19.73 -3.68,4.16 -10.21,-0.6 -12.84,-3.77 q -4.85,-5.86 -10.18,-10.8 c -2.03,-1.88 -9.58,-5.18 -8.37,-9.02 2,-6.4 4.37,-11.1 8.21,-16.74 q 5.74,-8.42 12.12,-17.03 2.99,-4.03 5.79,-6.44 1.65,-1.41 4.25,-0.76 7.51,1.87 13.62,4.2 a 0.47,0.47 0 0 1 0.29,0.4 q 1.61,20.71 -3.14,40.23 z","M 22.64,686.61 q -4.35,2.68 -8.97,5.43 -2,1.2 -3.76,0.73 -2.04,-0.55 -3.53,-1.72 a 1.59,1.59 0 0 1 -0.52,-1.77 q 0.73,-2.04 2.74,-3 5.14,-2.46 10.34,-5.1 a 13.93,13.75 -80.7 0 0 3.47,-2.53 c 3.04,-3.03 6.28,-5.7 9.81,-8.15 q 6.86,-4.77 13.58,-9.74 c 1.68,-1.24 2.71,-1.36 4.54,-0.38 4.66,2.47 -4.59,11.2 -6.57,12.67 -6.61,4.92 -13.95,9.14 -21.13,13.56 z","M 32.82,715.26 q -5.43,14.93 -12.06,27.84 -1.98,3.85 -4.71,6.75 a 1.67,1.66 51.8 0 1 -2.66,-0.32 c -2.02,-3.56 1,-13.05 2.6,-16.84 q 6.53,-15.37 13.87,-30.34 1.12,-2.28 2.93,-0.51 l 2.38,2.35 q 1.73,1.69 0.66,3.87 -1.5,3.03 -3.01,7.2 z","M 32.18,751.27 q -3.61,7.78 -7.04,13.77 -0.8,1.41 -2.48,1.29 a 2.04,2.04 0 0 1 -1.82,-1.48 q -0.59,-2.11 -0.16,-4.36 1.46,-7.75 4.24,-15.75 5.55,-15.95 13.53,-31.52 a 0.92,0.91 -74.1 0 1 0.89,-0.5 c 2.55,0.22 5.63,1.06 5.19,4.36 q -0.48,3.64 -1.61,7.19 -3.97,12.44 -10.74,27 z","M 54.56,726.38 c -4.87,12.51 -10.55,24.74 -16.83,36.91 q -1.47,2.85 -4.02,0.9 -0.2,-0.16 -0.33,-0.36 -1.89,-2.86 -0.7,-5.81 c 4.9,-12.05 9.63,-24.27 15.68,-36.05 q 0.94,-1.84 2.66,-0.68 l 2.47,1.68 q 1.89,1.28 1.07,3.41 z","M 53.04,752.14 c 1.93,-10.58 3.66,-20.18 11.74,-27.88 a 0.88,0.88 0 0 1 1.43,0.33 q 0.18,0.48 0.07,0.95 -3.65,14.78 -9.97,27.42 -0.75,1.49 -1.97,2.17 a 1.06,1.06 0 0 1 -1.57,-1.02 q 0.09,-0.98 0.27,-1.97 z","M 572.57,717.95 c -4.99,-6.62 -7.75,-14.53 -9.42,-22.45 q -3.74,-17.75 -2.3,-36.07 0.04,-0.54 0.55,-0.72 6.91,-2.55 14.55,-4.31 a 3.01,2.98 -33.7 0 1 2.4,0.47 q 2.39,1.67 4.36,4.26 11.12,14.61 17.14,24.22 2.19,3.48 3.91,8.26 c 1.42,3.93 2.9,6.43 -1.05,8.84 -6.91,4.23 -11.6,9.71 -16.7,15.64 q -2.2,2.56 -5.58,4.02 -4.71,2.02 -7.86,-2.16 z","M 629.7,692.91 q -0.88,0.05 -1.63,-0.39 -16.99,-9.79 -30.39,-19.09 -5.44,-3.78 -8.34,-10.22 a 1.71,1.66 45.9 0 1 0,-1.38 c 0.82,-1.77 3.4,-2.74 5.14,-1.47 6.84,4.98 13.95,9.43 20.22,14.76 2.49,2.13 4.62,4.61 7.54,6.13 q 5.16,2.68 10.13,5.06 1.59,0.76 2.51,2.34 a 1.98,1.97 56.7 0 1 -0.53,2.58 q -2.03,1.52 -4.65,1.68 z","M 619.38,741.59 c -5.55,-10.95 -9.91,-22.4 -14.42,-34.16 q -0.76,-1.97 0.82,-3.38 1.39,-1.24 2.48,-2.21 1.76,-1.58 2.8,0.54 8.21,16.69 14.65,32.42 2.73,6.68 2.32,13.6 -0.1,1.72 -1.83,1.98 a 1.61,1.58 -24.2 0 1 -1.45,-0.54 q -2.91,-3.38 -5.37,-8.25 z","M 615.42,764.65 c -7.37,-14.18 -14.47,-29.6 -18.64,-45 q -0.59,-2.21 -0.29,-4.52 0.07,-0.54 0.54,-0.83 1.9,-1.18 4.13,-1.51 1,-0.15 1.46,0.75 7.03,13.62 12.86,29.78 3.2,8.87 4.64,16.66 0.36,1.96 0.12,4.04 c -0.34,2.92 -3.74,2.72 -4.82,0.63 z","M 603.2,763.32 C 597.32,751.95 590.92,738.6 586.42,726.4 q -0.8,-2.15 1.08,-3.48 l 2.22,-1.57 q 1.83,-1.29 2.86,0.69 c 6.13,11.73 10.79,24.28 15.74,36.17 q 1.16,2.78 -0.76,5.72 -0.12,0.18 -0.3,0.32 -2.58,1.93 -4.06,-0.93 z","M 585.43,754.04 c -5.15,-8.61 -8.65,-19.26 -10.81,-28.78 q -0.46,-2.03 1.32,-0.96 1.2,0.73 2.2,1.88 c 6.71,7.78 8.51,18.11 10.03,28.15 a 0.6,0.59 -12.9 0 1 -0.42,0.66 q -1.5,0.43 -2.32,-0.95 z"],"adductors":["M 286.21,731.89 c 5.1,-12.47 11.15,-24.68 16.82,-36.79 a 1.17,1.17 0 0 1 1.84,-0.38 q 0.8,0.71 0.75,1.93 c -0.46,12.38 -1.19,24.44 -2.76,37.71 -1.13,9.56 -1.91,19.14 -3.49,28.56 -0.69,4.17 -2.41,8.04 -4.32,11.69 a 2.22,2.21 29.3 0 1 -3.12,0.87 q -1.32,-0.8 -1.28,-2.41 0.2,-8.82 0.13,-17.67 -0.01,-1.4 -0.62,-2.66 c -2.16,-4.44 -4.98,-9.87 -5.17,-14.91 q -0.11,-2.7 1.22,-5.94 z","M 292.87,682.52 c -3.12,14.57 -9.61,27.39 -18.76,39.63 q -0.68,0.91 -1.28,-0.05 c -2.93,-4.74 -4.21,-9.67 -4.63,-15.36 q -0.45,-5.9 -1.09,-8.14 -1.89,-6.56 -4.75,-13.01 c -2.76,-6.23 -4.28,-13.06 -7.14,-19.37 -7.35,-16.19 -16.26,-33.86 -22.42,-51.48 q -0.08,-0.21 -0.01,-0.42 a 0.26,0.26 0 0 1 0.46,-0.06 q 10.77,14.73 21.98,28.77 11.5,14.4 17.6,19.88 7.55,6.77 14.86,13.4 2.74,2.48 4.97,5.3 a 1.11,1.09 32.6 0 1 0.21,0.91 z","M 300.1,836.83 q 1.64,19.12 2.22,36.73 0.11,3.47 -0.89,0.14 -2.42,-8.03 -4.58,-16.34 c -4.22,-16.26 -9.63,-31.97 -14.75,-48.34 q -2.58,-8.25 -6.48,-18.58 -14.03,-37.14 -28.05,-75.59 -3.75,-10.3 -6.6,-19.52 -5.15,-16.64 -9.78,-32.48 c -4.96,-16.95 -8.01,-35.46 -8.1,-52.91 q -0.02,-2.71 0.71,-0.1 9.47,34.09 24.55,65.57 c 6.56,13.69 13.54,27.25 19.02,40.89 q 15.49,38.57 24.83,67.42 2.41,7.47 3.31,17.16 c 1.12,12.19 3.56,24.02 4.59,35.95 z","M 338.67,872.66 c 0.73,-20.39 1.92,-38.3 4.91,-57.16 1.83,-11.53 2.14,-23.33 6.03,-34.79 q 10.93,-32.22 23.86,-64.19 c 5.7,-14.09 12.7,-27.77 19.13,-41.2 q 15.32,-32.04 24.53,-65.61 0.65,-2.39 0.64,0.08 c -0.12,28.68 -7.98,55.21 -17.34,83.63 -1.78,5.41 -3.2,10.88 -5.19,16.32 -10.25,27.99 -20.2,55.76 -30.81,83.12 q -2.8,7.2 -4.91,13.95 -5.59,17.81 -11.19,35.6 c -3.34,10.63 -5.96,21.88 -9.13,32.74 q -0.27,0.92 -0.4,-0.03 -0.18,-1.22 -0.13,-2.46 z","M 394.37,647.3 c -4.46,9.4 -9.38,19.33 -12.44,29.17 q -1.3,4.17 -2.83,7.95 c -2.26,5.61 -4.97,10.94 -5.74,16.89 -0.99,7.53 -1.06,14.75 -5.53,21.2 a 0.5,0.5 0 0 1 -0.83,0.01 q -4.34,-6.22 -7.72,-11.72 -7.96,-12.97 -11.16,-28.21 a 1.61,1.61 0 0 1 0.35,-1.37 q 2.44,-2.82 5.14,-5.21 c 9.88,-8.72 18.7,-16.83 27.48,-27.39 q 13.43,-16.14 25.97,-33.56 0.32,-0.44 0.43,-0.49 0.87,-0.39 0.54,0.51 -5.81,15.68 -13.66,32.22 z","M 352.83,748.3 c -2.02,3.67 -2.95,6.58 -2.78,11.03 q 0.26,6.53 0.21,13.72 c -0.01,1.58 -1.13,2.86 -2.75,2.9 q -0.58,0.01 -0.9,-0.48 C 342.49,769 341.27,763.08 340.41,755 q -1.04,-9.79 -2.26,-19.97 c -1.6,-13.31 -2.43,-25.65 -2.79,-38.57 q -0.03,-1.03 0.53,-1.68 a 1.21,1.2 52.6 0 1 2.01,0.27 q 6.87,14.67 13.39,28.8 2.2,4.77 3.93,9.5 1.07,2.92 0.68,5.46 -0.83,5.42 -3.07,9.49 z"],"quadriceps":["M 250.69,888.3 q -16.76,-40.15 -28.04,-78.67 -9.66,-32.96 -14.75,-66.84 c -6.22,-41.38 -6.25,-81.5 4.58,-120.54 q 0.12,-0.43 0.43,-0.11 0.42,0.42 0.59,0.99 22.71,76.86 50.06,155.88 0.82,2.37 1.12,4.78 4.02,31.91 4.89,65.81 c 0.88,34.39 -0.14,66.83 -3.55,99.57 -0.42,4.08 -1.48,7.64 -3.4,11.1 a 1.74,1.74 0 0 1 -1.36,0.9 c -3.47,0.33 -9.58,0.21 -9.46,-4.63 q 0.8,-32.72 -0.01,-63.12 -0.07,-2.67 -1.1,-5.12 z","M 237.75,955.7 c -18.56,-47.89 -33.57,-96.23 -39.84,-146.62 -3.58,-28.72 -3.69,-58.65 1.76,-86.95 q 0.62,-3.18 0.81,0.06 0.5,8.53 1.83,17.04 3.42,21.88 10.35,47.5 6.6,24.41 13.5,49.26 2.72,9.81 5.92,19.09 4.05,11.74 7.55,25.02 1.76,6.7 2.16,12.33 2,28.5 1.14,55.08 c -0.12,3.52 -0.98,6.35 -3.98,8.55 a 0.79,0.79 0 0 1 -1.2,-0.36 z","M 301.11,919.16 c -0.02,16.26 -1.13,34.39 -10.87,47.81 -1.99,2.73 -6.98,1.8 -10.02,1.14 -1.09,-0.24 -1.35,-1.1 -1.62,-2.04 -3.49,-11.83 -3.03,-24.65 -1.79,-37.03 q 1.41,-14.09 3.35,-26.37 1.6,-10.13 1.54,-18.61 -0.09,-12.6 -1.48,-24.36 c -1.65,-13.85 -3.88,-27.85 -2.4,-41.77 a 0.32,0.32 0 0 1 0.4,-0.28 q 0.4,0.1 0.57,0.48 c 14.17,32.12 22.37,65.88 22.32,101.03 z","M 390.96,886.41 q -1.98,4.65 -2.04,9.09 -0.45,33.06 0.22,61.74 c 0.09,3.94 -6.78,4.21 -9.43,3.95 a 1.8,1.79 -10.8 0 1 -1.44,-0.97 c -1.51,-2.91 -2.67,-5.71 -3.07,-9.04 q -1.93,-16.27 -2.84,-32.46 c -2.55,-44.99 -1.64,-90.5 3.77,-134.26 q 0.37,-2.95 1.26,-5.54 26.45,-76.29 50.24,-156.54 a 0.39,0.38 21.6 0 1 0.55,-0.23 q 0.31,0.16 0.41,0.51 c 10.18,37.82 10.57,76.54 5.14,115.55 q -4.46,32.04 -13.33,63.85 -12.28,44.03 -29.44,84.35 z","M 441.32,723.15 q 5.4,27.88 3.91,59.43 c -1.5,31.66 -7.16,62.78 -15.56,93.66 q -10.93,40.18 -26.56,79.46 a 0.8,0.8 0 0 1 -1.23,0.34 c -4.09,-3.18 -3.84,-7.55 -3.96,-12.09 q -0.59,-24.2 1.07,-50.23 0.42,-6.4 2.05,-12.77 3.38,-13.22 8.06,-26.98 3.21,-9.44 5.93,-19.09 c 7.96,-28.15 15.34,-53.97 20.99,-81.11 q 3.3,-15.87 4.53,-32.62 0.01,-0.1 0.11,-0.14 l 0.25,-0.09 q 0.11,-0.04 0.12,0.07 0.06,0.98 0.29,2.16 z","M 350.02,966.12 c -9.24,-14.15 -10.21,-31.4 -10.24,-48.19 -0.07,-33.99 8.51,-69.02 22.57,-100.06 a 0.51,0.49 -76.6 0 1 0.45,-0.29 q 0.28,0 0.31,0.28 c 0.83,7.48 0.62,15.88 -0.25,23.21 -1.72,14.59 -3.74,28.99 -3.61,44.11 q 0.06,8 1.44,16.9 1.82,11.87 3.26,24.93 c 1.49,13.54 2.18,28.24 -1.97,40.04 a 1.57,1.55 2.7 0 1 -1.11,1 q -3.84,0.9 -7.13,0.61 -2.19,-0.19 -3.72,-2.54 z"],"knees":["M 258.39,1012.52 q -5.64,-13.48 -7.66,-29.52 -0.05,-0.4 0.28,-0.64 10.7,-7.7 22.82,-4.11 c 5.29,1.57 4.59,5.57 4.3,9.79 -0.9,12.75 -3.27,25.99 -10.59,36.26 a 1.05,1.05 0 0 1 -1.64,0.09 q -4.73,-5.21 -7.51,-11.87 z","M 258.71,1030.63 c 3.61,6.97 7.98,15.68 6.95,23.65 a 0.48,0.48 0 0 1 -0.72,0.35 l -18.34,-11.02 q -0.38,-0.23 -0.55,-0.64 -1,-2.44 -1.32,-4.76 -3.61,-26.35 -4.29,-51.87 -0.06,-2.2 0.39,-0.04 c 3.24,15.52 10.35,29.77 17.88,44.33 z","M 288.4,985.22 q 1.73,22.58 1.26,41.7 -0.04,1.47 -0.76,3.07 -4.6,10.16 -10.25,24.15 c -2.27,5.6 -3.1,11.54 -5.89,17 q -0.2,0.39 -0.5,0.07 -0.38,-0.42 -0.45,-1 c -1.47,-12.75 1.68,-26.74 4.89,-38.94 4.36,-16.65 9.53,-33.85 10.59,-51.47 q 0.01,-0.22 0.19,-0.33 0.05,-0.02 0.1,-0.02 0.14,0.02 0.16,0.16 0.44,2.76 0.66,5.61 z","M 367.17,978.19 c 7.47,-2.33 16.25,-0.86 22.63,4.13 q 0.45,0.35 0.38,0.92 -1.87,15.08 -7.33,28.55 -2.94,7.24 -7.89,12.74 a 0.87,0.87 0 0 1 -1.34,-0.05 c -8.34,-10.84 -10.82,-27.73 -10.91,-41.25 -0.01,-2.65 2.18,-4.32 4.46,-5.04 z","M 369.06,1070.47 q -0.22,1.65 -1.01,0.18 c -2.79,-5.17 -3.42,-10.89 -5.57,-16.11 q -5.2,-12.65 -10.53,-24.91 c -0.38,-0.88 -0.8,-1.93 -0.81,-2.92 q -0.26,-23.13 1.85,-46.89 a 0.27,0.26 -77 0 1 0.36,-0.23 l 0.25,0.11 q 0.13,0.05 0.14,0.19 0.36,9.87 2.31,18.26 4.17,17.95 9.24,37.46 c 3.02,11.63 5.3,23.46 3.77,34.86 z","M 378.49,1038.47 q 5.25,-11 11.25,-23 6.8,-13.59 10.56,-29.93 0.03,-0.15 0.18,-0.19 0.05,-0.01 0.1,0 0.1,0.01 0.09,0.11 -0.84,19 -2.62,37.31 -1.13,11.63 -2.64,19.1 -0.25,1.26 -1.49,1.99 -10.01,5.93 -17.84,10.76 a 0.53,0.53 0 0 1 -0.8,-0.37 c -0.79,-5.16 1.07,-11.29 3.21,-15.78 z"],"tibialis":["M 260.21,1135.29 c 4.48,29.68 7.59,58.82 9.36,87.72 0.53,8.66 1.47,17.39 2.79,25.97 q 1.84,11.96 7.34,33.23 0.5,1.94 1.04,7.01 0.48,4.54 -2.34,7.74 a 0.6,0.6 0 0 1 -0.99,-0.15 q -1.61,-3.47 -2.33,-7.07 -5.47,-27.17 -8.25,-45.03 -4.18,-26.84 -7.6,-47.71 -0.97,-5.95 -2.27,-12 -7.08,-33.02 -14.69,-65.86 -1.12,-4.84 -2.44,-9.69 -1.98,-7.22 -2.28,-9.76 -2.41,-20.6 1.44,-43.08 0.25,-1.46 0.73,-0.06 7.12,20.57 13.32,44.54 4.83,18.73 7.17,34.2 z","M 367.02,1257.45 q 3.27,-15.94 4.47,-35.75 2.4,-39.61 7.94,-77.98 2.44,-16.87 5.47,-30.17 6.3,-27.69 16.13,-56.67 0.69,-2.03 1.04,0.08 2.43,14.55 2.2,31.01 -0.15,10.91 -2.78,20.08 -1.29,4.53 -2.34,9.1 -7.34,31.94 -13.88,61.81 -2.12,9.66 -3.56,18.43 c -4.93,29.99 -9.41,60.77 -15.76,91.85 q -0.74,3.61 -2.23,7.21 a 0.86,0.86 0 0 1 -1.48,0.19 q -2.35,-3.11 -2.05,-7.14 0.36,-4.83 1.56,-9.43 3.01,-11.58 5.27,-22.62 z"],"calves":["M 273.89,1099.95 c 3.37,-15.16 7.39,-30.47 12.61,-44.88 q 0.67,-1.85 1.28,0.01 4.41,13.38 7.29,29.13 3.29,18.03 6.8,44.66 2.68,20.36 2.76,35.74 0.04,6.36 -1.26,13.77 -3.67,20.9 -7.39,37.94 -6.52,29.95 -12.99,57.95 -0.31,1.31 -0.67,0.01 -3.32,-11.98 -5.27,-24.29 -5.82,-36.85 -4.93,-74.51 c 0.46,-19.33 0.09,-35.61 0.04,-57.98 q -0.03,-9.65 1.73,-17.55 z","M 272.32,1289.43 q 0.14,1.3 -0.7,0.3 -1.96,-2.32 -3.31,-4.94 -4.85,-9.47 -8.79,-20.24 -9.58,-26.21 -15.83,-53.09 -1,-4.3 -2.77,-8.19 c -8,-17.6 -12.77,-36.6 -13.83,-55.89 q -1.45,-26.23 4.89,-54.26 0.41,-1.85 1,-0.05 1.2,3.7 2.35,7.92 c 6.05,22.14 11.41,47.6 16.75,71.19 q 2.42,10.71 3.46,19.48 2.54,21.38 5.09,39.58 c 2.14,15.29 4.57,31.52 9.27,46.7 q 1.76,5.67 2.42,11.49 z","M 351.12,1061.47 q 0.86,-3.24 2.27,-6.95 a 0.37,0.37 0 0 1 0.67,-0.04 q 0.6,1.15 1.07,2.55 4.5,13.38 8.77,29.36 3.17,11.88 4.35,21.44 0.65,5.26 0.58,16.16 c -0.12,17.19 -0.49,33.53 -0.01,50.26 q 0.96,33.46 -3.97,69.04 -2.3,16.62 -6.18,31.23 -0.05,0.18 -0.19,0.29 a 0.25,0.25 0 0 1 -0.39,-0.14 c -7.63,-32.4 -14.66,-63.57 -20.38,-95.86 q -1.46,-8.28 -1.39,-15.2 0.13,-12.7 1.63,-25.36 c 2.86,-24.12 6.38,-51.37 13.17,-76.78 z","M 400.56,1202.06 c -1.03,2.29 -2.11,4.68 -2.7,7.11 -5.58,23.36 -12.43,46.15 -21.19,67.15 q -3.13,7.49 -7.08,13.12 -0.19,0.27 -0.47,0.44 -0.68,0.4 -0.57,-0.38 0.79,-5.61 2.43,-11.29 5.47,-18.91 8.27,-39.41 3.36,-24.7 6.32,-48.64 1.04,-8.33 3.58,-19.59 5.82,-25.8 11.4,-49.84 3.49,-14.99 7.21,-27.24 0.18,-0.58 0.63,-1.01 0.33,-0.31 0.43,0.13 c 8.56,36.96 7.32,74.95 -8.26,109.45 z"],"ankles":["M 279.42,1326.07 q -2.66,-6.02 -11.2,-17.08 -1.56,-2.02 -1.72,-4 c -0.22,-2.73 1.78,-5.75 4.12,-7.13 q 0.49,-0.29 0.97,0.02 8.39,5.34 14.89,11.86 1.95,1.97 2.11,4.51 0.86,13.41 -1.46,27.53 a 0.31,0.31 0 0 1 -0.45,0.22 q -0.14,-0.08 -0.27,-0.19 -0.12,-0.1 -0.18,-0.24 -3.39,-7.76 -6.81,-15.5 z","M 284.58,1349.02 q 5.05,11.98 7,21.38 3.39,16.32 -0.69,32.76 a 0.43,0.43 0 0 1 -0.76,0.16 c -10.12,-13.11 -21.17,-25.72 -34.11,-35.39 a 1.63,1.62 16.1 0 1 -0.65,-1.17 q -0.75,-8.89 2.46,-14.38 0.98,-1.67 1.18,-3.55 1.38,-12.95 2.87,-26.6 a 0.7,0.7 0 0 1 0.91,-0.59 c 11.21,3.6 17.28,16.67 21.79,27.38 z","M 353.36,1339.65 q -1.77,-13.46 -1.06,-24.75 0.06,-0.96 0.22,-1.92 c 0.7,-4.2 12.74,-12.42 16.33,-14.86 q 1.07,-0.72 2.08,0.08 c 3.24,2.56 4.92,6.49 2.19,10.15 -5.11,6.84 -9.99,13.59 -13.3,21.5 q -2.27,5.41 -5.06,11.31 -0.76,1.62 -1.15,-0.12 -0.15,-0.68 -0.25,-1.39 z","M 379.01,1322.5 c 1.17,9.01 1.97,18.19 3.1,26.72 0.13,0.98 0.26,1.92 0.78,2.79 q 3.21,5.33 2.84,13.44 -0.1,2.05 -1.78,3.29 c -12.07,8.93 -22.71,21.31 -32.45,33.67 q -0.48,0.61 -1.15,0.95 a 0.24,0.24 0 0 1 -0.34,-0.16 q -5.23,-21.38 1.99,-42.64 2.82,-8.31 6.7,-16.77 c 4.2,-9.17 9.45,-18.49 19,-22.07 a 0.98,0.97 -14.1 0 1 1.31,0.78 z"],"feet":["M 268.26,1427.94 c -13.55,0.97 -28,-0.1 -40.94,-5.21 a 0.76,0.76 0 0 1 -0.35,-1.14 c 8.83,-12.76 18.97,-25.24 27.65,-37.39 q 0.72,-1 1.89,-0.61 11.12,3.76 18.81,14.19 c 1.66,2.25 0.2,9.63 -0.4,12.23 q -2.17,9.25 -5.67,17.23 a 1.19,1.17 -79.8 0 1 -0.99,0.7 z","M 279.15,1427.43 c -2.43,-4.43 -2.1,-22.42 2.82,-25.6 q 0.48,-0.31 0.93,0.02 c 4.5,3.21 11.09,10.03 10.33,15.88 q -0.43,3.39 -0.54,7.02 a 3.3,3.3 0 0 1 -3.32,3.21 l -9.41,-0.05 q -0.55,0 -0.81,-0.48 z","M 382.04,1384.42 q 1.51,-0.66 3.03,-0.87 0.57,-0.07 0.91,0.39 l 27.73,37.1 a 1.23,1.22 61 0 1 -0.53,1.87 c -12.37,4.87 -27.24,6.04 -40.29,5.05 a 1.5,1.49 81 0 1 -1.27,-0.93 c -3.14,-7.8 -6.11,-16.5 -6.82,-25.44 q -0.2,-2.47 0.96,-4.02 6.68,-8.97 16.28,-13.15 z","M 347.64,1416.45 c -0.34,-4.76 6.41,-11.73 10.12,-14.46 a 1.41,1.4 -37.2 0 1 1.94,0.26 c 2.44,3.09 2.86,7.16 3.19,10.93 q 0.6,6.77 -0.53,13.21 a 1.96,1.95 5.2 0 1 -1.95,1.62 l -9.39,-0.1 a 2.74,2.74 0 0 1 -2.7,-2.53 q -0.35,-4.33 -0.68,-8.93 z"]},"back":{"hair":["M 1096.04,0 h 7.79 c 22.49,2.45 53.18,10.99 60.21,36.27 q 0.46,1.66 2,2.05 c 64.38,16.44 60.01,99.49 44.24,147.61 q -2.62,7.99 -6.55,14.81 -0.51,0.89 -1.22,1.68 -0.97,1.07 -1.52,1.32 -3.63,1.58 -6.55,2.8 -14.77,6.1 -29.14,11 -0.74,0.26 -0.59,1.19 -0.52,-0.76 -1.47,-0.46 -4.4,1.42 -10.86,2.97 -3.97,1 -6.62,1.12 -5.28,0.24 -12.66,-0.36 -5.76,-0.52 -11.15,-2.21 -0.54,-0.17 -0.85,-0.03 -0.45,0.2 -0.58,0.77 0.26,-1.02 -0.52,-1.24 -9.76,-2.78 -19.21,-7.04 a 0.46,0.46 0 0 0 -0.65,0.43 l 0.39,12.23 q 0.49,15.83 -0.42,30.63 l -0.91,9.16 a 2.42,2.42 0 0 1 -1.99,2.15 q -11.5,2.06 -22.86,2.63 -5.84,0.05 -10.69,-1.12 -4.96,-1.19 -7,-1.31 -3.7,-0.23 -7.48,-0.12 -17.27,0.5 -33.97,1.33 -7.72,0.38 -15.15,-0.74 a 2.13,2.12 0.2 0 1 -1.78,-1.78 c -1,-6.77 1.75,-15.8 4.22,-22.15 q 5.88,-15.15 12.89,-32.55 c 7.85,-19.49 14.27,-41.02 13.35,-61.3 q -1.03,-22.68 -5.37,-57.36 -0.67,-5.33 -0.4,-10.31 0.98,-18.63 7.84,-37.04 5.87,-15.78 15.35,-24.54 c 7.92,-7.32 19.98,-14.55 31.09,-17.67 q 9.1,-2.55 18.79,-2.82 z m 40.66,79.56 c 15.08,3.29 29.45,-7.8 30.48,-23.26 q 0.15,-2.22 -0.63,-0.14 -6.61,17.62 -24.72,17.97 c -5.78,0.12 -11.81,-2.36 -16.39,-6.42 -1.53,-1.35 -3.74,-3.16 -5.84,-2.98 a 0.62,0.62 0 0 0 -0.5,0.9 q 5.86,11.37 17.6,13.93 z","M 1167.18,56.3 c -1.03,15.46 -15.4,26.55 -30.48,23.26 Q 1124.96,77 1119.1,65.63 a 0.62,0.62 0 0 1 0.5,-0.9 c 2.1,-0.18 4.31,1.63 5.84,2.98 4.58,4.06 10.61,6.54 16.39,6.42 q 18.11,-0.35 24.72,-17.97 0.78,-2.08 0.63,0.14 z"],"neck":["M 1133.1,222 -1.89,61.8 q -0.02,0.66 -0.62,0.4 -22.28,-9.35 -45.91,-9.91 a 0.77,0.77 0 0 1 -0.6,-1.22 q 1.38,-1.89 3.31,-2.48 c 6.78,-2.07 12.31,-3.9 18.36,-8.33 q 5.08,-3.71 7.66,-8.78 c 5.15,-10.11 6.3,-21.91 7.11,-32.95 q 0.13,-0.57 0.58,-0.77 0.31,-0.14 0.85,0.03 5.39,1.69 11.15,2.21 z","M 1164.71,218.73 c 1.42,12.25 1.86,24.62 7.81,35.59 3.46,6.38 11.4,11.41 17.38,13.62 q 4.31,1.6 8.68,2.96 1.85,0.58 2.75,2.35 a 0.65,0.65 0 0 1 -0.56,0.94 q -23.87,0.79 -45.98,10.03 a 0.34,0.34 0 0 1 -0.47,-0.3 l -1.94,-62.68 q 6.46,-1.55 10.86,-2.97 0.95,-0.3 1.47,0.46 z"],"trapezius":["M 1135.46,406.92 c -18.92,-8.6 -32.13,-23.67 -41.02,-42.55 q -5.92,-12.58 -12.01,-29.57 c -8.17,-22.8 -18.79,-46.58 -45.58,-51.11 q -2.73,-0.46 -0.13,-1.41 4.88,-1.81 11.29,-2.14 31.93,-1.68 62.2,8.18 c 8.7,2.84 17.39,6.76 24.41,12.87 q 2.26,1.96 2.37,4.56 c 1.34,31.32 1.02,63.51 1.17,95.68 q 0.01,2.48 -0.9,4.77 -0.52,1.31 -1.8,0.72 z","M 1207.43,323.66 c -6.47,16.09 -12.05,33.31 -20.26,48.12 q -13.47,24.27 -37.07,35.13 a 1.54,1.53 -20.3 0 1 -2.12,-0.97 q -0.48,-1.66 -0.5,-3.37 -0.3,-43.8 0.71,-95.35 c 0.05,-2.69 0.7,-4.25 2.8,-6.09 q 6.04,-5.32 13.64,-8.64 c 21.78,-9.51 47.77,-13.62 71.23,-12.54 4.41,0.2 9.17,0.92 13.49,2.46 q 1.76,0.62 -0.05,1.06 c -2.97,0.73 -5.89,1.25 -8.8,2.31 -17.14,6.22 -26.43,21.36 -33.07,37.88 z"],"deltoids":["M 1015.26,291.32 c 13.82,-8.28 31.54,1.05 42.43,10.31 a 0.79,0.78 46.2 0 1 -0.02,1.22 c -24.49,19.25 -48.03,41.91 -64.52,68.41 q -0.81,1.29 -0.91,-0.22 c -0.55,-8.02 -1.66,-16.16 -1.47,-24.04 q 0.34,-14.94 4.17,-28.72 4.91,-17.72 20.32,-26.96 z","M 1269.98,290.8 c 13.79,8.38 20.48,19.55 22.26,34.89 1.11,9.5 1.29,18.77 0.46,28.54 q -0.73,8.56 -1.29,17.08 -0.08,1.29 -0.8,0.22 c -16.86,-25.21 -37.38,-47.58 -59.38,-68.88 q -0.46,-0.45 0,-0.88 c 9.46,-8.91 18.65,-15.05 32.34,-13.43 2.34,0.28 4.42,1.25 6.41,2.46 z"],"upperBack":["M 1136.59,472.49 c -4.61,16.03 -15.02,30.53 -26.92,42.6 q -13.41,13.6 -29.37,25.62 -0.65,0.5 -0.73,-0.32 -5.92,-63.46 -22.92,-123.09 -4.96,-17.4 -9.99,-34.68 a 0.7,0.7 0 0 1 0.74,-0.89 q 8.92,0.83 16.32,1.52 10.81,1.01 19.97,-4.41 0.54,-0.32 1,0.1 1.78,1.59 3.48,3.41 22.52,24.07 30.7,32.06 7.98,7.79 16.19,14.02 0.79,0.6 1.05,1.52 6.33,22.2 0.48,42.54 z","M 1238.86,382.59 c -6.36,21.96 -12.97,44.37 -18.07,65.96 q -10.8,45.75 -14.79,91.85 a 0.46,0.46 0 0 1 -0.74,0.33 Q 1184.28,525.02 1169.34,508 c -8.23,-9.38 -15.46,-20.54 -19.54,-32.61 q -6.78,-20.06 -1.17,-43.01 c 0.49,-1.99 0.83,-3.24 2.53,-4.57 17.75,-13.89 33.26,-32.01 49.33,-48.67 q 0.64,-0.67 1.43,-0.19 9.01,5.38 20.51,4.24 7.75,-0.76 15.78,-1.39 a 0.62,0.62 0 0 1 0.65,0.79 z"],"rhomboids":["M1138.1 373.1L1137.9 342.2L1137.4 318.1L1080.2 328.6L1087.4 348L1093.5 362.2L1098.6 372.3L1104.2 381Z","M1148 318.1L1147.4 373.1L1181.3 381L1186.9 372.3L1192.2 361.7L1197.4 349.6L1205.5 328.6Z"],"lowerBack":["M 1068.62,544.21 c 7.96,11.18 10.18,25.23 10.98,38.79 a 1.16,1.16 0 0 1 -0.56,1.06 l -18.13,10.62 a 0.4,0.39 -13.5 0 1 -0.6,-0.36 q 1.04,-16.62 2.69,-32.09 0.79,-7.45 2.8,-14.26 0.6,-2.03 1.74,-3.74 a 0.66,0.65 -45.9 0 1 1.08,-0.02 z","M 1133.23,596.5 c -0.34,6.54 -1.25,13 -1.82,19.57 q -0.07,0.85 -0.6,0.17 -3.62,-4.73 -6.59,-7.98 -9.72,-10.63 -18.63,-20.4 -12.89,-14.11 -23.33,-31.15 a 0.57,0.57 0 0 1 0.2,-0.78 q 7.87,-4.59 14.81,-11.15 c 12.33,-11.64 23.63,-24.56 35.33,-36.99 q 0.87,-0.93 0.88,0.34 c 0.19,29.32 1.27,58.9 -0.25,88.37 z","M 1199.62,562.36 c -10.91,16.62 -23.7,30.13 -37.46,44.84 q -3.74,4 -7.34,8.9 -0.68,0.93 -0.82,-0.22 c -1.8,-15.45 -2.6,-31.26 -2.53,-47.01 q 0.14,-30.97 0.58,-60.87 0.02,-1.16 0.8,-0.31 13.63,14.85 25.73,27.71 7.18,7.63 15.56,14.48 4.25,3.47 8.77,5.95 0.51,0.27 0.23,0.78 -1.61,2.85 -3.52,5.75 z","M 1205.91,583.12 c 0.67,-13.86 3,-27.66 11.11,-39.08 a 0.57,0.57 0 0 1 0.96,0.06 q 1.93,3.49 2.75,7.64 c 2.78,13.99 3.44,28.55 4.52,42.69 a 0.37,0.36 13.1 0 1 -0.55,0.34 l -18.27,-10.7 a 1.05,1.04 16.6 0 1 -0.52,-0.95 z"],"triceps":["M 976.72,479.34 q -0.46,-17.73 -0.59,-32.11 c -0.22,-24.28 5.62,-47.43 19.17,-67.7 q 0.38,-0.55 0.24,0.1 -9.84,49.08 -17.78,99.12 a 0.83,0.82 -4 0 1 -0.58,0.66 l -0.25,0.08 q -0.21,0.06 -0.21,-0.15 z","M 990.45,481.03 c -2.39,-3.13 -3.03,-8.64 -3.15,-12.61 q -0.81,-26.18 5.96,-50.71 a 0.37,0.37 0 0 1 0.61,-0.17 q 0.16,0.15 0.19,0.37 c 2.18,16.06 4.1,31.34 3.14,46.56 -0.33,5.2 -1.01,12.19 -4.17,16.53 a 1.61,1.61 0 0 1 -2.58,0.03 z","M 1028.38,422.24 c 0.27,25.48 -7.52,49.09 -23.37,68.41 q -1.16,1.41 -0.93,-0.4 0.44,-3.53 0.41,-7.83 -0.06,-10.3 -1.3,-22.14 -2.2,-20.98 -3.39,-41.99 -0.61,-10.99 0.7,-23.78 c 1.65,-15.98 6.95,-30.6 19.9,-39.63 a 0.42,0.41 73.8 0 1 0.65,0.36 q -0.32,8.22 1.06,16.55 c 2.81,16.86 6.09,33.63 6.27,50.45 z","M 1281,491.32 c -15.93,-19.27 -23.98,-42.53 -23.89,-67.9 q 0.04,-11.8 1.5,-21.9 2.13,-14.76 4.78,-30.03 1.39,-8.03 1.05,-16.2 a 0.44,0.44 0 0 1 0.7,-0.38 c 15.59,11.17 19.78,29.71 20.57,48.58 q 0.43,10.46 -0.35,21.17 -1.37,18.51 -3.48,40.31 -1.27,13.12 -0.53,26.21 0.03,0.6 -0.35,0.14 z","M 1290.47,379.83 c 11.24,17.52 17.33,36.08 18.47,57.41 0.75,14.09 0.07,27.95 0.05,41.97 a 0.28,0.28 0 0 1 -0.41,0.24 l -0.26,-0.14 q -0.65,-0.34 -0.76,-1.06 -7.8,-49.99 -17.59,-98.21 -0.29,-1.43 0.5,-0.21 z","M 1291.39,418.15 q 0.03,-0.24 0.18,-0.46 0.48,-0.71 0.7,0.12 6.89,26.33 5.89,50.76 c -0.16,3.99 -0.69,8.84 -2.91,12.24 a 1.69,1.68 -51.8 0 1 -2.56,0.31 c -2.76,-2.6 -3.77,-9.43 -4.13,-13.42 -1.44,-16.19 0.36,-32.39 2.83,-49.55 z"],"forearm":["M 930.6,575.85 q 12.51,-34.52 28.14,-65.44 0.43,-0.86 0.47,0.1 c 0.49,12.97 -1.54,25.43 -3.91,38.74 -2.51,14.09 -8.58,26.84 -13.42,40.42 q -1.72,4.85 -6.72,12.65 -6.65,10.39 -13.96,19.24 -0.97,1.19 -0.94,-0.34 0.15,-6.74 1.54,-13.78 3.2,-16.15 8.8,-31.59 z","M 941.59,538.06 c -10.38,28.73 -19.89,57.37 -27.03,86.93 q -2.23,9.27 -3.43,18.85 -0.08,0.65 -0.71,0.78 -2.96,0.63 -5.97,-0.23 c -6.64,-1.91 -6.12,-8.24 -4.18,-13.33 q 16.12,-42.22 33.46,-84.93 5.37,-13.2 12.03,-26.13 2.79,-5.42 6.2,-10.06 1.45,-1.95 0.5,0.29 -5.71,13.57 -10.87,27.83 z","M 975.21,499.01 c 1.84,-4.34 5.3,-10.94 10.55,-11.69 3.15,-0.45 8.93,-1.45 11.43,0.58 q 3.23,2.63 1.33,6.34 -3.58,7.04 -8.39,12.41 -7.93,8.86 -17.96,19.2 a 0.33,0.32 -34.8 0 1 -0.53,-0.09 q -1.15,-2.76 -1.06,-6.04 0.31,-10.51 4.63,-20.71 z","M 999.09,525.32 q -17.79,35.36 -41.48,67.79 c -7.52,10.28 -15.96,20.81 -26,28.74 a 0.38,0.38 0 0 1 -0.53,-0.06 q -0.12,-0.14 -0.06,-0.3 11.88,-29.53 23.3,-54.73 6.13,-13.51 13.08,-26.59 3.39,-6.37 7.64,-12.19 c 1.13,-1.54 2.35,-1.94 4.17,-1.93 q 4.02,0.02 8.07,0.22 c 3.63,0.18 9.88,-4.42 13.11,-6.8 0.2,-0.14 0.64,-0.23 0.88,-0.2 a 0.39,0.39 0 0 1 0.32,0.53 q -1.15,2.82 -2.5,5.52 z","M 1287.36,495.1 q -0.66,-1.22 -1,-2.61 c -0.91,-3.66 3.19,-5.9 6.21,-5.78 q 4.25,0.16 7.87,0.8 c 8.25,1.44 13.07,19.85 14.04,26.73 q 0.78,5.48 -0.26,11.26 a 0.58,0.57 -61.9 0 1 -0.98,0.3 q -8.13,-8.44 -16.02,-16.95 -5.71,-6.16 -9.86,-13.75 z","M 1374.91,644.61 a 0.63,0.62 -88.1 0 1 -0.49,-0.53 q -1.21,-9.55 -3.48,-19.07 c -6.9,-28.95 -17.02,-59.28 -27.49,-88.05 q -4.81,-13.23 -10.53,-26.85 -0.87,-2.08 0.48,-0.27 2.91,3.89 5.26,8.23 6.11,11.31 10.9,22.92 19.34,46.92 36.37,92.34 1.24,3.29 0.04,6.8 c -1.45,4.24 -7.09,5.35 -11.06,4.48 z","M 1326.82,510.35 c 12.89,26.28 24.62,53.47 32.98,80.83 q 4.59,15.02 5.5,30.08 0.09,1.54 -0.91,0.36 -9.8,-11.56 -17.28,-24.72 -2.96,-5.2 -5.36,-12.12 -2.76,-7.98 -6.01,-15.96 c -4.29,-10.55 -5.9,-21.36 -7.75,-32.59 q -2.18,-13.15 -1.71,-25.77 0.04,-1.12 0.54,-0.11 z","M 1354.08,620.73 q 0.96,2.42 -1,0.71 -9.65,-8.41 -17.52,-18.38 -24.99,-31.7 -45.4,-70.39 -3.25,-6.15 -6.17,-12.68 -0.09,-0.2 -0.03,-0.4 a 0.51,0.51 0 0 1 0.78,-0.29 c 4.23,2.88 9.9,7.54 15.41,6.95 q 3.07,-0.34 6.17,-0.24 c 1.9,0.05 3.28,0.57 4.42,2.2 7.5,10.74 13.36,23.21 18.79,35.06 q 12.91,28.18 24.55,57.46 z"],"hands":["M 848.29,759.36 c -5.06,1.08 -7.66,-1.55 -5.81,-6.56 6.01,-16.27 11.17,-30.37 18.43,-44.8 q 1.12,-2.22 3.5,-1.5 l 0.45,0.14 a 3.88,3.87 16.7 0 1 2.59,4.81 c -4.79,16.16 -11.42,31.25 -18.02,46.96 a 1.59,1.57 -84.6 0 1 -1.14,0.95 z","M 847.54,670.63 q 10.11,-7.1 20.43,-14.71 c 1.82,-1.34 3.93,-1.24 5.61,0.25 q 1.28,1.14 0.18,2.44 -14.63,17.34 -36.12,26.57 -2.85,1.23 -6.59,0.27 -0.66,-0.17 -1.22,-0.56 -2.78,-1.93 0.1,-3.71 c 5.74,-3.54 11.89,-6.53 17.61,-10.55 z","M 857.95,703.24 c -4.4,13.3 -9.63,25.8 -16.79,37.33 q -1.72,2.78 -4.23,4.64 a 1.09,1.09 0 0 1 -1.74,-0.77 c -1.48,-16.04 8.92,-33.06 16.88,-46.35 q 0.57,-0.95 1.66,-0.8 c 2.95,0.39 5.23,2.88 4.22,5.95 z","M 875.79,722.55 c -4.07,11.58 -8.41,22.82 -15.01,33 q -1.32,2.03 -3.6,3.48 -0.5,0.32 -0.97,-0.05 c -2.61,-2.08 -1.53,-6.69 -0.45,-9.36 q 5.27,-13.01 10.45,-25.43 1.81,-4.36 4.29,-8.03 0.62,-0.92 1.74,-0.88 c 4.7,0.15 4.82,3.66 3.55,7.27 z","M 887.56,727.64 q -3.99,9.72 -9.96,19.13 -0.8,1.27 -2.1,1.97 a 0.74,0.74 0 0 1 -1.08,-0.76 q 1.91,-12.47 8.14,-23.5 2.02,-3.58 4.82,-5.9 a 0.94,0.94 0 0 1 1.47,0.36 c 1.15,2.7 -0.24,6.15 -1.29,8.7 z","M 902.05,654.63 c 1.72,20.81 -0.74,43.2 -13.83,59.63 -1.5,1.87 -3.8,1.35 -5.78,0.55 q -7.06,-2.82 -10.22,-9.71 c -0.79,-1.73 -2.34,-3.24 -3.92,-4.25 q -5.99,-3.87 -10.35,-8.32 a 2.19,2.18 28.4 0 1 -0.59,-1.97 q 1.69,-8.62 7.46,-16.29 7.41,-9.85 18.48,-23.61 0.37,-0.46 0.96,-0.45 8.59,0.19 16.75,3.06 a 1.58,1.57 -82.5 0 1 1.04,1.36 z","M 1390.47,703.5 c -7.03,-15.23 -8.6,-32.38 -6.98,-49.44 a 0.84,0.84 0 0 1 0.55,-0.71 q 8.24,-2.9 16.94,-3.13 a 1.84,1.82 -19.6 0 1 1.51,0.71 q 7.66,9.84 15.58,19.76 7.56,9.46 9.92,18.85 c 0.44,1.72 -0.22,3.09 -1.51,4.23 q -4.73,4.18 -10.02,7.65 -2.13,1.39 -3.17,3.63 c -2.09,4.49 -5.23,7.65 -10.01,9.66 q -2.32,0.97 -4.45,0.69 -0.49,-0.06 -0.83,-0.42 -4.41,-4.73 -7.53,-11.48 z","M 1434.6,668.37 q 8.2,5.82 20.84,12.66 3.02,1.63 0.3,3.74 -0.49,0.38 -1.08,0.56 -3.68,1.1 -6.72,-0.17 -21.61,-9.06 -36.36,-26.82 -0.91,-1.09 0.16,-2.02 c 2.56,-2.23 4.17,-1.59 6.69,0.28 q 8.2,6.11 16.17,11.77 z","M 1440.18,733.51 c -5.02,-9.9 -10.12,-20.82 -13.01,-31.69 q -0.15,-0.58 0.1,-1.13 1.52,-3.24 4.84,-3.48 0.7,-0.05 1.06,0.55 c 8.34,13.8 18.29,30.28 17.05,46.84 a 0.97,0.97 0 0 1 -1.49,0.74 c -3.56,-2.27 -6.64,-8.06 -8.55,-11.83 z","M 1431.61,747.81 q -8.05,-18.9 -13.4,-35.42 -0.77,-2.34 0.9,-4.93 0.26,-0.41 0.73,-0.64 3.35,-1.63 4.67,0.91 3.49,6.76 6.36,13.86 6.23,15.39 12.52,32.24 c 1.04,2.81 0.09,4.43 -2.57,5.47 q -3.87,1.52 -5.42,-2.33 -1.86,-4.6 -3.79,-9.16 z","M 1409.03,720.33 c -1.15,-3.85 4.48,-7.35 6.5,-3.44 1.02,1.99 2.25,3.91 3.11,5.95 q 5.89,13.98 11.33,27.6 1.3,3.26 0.57,7.15 a 1.77,1.77 0 0 1 -2.76,1.12 c -3.33,-2.36 -6.22,-7.81 -8.08,-11.63 -4.21,-8.63 -7.92,-17.55 -10.67,-26.75 z","M 1407.92,746.8 c -4.19,-6.47 -7.65,-13.37 -10.63,-20.61 q -1.4,-3.4 -0.83,-7.06 a 0.95,0.94 -66.3 0 1 1.52,-0.6 q 2.67,2.14 4.37,5.02 6.61,11.16 8.73,24.5 a 0.6,0.6 0 0 1 -0.81,0.65 q -1.51,-0.6 -2.35,-1.9 z"],"gluteal":["M 1031.34,630.56 q 8.17,-17.96 22.15,-29.52 0.57,-0.47 1.35,-0.78 c 0.63,-0.25 1.17,-0.54 1.88,-0.51 14.27,0.79 25.72,4.26 35.26,15.37 q 6.45,7.51 12.43,13.9 a 0.36,0.36 0 0 1 -0.21,0.6 c -34.24,5.14 -63.6,20.7 -83.41,49.12 q -0.77,1.1 -0.69,-0.24 1.54,-26.6 11.24,-47.94 z","M 1092.12,758.09 q -11.32,3.91 -20.99,7.71 c -12.16,4.78 -21.24,13.16 -25.53,25.74 a 0.48,0.48 0 0 1 -0.84,0.14 c -13.74,-17.9 -25.37,-38.01 -28.48,-60.45 -4.82,-34.78 16.06,-62.1 45.13,-78.08 q 32.39,-17.79 71.37,-20.24 0.77,-0.05 0.81,0.72 0.34,5.98 0.51,12.21 0.73,27.38 0.54,74.62 0,0.87 -0.42,1.68 -13.36,26.01 -42.1,35.95 z","M 1186.16,755.14 q -22.34,-9.6 -34.37,-32.01 -0.93,-1.73 -0.95,-3.5 -0.44,-43.95 0.95,-86.05 a 0.58,0.58 0 0 1 0.61,-0.56 q 41.96,2.14 76.79,23.16 c 13.08,7.9 25.57,19.74 32.87,33.53 18.71,35.37 0.74,73.49 -21.32,101.95 a 0.51,0.51 0 0 1 -0.88,-0.15 c -5.18,-15.06 -16.82,-23.21 -31.43,-28.03 q -12.38,-4.09 -22.27,-8.34 z","M 1264.84,679.01 c -19.47,-28.27 -49.51,-44.62 -83.31,-49.28 a 0.48,0.48 0 0 1 -0.29,-0.79 q 6.39,-7.08 11.97,-13.48 c 9.56,-10.98 20.54,-14.92 34.76,-15.73 q 2.05,-0.11 3.56,1.07 c 22.85,17.9 32.44,49.93 33.85,78.03 q 0.06,1.04 -0.54,0.18 z"],"adductors":["M 1105.13,759.58 c 5.8,-4.09 12.22,-8.33 18.77,-11.59 a 0.54,0.54 0 0 1 0.76,0.34 q 6.8,24.08 7.01,48.83 0.14,15.6 -0.3,31.35 -0.18,6.57 -1.58,13.23 -3.79,18 -7.08,34.37 -5.52,27.39 -7.25,53.63 -0.01,0.2 -0.21,0.19 h -0.01 q -0.21,0 -0.21,-0.21 0.06,-11.05 -1.13,-21.98 -3.47,-31.95 -10.99,-67.96 c -3.17,-15.15 -5.96,-29.39 -7.82,-44.53 q -1.41,-11.59 -0.64,-23.56 c 0.24,-3.74 7.85,-10.11 10.68,-12.11 z","M 1103.25,880.79 q 0.13,-2.03 0.52,-4.03 0.12,-0.59 0.23,0 6.54,34.5 9.4,71 1.16,14.9 0.83,30.46 c -0.35,16.42 -2.06,31.59 -8.52,45.43 q -0.65,1.38 -0.93,-0.12 -1.07,-5.81 -1.74,-12.63 c -4.13,-42 -2.61,-84.7 0.21,-130.11 z","M 1170.31,929.79 q -0.01,0.14 -0.14,0.14 h -0.01 q -0.15,0 -0.16,-0.15 c -1.65,-27.23 -6.7,-52.91 -12.71,-80.29 q -1.04,-4.77 -2.03,-9.9 -0.97,-5.04 -1.11,-10.04 -0.71,-25 0,-41.29 0.88,-20.1 6.78,-40.2 a 0.39,0.39 0 0 1 0.58,-0.23 c 9.66,5.72 22.47,11.93 28.7,21.66 q 0.95,1.49 1.03,4.47 c 0.23,9.46 -0.26,19.48 -1.78,29.2 q -3.09,19.91 -8.67,45.97 -4.33,20.25 -8.36,50.7 c -1.32,9.97 -1.83,19.78 -2.12,29.96 z","M 1182.66,888.38 c 3.02,46.17 3.96,90.2 -1.62,134.34 q -0.38,3.02 -1.62,0.24 -5.13,-11.5 -6.75,-24.8 -2.53,-20.86 -1.07,-43.33 2.55,-39.34 9.73,-77.33 0.48,-2.54 0.64,0.04 0.36,5.65 0.69,10.84 z"],"hamstring":["M 1016.46,760.39 c 9.44,12.24 16.13,25.63 21.41,40.04 q 0.82,2.23 0.84,4.98 0.07,11.27 -2.12,20.02 -2.75,11.03 -6.86,22.65 -0.52,1.46 -0.85,-0.05 -5.74,-25.82 -9.75,-52.59 -2.71,-18.1 -3.52,-34.73 -0.08,-1.52 0.85,-0.32 z","M 1070.52,797.23 c -11.68,27.55 -15.75,60.62 -14.27,91.04 q 0.39,8.01 2.12,18.82 4.13,25.86 6.66,45.29 c 2.03,15.61 1.65,31.91 -2.1,47.3 q -0.46,1.88 -0.63,-0.05 -1.63,-18.54 -5.82,-37.03 c -4.65,-20.57 -11.75,-43.58 -16.62,-63.37 -3.73,-15.15 -6.46,-30.31 -6.22,-45.8 q 0.49,-31.41 19.87,-55.13 c 2.88,-3.51 6.39,-5.98 9.88,-8.87 q 4.53,-3.74 10.3,-2.59 a 1.34,1.33 19.9 0 1 0.91,1.94 q -2.27,4.18 -4.08,8.45 z","M 1098.11,859.08 c 1.35,28.16 0.76,58.11 -0.79,88.31 q -0.29,5.81 -1.41,12.09 -3.22,18.13 0.59,38.78 0.25,1.36 -0.6,0.27 c -20.01,-25.52 -30.66,-57.27 -32.98,-89.64 -3.21,-44.66 6.94,-89.32 20.75,-132.24 q 0.55,-1.71 1.12,0 4.19,12.73 6.41,24.46 5.53,29.26 6.91,57.97 z","M 1219.83,958.26 c 1.6,-16.19 4.52,-34.12 7.27,-51.04 q 1.66,-10.21 2.07,-18.85 1.54,-32.19 -5.11,-62.59 -4.38,-20.02 -13.16,-37.05 -0.74,-1.43 0.83,-1.82 c 6.74,-1.68 10.82,2.92 15.54,6.72 q 2.63,2.11 4.95,4.97 22.46,27.73 19.33,65.93 c -1.28,15.6 -4.64,30.53 -8.67,45.57 q -4.34,16.19 -8.51,30.94 -8.04,28.43 -11.39,59.02 -0.17,1.55 -0.51,0.03 -4.7,-20.89 -2.64,-41.83 z","M 1222.33,911.18 c -2.52,31.89 -13.09,61.94 -32.73,87.27 q -0.72,0.94 -0.52,-0.23 2.27,-12.72 1.81,-27.27 -0.2,-6.27 -1.31,-11.44 -1.06,-4.94 -1.37,-9.68 -2.26,-34.73 -1.33,-78.46 0.82,-38.23 7.92,-73.18 2.24,-11.02 6.07,-21.84 0.39,-1.11 0.77,0.01 c 14.36,43.28 24.25,89.74 20.69,134.82 z","M 1252.18,789.16 c 4.38,-10.33 10.1,-20.26 17.11,-29.06 q 0.66,-0.83 0.64,0.22 -0.05,2.47 -0.26,5.11 c -2.25,28.2 -7.17,55.27 -13.07,82.76 q -0.28,1.33 -0.76,0.06 -5.28,-13.81 -7.95,-27.73 c -1.27,-6.66 -2.21,-15.94 0.54,-22.48 q 1.91,-4.56 3.75,-8.88 z"],"calves":["M 1058.29,1085.75 c 6.08,-36.26 10.83,-64.98 13.27,-97.84 a 0.64,0.63 12.9 0 1 0.87,-0.54 c 4.34,1.73 9.74,5.17 11.34,9.62 q 0.48,1.32 0.33,3.57 c -2.18,33.02 -2.33,66.33 -2.21,98.92 q 0.04,10.61 0.89,19.22 2.51,25.4 2.71,52.08 c 0.09,12.28 -0.31,25.64 -3.38,37.51 q -0.44,1.7 -1.2,3.04 a 1.46,1.45 41.5 0 1 -2.43,0.15 c -11.56,-15.48 -22.57,-30.58 -27.04,-49.16 -1.94,-8.07 -1.22,-16.06 -0.32,-24.08 q 3.25,-29.05 7.17,-52.49 z","M 1065.65,1205.72 q 0.18,-0.49 0.65,-0.28 0.57,0.24 0.99,0.74 c 7.66,9.08 12.41,22.27 15.49,34.01 q 4.92,18.73 7.73,38.56 5.06,35.68 6.15,72.03 0.14,4.75 0.25,9.3 0.09,3.29 -3.11,2.5 -0.29,-0.07 -0.59,-0.13 -3.27,-0.66 -3.31,-4 c -0.46,-33.25 -5.05,-66.1 -13.91,-98.69 q -4.29,-15.78 -9.2,-30.12 c -2.89,-8.45 -4,-15.96 -1.14,-23.92 z","M 1092.9,1005.49 c 6.21,14.55 10.89,30.05 15.1,45.29 q 10.42,37.71 15.89,75.17 c 2.5,17.09 4.13,34.52 2.57,51.57 -0.69,7.55 -2.44,16.36 -7.25,22.3 a 0.72,0.71 31.3 0 1 -0.84,0.2 q -15.39,-6.63 -22.38,-22.48 -0.37,-0.84 -0.47,-1.77 -7.84,-73.34 -8.63,-146.47 -0.15,-13.23 1,-26.05 0.18,-2.03 0.73,-4.04 a 0.43,0.43 0 0 1 0.78,-0.13 q 2.25,3.5 3.5,6.41 z","M 1105.01,1296.15 c 0.31,-3.79 0.81,-7.66 0.78,-11.4 -0.13,-20.92 -0.61,-43.07 2,-63.38 0.83,-6.47 2.37,-14.24 6.84,-19.26 a 0.48,0.48 0 0 1 0.83,0.26 q 2,15.5 0.91,32.56 -1.2,18.89 -3.49,38.19 -1.15,9.79 -1.38,19.57 -0.5,21.82 -2.41,44.66 -0.8,9.48 -2.65,18.21 a 0.62,0.61 -66.5 0 1 -0.96,0.38 q -3.82,-2.71 -4.14,-6.62 -0.59,-7.27 0.39,-17.04 1.85,-18.46 3.28,-36.13 z","M 1195.51,999.93 q 1.11,-2 1.54,0.25 0.83,4.43 1.06,9.07 0.79,16.08 0.37,32.68 -1.79,71.08 -8.41,133.14 c -0.54,5.01 -5.87,11.84 -9.39,15.76 -3.68,4.08 -8.74,6.74 -13.52,9.33 q -0.36,0.2 -0.63,-0.11 c -4.85,-5.52 -6.81,-14.78 -7.44,-21.9 -1.74,-19.58 0.51,-41.13 3.73,-60.68 q 6.55,-39.63 18.22,-79.21 3.88,-13.17 8.74,-26 2.41,-6.37 5.73,-12.33 z","M 1170.98,1202.22 q 2.43,2.66 3.69,6.26 c 3.13,8.93 4.01,18.89 4.48,28.32 q 1.05,21.18 0.46,40.21 -0.29,9.19 0.45,16.73 1.84,18.75 3.59,37.51 0.69,7.41 0.77,15.52 0.06,5.8 -4.1,9 a 0.89,0.89 0 0 1 -1.42,-0.54 q -2.23,-11.91 -3.17,-25.71 -1.35,-19.53 -1.75,-36.62 -0.22,-9.41 -1.32,-18.68 -2.7,-22.94 -3.76,-42.69 -0.78,-14.6 1.04,-28.98 a 0.6,0.6 0 0 1 1.04,-0.33 z","M 1209.54,1220.37 q 3.46,-8.19 9.41,-14.95 a 0.5,0.49 56.8 0 1 0.84,0.18 q 1.93,5.91 1.63,12.13 -0.21,4.19 -2.73,11.81 -8.63,26.04 -13.9,49.21 -8.52,37.45 -9.27,80.13 -0.04,2.72 -2.68,3.4 -0.94,0.24 -1.91,0.38 -2.41,0.33 -2.37,-2.1 0.65,-35.68 4.84,-70.31 c 2.84,-23.48 7.15,-48.63 16.14,-69.88 z","M 1234.23,1161.52 c -4.22,19.14 -15.78,34.23 -26.98,49.71 a 1.72,1.72 0 0 1 -3.01,-0.42 q -1.93,-5.29 -2.63,-11.11 -1.51,-12.55 -1.6,-22.65 -0.27,-28.3 2.59,-57.1 0.96,-9.64 1.02,-20.11 0.27,-52.48 -2.22,-101.41 c -0.04,-0.76 0.35,-1.89 0.76,-2.54 q 3.68,-5.85 11.13,-8.53 0.53,-0.19 0.58,0.37 2.93,37.23 10.25,79.5 c 4.59,26.56 9.04,54.75 11.1,81.03 q 0.51,6.47 -0.99,13.26 z"],"feet":["M 1079.17,1372.43 q 2.14,-5.13 4.33,-10.15 0.64,-1.46 0.77,0.13 0.19,2.38 0.04,5.19 -0.48,8.92 -1.17,17.73 c -0.55,6.98 -0.51,14.62 0.97,21.25 q 0.81,3.6 3.17,7.55 2.42,4.04 6.98,2.53 2.09,-0.69 2.69,-2.94 c 5.05,-18.81 8.53,-32.57 10.08,-47.69 q 0.17,-1.71 0.65,-0.06 c 4.88,16.71 7.77,34.11 9.71,51.52 a 2.81,2.81 0 0 1 -0.55,2.02 c -5.24,7.01 -14.76,8.75 -23.07,8.71 -8.31,-0.03 -16.89,-1.11 -24.67,-3.97 -3.23,-1.19 -5.27,-5.26 -4.38,-8.25 4.42,-14.8 8.65,-29.67 14.45,-43.57 z","M 1206.8,1373.7 q 8.72,22.21 13.81,42.33 0.94,3.7 -1.71,6.53 -1.44,1.54 -5.28,2.63 -14.71,4.18 -29.01,2.49 -9.46,-1.11 -14.96,-6.81 -1.68,-1.75 -1.46,-3.83 2.75,-26.35 9.42,-50.74 0.68,-2.5 0.89,0.09 0.63,7.86 2.59,16.87 2.96,13.59 7.32,30.23 0.79,2.98 3.86,3.47 3.52,0.56 5.1,-1.58 c 2.84,-3.86 4.42,-8.89 4.83,-13.69 0.96,-11.15 -0.35,-22.32 -1,-33 q -0.2,-3.25 0.17,-6.56 0.09,-0.79 0.42,-0.07 2.74,5.83 5.01,11.64 z"],"ankles":["M1079.7 1373.3L1075.5 1384.4L1070.9 1398.2L1082.2 1398.2L1082.1 1389.2L1083.3 1370.6L1083.6 1364.1Z","M1114 1398.2L1111.1 1382.7L1107.6 1368.5L1105.4 1382.4L1101.8 1398.2Z","M1177.9 1368.4L1174.3 1383.5L1171.5 1398.3L1183.7 1398.3L1179.7 1380.5Z","M1214.7 1398.3L1208.3 1379.9L1205 1371.2L1202 1364.4L1202 1368.3L1203.2 1388L1203.2 1398.3Z"]},"vb":{"front":[0,0,650,1450],"back":[823,0,650,1450]}};
@@ -553,8 +918,9 @@ const P={
     <section class="hero" id="hero">
       <div class="herobar"><span class="xs muted">目标 · ${esc(t.name)}</span>
         <div class="seg sm" role="group" aria-label="视角">${[['front','正面'],['back','背面']].map(([v,l])=>`<button type="button" data-act="figView" data-arg="${v}" aria-pressed="${(S.figView||'front')===v}">${l}</button>`).join('')}</div></div>
-      <div id="figHost">${figureSVG(r,S.figView||'front')}</div>
+      <div id="body3d" class="body3d"><p class="b3load xs muted">正在按你的尺寸生成模型…</p></div>
       <div class="figkey"><span><i style="background:var(--under)"></i>比目标小</span><span><i style="background:var(--warm)"></i>比目标大</span><span><i style="background:var(--accent)"></i>±1 cm 达标</span></div>
+      <div class="mpanel" id="mpanel" aria-live="polite">${musclePanel(T.muscle)}</div>
     </section>
     <div class="stack" style="gap:4px;margin-top:-10px">
       <p class="h1">${r.head}</p>
@@ -568,10 +934,10 @@ const P={
         ${met('thigh','腿围',Math.round(c.thigh),m.legR?'腿长 '+Math.round(m.legR*100)+'%':'','muted')}
       </div>
       ${ratioRow('肩腰比',m.swr,t.swr)}${ratioRow('臀腰比',m.hwr,t.hwr)}
-      ${isSample()?`<p class="small muted">这是演示用的样例身材。<button class="link" type="button" data-go="measure">测量我的${I.chev}</button></p>`:`<p class="xs muted">${m.est.length?'没有侧面照，围度按常见体型估算。':'围度由正面宽度和侧面厚度按椭圆估算。'}<button class="link xs" type="button" data-go="measure">更新测量${I.chev}</button></p>`}
+      ${isSample()?`<p class="small muted">这是演示用的样例身材。<button class="link" type="button" data-go="measure">测量我的${I.chev}</button></p>`:`<p class="xs muted">${m.src==='manual'?(m.est.length?'尺寸为你手动输入，大腿围按臀围估算。':'尺寸为你手动输入。'):m.src==='scan'?'围度由正面照宽度按常见体型估算。':m.est.length?'没有侧面照，围度按常见体型估算。':'围度由正面宽度和侧面厚度按椭圆估算。'}<button class="link xs" type="button" data-go="measure">更新测量${I.chev}</button></p>`}
     </div>
     <section class="today">${todayBlock}</section>`;
-  },after(){ applyFigFocus(); }},
+  },after(){ mountBody($('body3d'),analyze()); },leave(){ unmount3D(); }},
   plan:{title:'本周计划',render(){
     const r=analyze(), plan=weekPlan(r), today=todayISO();
     const focusTxt=r.focus.length?r.focus.map(id=>MUSCLES[id].name).join('、'):'整体保持';
@@ -605,6 +971,7 @@ const P={
   }},
   library:{title:'动作库',render(){
     return Object.keys(MUSCLES).map(mu=>`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">${MUSCLES[mu].name} · ${MUSCLES[mu].area}</p><div class="list">${MUSCLES[mu].ex.map(e=>`<button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span><span class="t">${EX[e].name}${notesOf(e).length?'<span class="badge">备注</span>':''}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div></section>`).join('')
+      +[['手臂',['db_curl','hammer_curl','pushdown','bench_dip']],['腰腹 · 下背',['side_plank','russian_twist','superman','back_ext']],['大腿内侧 · 小腿',['plie_squat','calf_raise','seated_calf']]].map(([n,l])=>`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">${n}</p><div class="list">${l.map(e=>`<button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span><span class="t">${EX[e].name}${notesOf(e).length?'<span class="badge">备注</span>':''}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div></section>`).join('')
       +`<section class="stack" style="gap:0"><p class="eyebrow" style="margin-bottom:4px">拉伸</p><div class="list">${['chest_stretch','hipflex_stretch'].map(e=>`<button class="li" type="button" data-go="ex" data-arg="${e}"><img class="thumb" src="${imgSrc(e,1)}" alt="" loading="lazy"><span><span class="t">${EX[e].name}</span><span class="s">${EX[e].reps}</span></span><span class="r">${I.chev}</span></button>`).join('')}</div></section>`;
   }},
   ex:{title:a=>EX[a.split('|')[0]].name,render(a){
@@ -641,7 +1008,7 @@ const P={
       <p class="small muted">${m.h?`身高 ${m.h} cm · `:''}腰围 ${Math.round(m.cm.waist)} · 臀围 ${Math.round(m.cm.hip)} · 腿围 ${Math.round(m.cm.thigh)} cm</p>
     </div>
     <div class="list">
-      <button class="li" type="button" data-go="measure"><span></span><span><span class="t">测量身材</span><span class="s">身高 + 正面照 + 侧面照</span></span><span class="r">${I.chev}</span></button>
+      <button class="li" type="button" data-go="measure"><span></span><span><span class="t">测量身材</span><span class="s">手动输入尺寸，或拍一张正面照扫描</span></span><span class="r">${I.chev}</span></button>
       <button class="li" type="button" data-go="target"><span></span><span><span class="t">目标身材</span><span class="s">${esc(t.name)} · 肩腰 ${f2(t.swr)} · 臀腰 ${f2(t.hwr)}</span></span><span class="r">${I.chev}</span></button>
       <button class="li" type="button" data-go="posture"><span></span><span><span class="t">体态</span><span class="s">${[S.rounded&&'圆肩',S.apt&&'骨盆前倾'].filter(Boolean).join('、')||'无'}</span></span><span class="r">${I.chev}</span></button>
       <button class="li" type="button" data-go="about"><span></span><span><span class="t">关于</span><span class="s">怎么算的、隐私、素材来源</span></span><span class="r">${I.chev}</span></button>
@@ -657,11 +1024,11 @@ const P={
   }},
   about:{title:'关于',render(){
     return `<section class="stack" style="gap:16px;font-size:14.5px">
-      <div><p class="eyebrow">怎么算的</p><p>正面照量宽度，侧面照量厚度，用身高把像素换算成厘米。围度按椭圆估算：周长 ≈ π[3(a+b) − √((3a+b)(a+3b))]，a、b 是半宽和半厚。肩腰比、臀腰比用正面宽度计算。</p></div>
-      <div><p class="eyebrow">准确度</p><p>2D 照片估算的围度会有 ±3–5 cm 的误差，适合看比例和变化趋势，不能代替软尺。3D 模型按这些数生成，是示意。</p></div>
+      <div><p class="eyebrow">怎么算的</p><p>两种方式：手动输入软尺量的肩宽和围度；或拍一张正面照，用身高把像素换算成厘米，量出肩、腰、臀、腿的宽度。宽度和围度之间按椭圆换算：周长 ≈ π[3(a+b) − √((3a+b)(a+3b))]，a、b 是半宽和半厚，厚度按常见体型的厚宽比估算。肩腰比、臀腰比用正面宽度计算。</p></div>
+      <div><p class="eyebrow">准确度</p><p>2D 照片估算的围度会有 ±3–5 cm 的误差，适合看比例和变化趋势，不能代替软尺。3D 模型用 MakeHuman 女性基础网格，按你的肩宽、腰围、臀围、腿围调整四个形变，再缩放到你的身高，只表现比例。</p></div>
       <div><p class="eyebrow">隐私</p><p>照片只保存在这台设备的浏览器里，识别也在本机完成，不上传。</p></div>
       <div><p class="eyebrow">说明</p><p>目标比例是演示设定值。训练建议不替代专业教练或医疗意见。</p></div>
-      <p class="credits">动作照片：<a href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noopener">free-exercise-db</a>（Unlicense，公共领域）<br>肌群图：<a href="https://github.com/melihcolpan/MuscleMap" target="_blank" rel="noopener">MuscleMap</a> © Melih Colpan（MIT License）<br>姿态识别：MediaPipe Pose Landmarker（Apache 2.0）</p>
+      <p class="credits">动作照片：<a href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noopener">free-exercise-db</a>（Unlicense，公共领域）<br>肌群图：<a href="https://github.com/melihcolpan/MuscleMap" target="_blank" rel="noopener">MuscleMap</a> © Melih Colpan（MIT License）<br>3D 人体：<a href="https://github.com/makehumancommunity/mpfb2" target="_blank" rel="noopener">MakeHuman / MPFB2</a> 基础网格与形变（CC0）<br>3D 渲染：three.js（MIT License）<br>姿态识别：MediaPipe Pose Landmarker（Apache 2.0）</p>
     </section>`;
   }},
   session:{title:'跟练',immersive:true,render(){ return SESSION_HTML(); },after:a=>startSession(a)}
@@ -717,43 +1084,62 @@ function viewCalc(view){
     waistF:fy((p.wl[1]+p.wr[1])/2),hipF:fy((p.hl[1]+p.hr[1])/2),legR:fy((p.hl[1]+p.hr[1])/2)};
   return {waistD:w('wf','wb'),hipD:w('hf','hb'),thighD:w('tf','tb')};
 }
-function draftMeas(){
+// 拍照扫描：只用一张正面照，厚度按常见体型估算
+function scanMeas(){
   const f=viewCalc('front'); if(!f||f.waistW<5) return null;
-  const s=viewCalc('side')||{};
-  const raw={shoulderW:f.shoulderW,waistW:f.waistW,hipW:f.hipW,thighW:f.thighW,waistD:s.waistD,hipD:s.hipD,thighD:s.thighD};
-  const m=derive(raw,S.h,f.legR); m.waistF=f.waistF; m.hipF=f.hipF; m.raw=raw; return m;
+  const raw={shoulderW:f.shoulderW,waistW:f.waistW,hipW:f.hipW,thighW:f.thighW};
+  const m=derive(raw,S.h,f.legR); m.waistF=f.waistF; m.hipF=f.hipF; m.raw=raw; m.src='scan'; return m;
+}
+/* 手动输入：软尺量的围度。围度 → 宽度按常见体型的厚宽比反推（周长对宽度是线性的），再走同一套 derive */
+const MAN_FIELDS=[
+  {k:'shoulder',name:'肩宽',hint:'两侧肩峰（肩膀最外侧的骨点）之间的直线距离',min:25,max:60,ph:'36'},
+  {k:'waist',name:'腰围',hint:'肚脐上方最细处绕一圈，自然呼气时量',min:45,max:150,ph:'68'},
+  {k:'hip',name:'臀围',hint:'臀部最翘、最宽处水平绕一圈',min:60,max:170,ph:'92'},
+  {k:'thigh',name:'大腿围',hint:'大腿根下方最粗处绕一圈，不填按臀围估算',min:30,max:95,ph:'52',opt:1}
+];
+function manualMeas(){
+  const v=T.man||{}, num=k=>{ const x=parseFloat(v[k]); return isFinite(x)?x:0; };
+  const bad=MAN_FIELDS.find(f=>{ const x=num(f.k); return f.opt&&!x?false:!(x>=f.min&&x<=f.max); });
+  if(bad||!(S.h>=120&&S.h<=210)) return null;
+  const est=[], thighC=num('thigh')||(est.push('thigh'),num('hip')*.56);
+  const raw={shoulderW:num('shoulder'),waistW:num('waist')/ellipse(1,DEPTH_K.waist),hipW:num('hip')/ellipse(1,DEPTH_K.hip),thighW:thighC/ellipse(1,DEPTH_K.thigh)};
+  const m=derive(raw,S.h,null); m.est=est; m.raw=raw; m.src='manual'; return m;
+}
+const draftMeas=()=>T.mtab==='scan'?scanMeas():manualMeas();
+// 切到手动输入时，用已有数据（刚扫描的 > 已保存的）预填
+function manFill(){
+  if(T.man) return; const m=scanMeas()||S.meas; T.man={};
+  if(m&&m.cm){ T.man={shoulder:f1(m.cm.shoulder),waist:String(Math.round(m.cm.waist)),hip:String(Math.round(m.cm.hip))}; if(!m.est.includes('thigh')) T.man.thigh=String(Math.round(m.cm.thigh)); }
 }
 function readoutHTML(m){
-  if(!m) return '<p class="small muted">放好正面照的点之后，这里会出现结果。</p>';
+  if(!m) return `<p class="small muted">${T.mtab==='scan'?'填好身高、放好正面照的点之后，这里会出现结果。':'填好身高、肩宽、腰围、臀围之后，这里会出现结果。'}</p>`;
   const e=k=>m.est.includes(k)?'<span class="est">估</span>':'';
   const cell=(k,v,u='cm',x='')=>`<div><span class="k">${k}${x}</span><span class="num">${v}<small class="mono xs muted"> ${u}</small></span></div>`;
-  return `<div class="readout">${cell('肩宽',f1(m.cm.shoulder))}${cell('腰围',Math.round(m.cm.waist),'cm',e('waist'))}${cell('臀围',Math.round(m.cm.hip),'cm',e('hip'))}${cell('大腿围',Math.round(m.cm.thigh),'cm',e('thigh'))}${cell('腰臀比',f2(m.whr),'')}${cell('腿长比',Math.round(m.legR*100),'%')}${cell('肩腰比',f2(m.swr),'')}${cell('臀腰比',f2(m.hwr),'')}</div>
-    ${m.est.length?'<p class="xs muted">标「估」的没有侧面照，厚度按常见体型估算。</p>':''}`;
+  return `<div class="readout">${cell('肩宽',f1(m.cm.shoulder))}${cell('腰围',Math.round(m.cm.waist),'cm',e('waist'))}${cell('臀围',Math.round(m.cm.hip),'cm',e('hip'))}${cell('大腿围',Math.round(m.cm.thigh),'cm',e('thigh'))}${cell('腰臀比',f2(m.whr),'')}${m.legR?cell('腿长比',Math.round(m.legR*100),'%'):''}${cell('肩腰比',f2(m.swr),'')}${cell('臀腰比',f2(m.hwr),'')}</div>
+    ${m.est.length?`<p class="xs muted">${m.src==='scan'?'标「估」的由照片宽度按常见体型估算，想更准可以切到「手动输入」用软尺量的数改一下。':'大腿围没填，按臀围估算。'}</p>`:''}`;
 }
 P.measure={title:'测量身材',render(){
-  const st=T.step, hasF=!!(T.ph.front&&T.ph.front.url), hasS=!!(T.ph.side&&T.ph.side.url);
-  const stepBtn=(k,n,l,done)=>`<button type="button" data-act="mstep" data-arg="${k}" ${st===k?'aria-current="step"':''} class="${done?'done':''}"><b>0${n}</b>${l}</button>`;
-  let body='';
-  if(st==='h'){
-    body=`<div class="stack" style="gap:8px"><p class="h2">你的身高</p><p class="small muted">用来把照片里的像素换算成厘米。</p>
-      <label class="field"><input id="hIn" type="number" inputmode="numeric" min="120" max="210" placeholder="165" value="${S.h||''}" aria-label="身高（厘米）"><span>cm</span></label></div>
-      <button class="btn block" type="button" data-act="hNext">下一步：正面照</button>`;
+  const tabv=T.mtab, hasF=!!(T.ph.front&&T.ph.front.url);
+  if(tabv==='manual') manFill();
+  const hField=`<label class="field"><input id="hIn" type="number" inputmode="decimal" min="120" max="210" placeholder="165" value="${S.h||''}" aria-label="身高（厘米）"><span>cm</span></label>`;
+  let body;
+  if(tabv==='manual'){
+    body=`<div class="mfields">
+      <div class="mf"><span class="t">身高</span>${hField}</div>
+      ${MAN_FIELDS.map(f=>`<div class="mf"><span class="t">${f.name}${f.opt?'<em>可选</em>':''}</span><label class="field"><input data-man="${f.k}" type="number" inputmode="decimal" step="0.1" min="${f.min}" max="${f.max}" placeholder="${f.ph}" value="${esc(T.man[f.k]||'')}" aria-label="${f.name}（厘米）"><span>cm</span></label><span class="xs muted">${f.hint}</span></div>`).join('')}
+    </div>`;
   } else {
-    const view=st, ph=T.ph[view], has=view==='front'?hasF:hasS;
-    const guide=view==='front'?'正面站直，双脚与髋同宽，手臂离开身体一点，穿贴身衣服，头到脚都在画面里。':'侧身站直，手臂自然下垂或抱在胸前，头到脚都在画面里。';
-    body=`<div class="stack" style="gap:8px"><p class="h2">${view==='front'?'正面照':'侧面照'}${view==='side'?'<span class="badge acc">推荐</span>':''}</p><p class="small muted">${guide}</p></div>
-      <label class="drop" id="drop" ${has?'hidden':''}><input type="file" id="file" accept="image/*">${view==='front'?I.poseFront:I.poseSide}<b>选择照片</b><span class="xs muted">照片只保存在这台设备上</span></label>
-      <div id="photoArea" ${has?'':'hidden'} class="stack" style="gap:8px"><div class="stage" id="stage"><img id="photo" alt="${view==='front'?'正面照':'侧面照'}" ${has?`src="${ph.url}"`:''}><svg class="ov" id="lines" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div>
-        <p class="xs muted">${view==='front'?'头顶、脚底两条线定比例；其余每组点对准身体轮廓最外侧。腰取最细处，臀取最宽处，腿量一条大腿最粗处。':'头顶、脚底定比例；每组点一前一后，对准身体轮廓。'}按住拖动，放大镜里对准。</p></div>
+    const ph=T.ph.front;
+    body=`<div class="mf"><span class="t">身高</span>${hField}<span class="xs muted">用来把照片里的像素换算成厘米</span></div>
+      <p class="small muted">正面站直，双脚与髋同宽，手臂离开身体一点，穿贴身衣服，头到脚都在画面里。</p>
+      <label class="drop" id="drop" ${hasF?'hidden':''}><input type="file" id="file" accept="image/*">${I.poseFront}<b>拍照或选择照片</b><span class="xs muted">自动识别轮廓 · 照片只保存在这台设备上</span></label>
+      <div id="photoArea" ${hasF?'':'hidden'} class="stack" style="gap:8px"><div class="stage" id="stage"><img id="photo" alt="正面照" ${hasF?`src="${ph.url}"`:''}><svg class="ov" id="lines" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div>
+        <p class="xs muted">点位已自动放好。不准的话按住拖动，放大镜里对准身体轮廓最外侧：腰取最细处，臀取最宽处。</p></div>
       <p class="status" id="pstatus"></p>
-      <div id="pbtns" class="stack" style="gap:8px" ${has?'':'hidden'}>
-        <div class="row2"><button class="btn ghost" type="button" data-act="auto" style="flex:1">重新识别</button><button class="btn" type="button" data-act="${view==='front'?'toSide':'toSum'}" style="flex:1.4">${view==='front'?'下一步：侧面照':'看结果'}</button></div>
-        <button class="linkbtn" type="button" data-act="deletePhoto">删除这张照片</button>
-      </div>
-      ${view==='side'&&!hasS?'<button class="link" type="button" data-act="toSum">先跳过，厚度用估算'+I.chev+'</button>':''}`;
+      <div id="pbtns" class="row2" ${hasF?'':'hidden'}><button class="btn ghost" type="button" data-act="auto" style="flex:1">重新识别</button><button class="btn ghost" type="button" data-act="deletePhoto" style="flex:1">换一张</button></div>`;
   }
   const m=draftMeas();
-  return `<div class="steps">${stepBtn('h',1,'身高',!!S.h)}${stepBtn('front',2,'正面',hasF)}${stepBtn('side',3,'侧面',hasS)}</div>
+  return `<div class="seg mtabs" role="tablist" aria-label="测量方式">${[['manual','手动输入'],['scan','拍照扫描']].map(([k,l])=>`<button type="button" role="tab" data-act="mtab" data-arg="${k}" aria-selected="${tabv===k}" aria-pressed="${tabv===k}">${l}</button>`).join('')}</div>
     ${body}
     <section class="stack" style="gap:14px" id="sumSec"><p class="eyebrow">测量结果</p><div id="readout">${readoutHTML(m)}</div>
       <button class="btn block acc" type="button" data-act="saveMeas" ${m?'':'disabled style="opacity:.4"'}>保存为我的身材数据</button></section>`;
@@ -830,7 +1216,7 @@ async function savePhoto(view){
 const saveTimers={}; const savePhotoSoon=v=>{ if(v!=='front'&&v!=='side') return; clearTimeout(saveTimers[v]); saveTimers[v]=setTimeout(()=>savePhoto(v),600); };
 const imgSize=url=>new Promise(r=>{ const im=new Image(); im.onload=()=>r([im.naturalWidth,im.naturalHeight]); im.onerror=()=>r([0,0]); im.src=url; });
 async function loadPhotos(){
-  for(const view of ['front','side']){
+  for(const view of ['front']){
     let rec=null;
     try{ rec=await kvGet(pkey(view)); }catch(e){}
     if(!rec){ try{ const j=JSON.parse(localStorage.getItem(pkey(view))||'null'); if(j){ rec={blob:await (await fetch(j.url)).blob(),pts:j.pts}; } }catch(e){} }
@@ -847,8 +1233,9 @@ function shrink(file){ return new Promise((res,rej)=>{ const u=URL.createObjectU
   im.onerror=()=>{ URL.revokeObjectURL(u); rej(new Error('decode')); }; im.src=u; }); }
 async function deletePhoto(){ const v=T.step; try{ await kvDel(pkey(v)); }catch(e){} try{localStorage.removeItem(pkey(v));}catch(e){} const ph=T.ph[v]; if(ph&&ph.url) URL.revokeObjectURL(ph.url); T.ph[v]=null; refresh(); toast('照片已从这台设备删除'); }
 function setupPhoto(){
-  const f=$('file'); const view=T.step; if(view==='h'){ const i=$('hIn'); if(i) i.addEventListener('input',()=>{ const v=+i.value; if(v>=120&&v<=210){ S.h=v; save(); updateReadout(); } }); return; }
-  if(!f) return;
+  const i=$('hIn'); if(i) i.addEventListener('input',()=>{ const v=+i.value; if(v>=120&&v<=210){ S.h=v; save(); } if(T.mtab==='scan'&&T.ph.front) measure(); else updateReadout(); });
+  document.querySelectorAll('[data-man]').forEach(n=>n.addEventListener('input',()=>{ T.man[n.dataset.man]=n.value; updateReadout(); }));
+  const f=$('file'); const view='front'; if(!f) return;
   f.addEventListener('change',async e=>{ const file=e.target.files&&e.target.files[0]; if(!file) return;
     let s; try{ s=await shrink(file); }catch(err){ const st=$('pstatus'); st.className='status err'; st.textContent='这张图片打不开，换一张 JPG 或 PNG'; return; }
     const old=T.ph[view]; if(old&&old.url) URL.revokeObjectURL(old.url);
@@ -928,11 +1315,8 @@ async function autoDetect(){
   if(est.length) st.textContent+=`（${est.join('、')}没找到清晰轮廓，是估算位置，建议放大核对）`;
 }
 const MEAS_ACT={
-  mstep(a){ if(a!=='h'&&!S.h){ toast('先填身高'); return; } if(a==='side'&&!(T.ph.front&&T.ph.front.url)){ toast('先完成正面照'); return; } T.step=a; refresh(); },
-  hNext(){ const i=$('hIn'), v=+(i&&i.value); if(!(v>=120&&v<=210)){ toast('身高填 120–210 之间的数'); return; } S.h=v; save(); T.step='front'; render('fwd'); },
-  toSide(){ T.step='side'; render('fwd'); },
-  toSum(){ const s=$('sumSec'); if(s) s.scrollIntoView({behavior:'smooth',block:'start'}); },
-  saveMeas(){ const m=draftMeas(); if(!m){ toast('先放好正面照的点'); return; } S.meas=m; S.mode='photo'; save(); ['front','side'].forEach(savePhoto); toast('已保存'); T.hFocus=null; stack=[{p:'home'}]; render('back'); },
+  mtab(a){ if(T.mtab===a) return; T.mtab=a; if(a==='manual') T.man=null; refresh(); },
+  saveMeas(){ const m=draftMeas(); if(!m){ toast(T.mtab==='scan'?'先填身高、放好照片上的点':'先填好身高、肩宽、腰围、臀围'); return; } S.meas=m; S.mode='photo'; save(); if(m.src==='scan') savePhoto('front'); toast('已保存'); T.hFocus=null; T.man=null; stack=[{p:'home'}]; render('back'); },
   auto:autoDetect, deletePhoto
 };
 /* ---------------- AI coach ---------------- */
@@ -1210,8 +1594,11 @@ const ACT={
   setTarget(a){S.target=a;save();refresh();toast('目标已改为 '+target().name);},
   toggle(a){S[a]=!S[a];save();refresh();},
   mode(a){ if(a==='photo'&&!S.meas){ go('measure'); return; } S.mode=a; if(a!=='photo'){S.rounded=SAMPLES[a].rounded;S.apt=SAMPLES[a].apt;} save(); refresh(); },
-  focus(k){ T.hFocus=T.hFocus===k?null:k; applyFigFocus(); },
-  figView(v){ S.figView=v; save(); const h=$('figHost'); if(h) h.innerHTML=figureSVG(analyze(),v); document.querySelectorAll('[data-act="figView"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.arg===v))); applyFigFocus(); },
+  focus(k){ T.hFocus=T.hFocus===k?null:k; applyFigFocus(); if(B3.r) B3.r.focus(T.hFocus); },
+  figView(v){ S.figView=v; save(); document.querySelectorAll('[data-act="figView"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.arg===v)));
+    if(B3.r) B3.r.turnTo(v==='back'?Math.PI:0); else { const h=$('body3d'); if(h&&h.classList.contains('flat')){ h.innerHTML=figureSVG(analyze(),v); applyFigFocus(); } } },
+  muscle(k){ T.muscle=k&&RINFO[k]?k:null; const p=$('mpanel'); if(p) p.innerHTML=musclePanel(T.muscle);
+    if(B3.r){ B3.r.paint(); if(T.muscle) B3.r.face(T.muscle); } },
   selDay(a){ T.selDay=a; refresh(); },
   openDay(a){ T.selDay=a; tab('train'); },
   frame(a){ stopFrames(); showFrame(+a); },
@@ -1236,5 +1623,5 @@ render();
 loadPhotos();
 })();
 </script>
-</body>
-</html>
+
+</body></html>
