@@ -2,7 +2,7 @@
    页面（index.html）网络优先：在线时总是拿到最新版，离线时用缓存。
    其余资源（3D 网格、动作照片、MediaPipe、three.js、字体）缓存优先：第一次用到时存下来，之后离线也能打开。
    改了 index.html 以外的资源（body.mesh.wasm、ex/、mp/、图标）时，把 VERSION 加一，旧缓存会在下次打开时清掉。 */
-const VERSION = 'v2';
+const VERSION = 'v1';
 const CACHE = 'bodynav-' + VERSION;
 const SHELL = [
   './',
