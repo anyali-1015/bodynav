@@ -933,6 +933,24 @@ function smoothChest(M,X,H,r1,r2,dz){
       X[i*3+2]+=(c[0]+c[1]*x+c[2]*y+c[3]*x*x+c[4]*x*y+c[5]*y*y-X[i*3+2])*w; }
   }
 }
+/* 男性人台的胸：两侧分别拟合时外圈会落进乳房下沿和胸骨沟，拟合面偏低，胸口凹进去两块。
+   改成按左右位置 |x| 分条：取锁骨下（Y1 上方一条带）和胸下肋骨（Y0 下方一条带）真实的表面前后位置 zU(x)、zL(x)，
+   中间整块（两侧乳房 + 胸骨沟）按胸肌的弧线在两者之间过渡——上缘很快鼓出来，往下接近肋骨的高度。左右对称，不会出现凹坑。 */
+function flatChest(M,X,H){
+  const Y0=.665, Y1=.775, XW=.12, BW=.01, NB=Math.ceil(XW/BW)+2, rowMax=new Map(), bin=i=>Math.round(X[i*3+1]/H/.004);
+  for(let i=0;i<M.nv;i++){ if(M.part[i]!==0||Math.abs(X[i*3])>XW*H) continue; const k=bin(i); rowMax.set(k,Math.max(rowMax.has(k)?rowMax.get(k):-1e9,X[i*3+2])); }
+  const isFront=(i,t)=>X[i*3+2]>rowMax.get(bin(i))-t*H;
+  const band=(lo,hi)=>{ const s=new Float64Array(NB), n=new Float64Array(NB);
+    for(let i=0;i<M.nv;i++){ if(M.part[i]!==0) continue; const ax=Math.abs(X[i*3])/H, y=X[i*3+1]/H; if(ax>XW+BW||y<lo||y>hi||!isFront(i,.03)) continue; const b=Math.round(ax/BW); s[b]+=X[i*3+2]; n[b]++; }
+    const z=[...s].map((v,b)=>n[b]?v/n[b]:null); for(let b=1;b<NB;b++) if(z[b]==null) z[b]=z[b-1]; for(let b=NB-2;b>=0;b--) if(z[b]==null) z[b]=z[b+1];
+    return ax=>{ const f=Math.min(NB-1.001,ax/BW), b=Math.floor(f); return z[b]+(z[b+1]-z[b])*(f-b); }; };
+  const zU=band(Y1,Y1+.015), zL=band(Y0-.012,Y0);
+  for(let i=0;i<M.nv;i++){ if(M.part[i]!==0) continue; const ax=Math.abs(X[i*3])/H, y=X[i*3+1]/H;
+    if(ax>XW||y<Y0||y>Y1+.01||!isFront(i,.06)) continue;
+    const s=Math.min(1,Math.max(0,(Y1-y)/(Y1-Y0))), e=1-Math.pow(1-s,2.2); // s：0 在上缘，1 在下缘
+    const z=zU(ax)+(zL(ax)-zU(ax))*e, w=(1-sstep(Y1-.005,Y1+.01,y))*(1-sstep(XW-.035,XW,ax));
+    X[i*3+2]+=(z-X[i*3+2])*w; }
+}
 function loopSub(M,X,A){
   const nv=M.nv, I=M.idx, emap=new Map(), E=[], eid=new Uint32Array(I.length); let ne=0;
   for(let f=0;f<I.length;f+=3) for(let e=0;e<3;e++){
@@ -951,7 +969,7 @@ function loopSub(M,X,A){
     idx.set([a,ab,ca, ab,b,bc, ca,bc,c, ab,bc,ca],t); }
   return {nv:N,idx,sv,part,X:Y,adj:adjOf(N,idx)};
 }
-// sex='m'：基础网格是女性，男性人台把整个胸部压平（同一个曲面拟合，半径放大）
+// sex='m'：基础网格是女性，男性人台用 flatChest 把整个胸部压平
 function dispMesh(M,F,sex){
   const ck='disp_'+sex; if(F[ck]) return F[ck];
   const X=new Float32Array(F.X), H=F.mm.H, nv=M.nv, A=MESH.adj||(MESH.adj=adjOf(nv,M.idx)), w=new Float32Array(nv);
@@ -959,7 +977,7 @@ function dispMesh(M,F,sex){
   for(let i=0;i<nv;i++){ const y=X[i*3+1]/H; w[i]=M.part[i]===4&&y>.8?sstep(.84,.9,y):0; } taubin(X,A,w,12);
   for(let i=0;i<nv;i++){ const y=X[i*3+1]/H; w[i]=y>.78&&y<.885&&Math.abs(X[i*3])<.07*H?.7*sstep(.78,.81,y):0; } taubin(X,A,w,10); // 颈根处的筋络抹平
   smoothChest(M,X,H,.015,.028,.02);
-  if(sex==='m') smoothChest(M,X,H,.06,.09,.05);
+  if(sex==='m') flatChest(M,X,H);
   for(let i=0;i<nv;i++){ const y=X[i*3+1]/H; w[i]=M.part[i]===4&&y>.4&&y<.8?.9:0; } taubin(X,A,w,30);
   taubin(X,A,null,2);
   poseArms(M,X,H);

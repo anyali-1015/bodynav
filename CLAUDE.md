@@ -31,7 +31,7 @@ python3 -m http.server 8000
 - `EX` 动作库（名称、次数、步骤、要点、易错点、发力肌群）、`MUSCLES` 肌群→可选动作
 - 状态：`S`（持久化到 localStorage `bodynav.v4`）、`T`（临时 UI 状态）；照片存在 IndexedDB `bodynav`/`kv`
 - `derive()` 由宽度/厚度推算围度（椭圆周长，缺厚度时用 `DEPTH_K` 估算）
-- 性别：`S.sex`（'f' / 'm' / 未选），`sx()` 取值（未选按女）。`TARGETS`、`SAMPLES` 都带 `sex`；`DEPTH_KS` / `NORMS` 按性别给厚宽比和骨架上限；`S.tgt.sex`、`S.meas.sex` 记录生成时的性别。切换走 `ACT.setSex`。3D 只有女性基础网格，男性显示时 `smoothChest` 用大半径把胸部压平
+- 性别：`S.sex`（'f' / 'm' / 未选），`sx()` 取值（未选按女）。`TARGETS`、`SAMPLES` 都带 `sex`；`DEPTH_KS` / `NORMS` 按性别给厚宽比和骨架上限；`S.tgt.sex`、`S.meas.sex` 记录生成时的性别。切换走 `ACT.setSex`。3D 只有女性基础网格，男性显示时 `flatChest` 按锁骨下和胸下两条带的真实表面插值，把整片胸压平（不要再用两侧分别拟合，会凹进去两块）
 - 目标：`TARGETS` 预设只有比例；`S.target==='mine'` 时用 `S.tgt`（kind: auto / custom / ref，存四项 cm）。`target()` 统一返回 `{name, swr, hwr, cm?}`。`capOf()` 骨架上限、`autoCm()` 下一阶段生成、`refCalc()/refToCm()` 参考照片提取与换算、`gapRows()` 逐项差距表
 - `bodyAdvice()` 体型建议（规则 A0–A5）：和按身高的理想值比，始终至少给一条；`analyze()` 把前两条加进计划，目标达成时首页标题用第一条
 - `analyze()` **规则引擎**：预设按比例差距、「我的目标」按每项 cm 差距（阈值 `TOL` / `GAP_TH`，显示和规则共用），加圆肩/骨盆前倾 → 各肌群等级（focus/boost/keep/less，权重 3/2/1/0.5）→ 按约 36 组/周分配；返回 `reached`、`notes`。规则表见 README
