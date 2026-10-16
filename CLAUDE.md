@@ -14,6 +14,7 @@
 - `body.mesh.wasm` — 3D 人体网格（MakeHuman 女性基础网格 + 4 个测量形变 + 顶点在 MuscleMap 图上的坐标；自定义二进制格式，见 `meshParse()`）
 - `ex/` — 动作照片（free-exercise-db）；`mp/` — MediaPipe 本地副本（失败回退 jsdelivr CDN）
 - `pose_landmarker_lite.task` — MediaPipe 姿态模型，本地优先加载
+- 主屏 App（PWA）：`manifest.webmanifest`、`icons/`（由脚本生成：绿底 + 肩/腰/臀三条软尺线）、`sw.js`（页面网络优先，其余资源缓存优先）。**改了 index.html 以外的资源（body.mesh.wasm、ex/、mp/、icons/）时把 `sw.js` 里的 `VERSION` 加一**，否则已安装的手机会一直用旧缓存。iPhone 安装：Safari 打开 → 分享 → 添加到主屏幕（微信内置浏览器不行）
 - `bodynav-repo.zip` — 最早版本的打包存档，可忽略
 
 注意：2026-10-16 起的工作版本来自用户发来的 `~/Downloads/薄肌比例导航.zip`，比 GitHub 上的 `main` 新（带 3D 模型、`ex/`、`mp/`）。

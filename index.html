@@ -1,9 +1,24 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>薄肌比例导航</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="手动输入尺寸或拍一张正面照，算出身材比例和目标的差距，生成每周训练计划。">
+<!-- 主屏 App（PWA）：iPhone 用 Safari 打开 → 分享 → 添加到主屏幕 -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#f6f7f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d100f" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="薄肌导航">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <style>
 /* Layout: one-column phone shell. Home = tailor's fitting-card figure with tape lines, one thesis line, four numbers, today. Everything else is one tap deeper. */
 :root{
@@ -28,6 +43,7 @@ button,input,textarea{font:inherit;color:inherit}
 p,h1,h2,h3{margin:0}
 [hidden]{display:none!important}
 .app{position:relative;height:100%;max-width:440px;margin:0 auto;display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
+@media (max-width:599px){body{background:var(--bg)}} /* 手机上底色和 App 一致（状态栏、Home 条两侧不露出桌面灰） */
 @media (min-width:600px){.app{height:calc(100% - 48px);max-height:900px;margin-top:24px;border-radius:36px;box-shadow:0 30px 80px rgba(0,0,0,.14),0 0 0 1px var(--line)}}
 
 /* top bar */
@@ -294,6 +310,8 @@ ol.how li::before{content:counter(s,decimal-leading-zero);font:500 12px/1.9 var(
 .big{font-size:22px;font-weight:600;line-height:1.3}
 .label{font:500 11px var(--mono);letter-spacing:.06em;color:var(--muted)}
 </style>
+</head>
+<body>
 <!--BODY-->
 <div class="app" id="app">
   <header class="top" id="top"></header>
@@ -464,6 +482,7 @@ function cur(){
   if(S.mode==='photo'&&S.meas) return S.meas;
   const s=SAMPLES[S.mode==='photo'?'a':S.mode]||SAMPLES.a; return derive(s.raw,s.h,s.legR);
 }
+const isApp=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 const isSample=()=>!(S.mode==='photo'&&S.meas);
 
 /* ---------------- plan logic ---------------- */
@@ -1066,6 +1085,7 @@ const P={
       <button class="li" type="button" data-go="measure"><span></span><span><span class="t">测量身材</span><span class="s">手动输入尺寸，或拍一张正面照扫描</span></span><span class="r">${I.chev}</span></button>
       <button class="li" type="button" data-go="target"><span></span><span><span class="t">目标身材</span><span class="s">${esc(t.name)} · 肩腰 ${f2(t.swr)} · 臀腰 ${f2(t.hwr)}</span></span><span class="r">${I.chev}</span></button>
       <button class="li" type="button" data-go="posture"><span></span><span><span class="t">体态</span><span class="s">${[S.rounded&&'圆肩',S.apt&&'骨盆前倾'].filter(Boolean).join('、')||'无'}</span></span><span class="r">${I.chev}</span></button>
+      ${isApp()?'':`<button class="li" type="button" data-go="install"><span></span><span><span class="t">安装到手机</span><span class="s">添加到主屏幕，像 App 一样全屏打开，离线也能用</span></span><span class="r">${I.chev}</span></button>`}
       <button class="li" type="button" data-go="about"><span></span><span><span class="t">关于</span><span class="s">怎么算的、隐私、素材来源</span></span><span class="r">${I.chev}</span></button>
     </div>
     <div class="stack" style="gap:6px"><p class="eyebrow">数据来源</p><div><div class="seg" role="group" aria-label="数据来源">${[['photo','我的测量'],['a','样例 A'],['b','样例 B']].map(([k,l])=>`<button type="button" data-act="mode" data-arg="${k}" aria-pressed="${S.mode===k}">${l}</button>`).join('')}</div></div></div>`;
@@ -1104,6 +1124,17 @@ const P={
         ${TARGETS.map(x=>opt(x.id,x.name+(passed(x)?' <span class="badge acc">已超过</span>':''),x.note,`肩腰 ${f2(x.swr)} · 臀腰 ${f2(x.hwr)}`,mini(x))).join('')}
       </div>
     </section>`;
+  }},
+  install:{title:'安装到手机',render(){
+    const ios=/iPhone|iPad|iPod/.test(navigator.userAgent), wx=/MicroMessenger/i.test(navigator.userAgent);
+    const step=(n,t,d)=>`<li><span><b>${t}</b>${d?`<br><span class="small muted">${d}</span>`:''}</span></li>`;
+    return `<p class="small muted">不用经过应用商店。添加到主屏幕后有自己的图标，全屏打开，打开过一次之后离线也能用。</p>
+      ${wx?'<p class="status err">你现在在微信里打开，微信内置浏览器不能添加到主屏幕。点右上角「···」，选「在默认浏览器中打开」（iPhone 是 Safari）。</p>':''}
+      <section class="stack" style="gap:10px"><p class="eyebrow">iPhone · Safari</p>
+        <ol class="how">${step(1,'用 Safari 打开这个网址',esc(location.origin+location.pathname))}${step(2,'点底部工具栏的「分享」按钮','方框加向上箭头的图标；iOS 26 起可能在「···」菜单里')}${step(3,'在菜单里选「添加到主屏幕」','没看到就往下滑')}${step(4,'点右上角「添加」','桌面上会出现「薄肌导航」图标，之后从图标打开')}</ol></section>
+      ${ios?'':`<section class="stack" style="gap:10px"><p class="eyebrow">安卓 · Chrome</p><ol class="how">${step(1,'用 Chrome 打开这个网址','')}${step(2,'点右上角「⋮」菜单','')}${step(3,'选「安装应用」或「添加到主屏幕」','')}</ol></section>`}
+      <section class="stack" style="gap:6px"><p class="eyebrow">注意</p>
+        <p class="small muted">主屏 App 和浏览器里的数据是分开存的：在浏览器里填过的尺寸、照片不会自动带过去，从主屏图标打开后再测量一次就好。照片和数据都只存在这台手机上。</p></section>`;
   }},
   posture:{title:'体态',render(){
     return `<p class="small muted">照片看不出来，手动勾选。会加入纠正动作和拉伸。</p><div style="border-top:1px solid var(--line)">${sw('rounded','圆肩','肩膀前扣、含胸；自然站立时手背朝前')}${sw('apt','骨盆前倾','靠墙站，腰后能塞进一个拳头')}</div>`;
@@ -1804,5 +1835,12 @@ render();
 loadPhotos();
 })();
 </script>
+<script>
+// 主屏 App：注册离线缓存（只在 https 或本机调试时）
+if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
+  addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(e=>console.warn('[BodyNav] sw',e)));
+}
+</script>
 
-</body></html>
+</body>
+</html>
