@@ -37,6 +37,7 @@ python3 -m http.server 8000
 - `analyze()` **规则引擎**：预设按比例差距、「我的目标」按每项 cm 差距（阈值 `TOL` / `GAP_TH`，显示和规则共用），加圆肩/骨盆前倾 → 各肌群等级（focus/boost/keep/less，权重 3/2/1/0.5）→ 按约 36 组/周分配；返回 `reached`、`notes`。规则表见 README
 - `weekPlan()` 把肌群分到 A 上肢 / B 下肢 / C 重点强化；`S.days`（用户在「我的 → 训练日」选的周几）经 `sched()` 轮换成每天的 A/B/C，2/4 天用两分（`twoSplit()`）
 - `dayItems(date,k,plan)` 是某一天实际要做的动作：`WARM` 热身 + 计划 + 用户自选，按 `S.day[date]` 里的 order/add/del/wu/k 调整；训练页拖动排序、动作库「+」、整体跟练（`buildQueue('day:日期')`）都基于它
+- 完成奖励：`todayGlow()` 把今天做完的动作（`S.done`，不含热身/拉伸）映射到 3D 区块（`SLUG_RG`），`build3D` 里顶点属性 `glow` + 着色器里的 `glowI`/`pump` 做发光和鼓起，`celebrate()` 放金色光点；`S.cele` 记录当天是否已自动放过；`RG_FX` 是每个部位的变化文案（不要写成局部减脂）
 - 历史回顾：`S.log`（每次保存测量记一笔）+ IndexedDB `bodynav.hist.<日期>` 照片；`histHTML()` 画曲线和照片对比，`S.remind` 控制提醒间隔
 - `P` 页面表：home、plan、train、library、ex、me、target、posture、about、session、measure 等；`render()`/`go()`/`back()`/`tab()` 是简单的栈式路由，底部三个 tab：身材 / 训练 / 我的
 - 3D 建模的尺寸先过 `plausible()`：不合人体常理的组合（臀/腰、腿/臀超出 `PLAUS` 范围）按边界收回再建模，只影响外形，标签和计划仍用实测值，并在首页 / 测量页提示核对。`fitBody()` 的形变权重限制在设计范围附近（腿围尤其不能大幅取负，否则大腿根出凹坑），剩余的腿围差距由 `scaleLegs()` 整条腿平滑缩放
